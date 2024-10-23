@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "module": "node16",
+    "target": "es2022",
+
+    "strict": true,
+    "outDir": "./build",
+    "skipLibCheck": true,
+    "moduleResolution": "node16"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "build/*"
+  ],
+  "outDir": "./build",
+  "skipLibCheck": true
+}
