@@ -14,7 +14,11 @@ A mostani marketplace weboldalak túlnyomó része nem valós profilból létreh
 
 | Id | Modul | Név | Leírás |
 | :---: | --- | --- | --- |
-| K1 | ...| ... | ... |
+| K1 | Felület | Főoldal | Weboldal megnyitásakor ez fogadja a felhasználót |
+| K2 | Felület | Termékek | Meghirdetett termékek listája egy legördülő menüben |
+| K3 | Felület | Profil | Regisztrált profil megtekintése |
+| K4 | Felület | Hirdetés feladása | Szükséges adatok megadása,hogy érvényes legyen a hirdetés megjelenítése a weboldalon |
+| K5 | Felület | Bejelentkezés/Regisztráció | Felhaszáló készítése illetve bejelentkezés |
 
 ## 6. Használati esetek
 
