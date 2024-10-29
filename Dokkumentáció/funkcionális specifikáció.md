@@ -2,6 +2,7 @@
 ## 1. Jelenlegi helyzet leírása
 
 ## 2. Vágyálomrendszer leírása
+A weboldalunk célja egy olyan felületet létrehozni,ami egy marketplace-t valósít meg.Manapság igen népszerű az ilyen és ehhez hasonló platformok ahol megunt vagy nem használt termékeinket árulni tudjuk vagy megvásárolni. Ezzel olcsóbban tudunk hozzájutni régóta vágyott tárgyakhoz.Az oldalon termék típusok szerint lehet majd szűrni,hogy éppen elektronikai eszköz,ruhadarabok,könyvek vagy társasjátékok közül válogathatunk.Vásárlás lebonyolítása utánvéttel csomagküldő szolgáltatással biztosítjuk,hogy mindenki számára biztonságos legyen az adás-vétel.Ezután értékelhetjük az eladót,hogy mennyire voltunk megelégedve a termék pontos leírásával, csomagolással, kommunikációval.
 
 ## 3. Jelenlegi üzleti folyamatok modellje
 
