@@ -120,11 +120,4 @@ Fizikai telepítési terv:
 Szoftver telepítési terv: 
 
 ## 13. Karbantartási terv
-
-Fontos ellenőrizni:
-...
-
-Figyelembe kell venni a felhasználó által jött visszajelzést is a programmal kapcsolatban.
-Ha hibát talált, mielőbb orvosolni kell, lehet az:
-*	Működéssel kapcsolatos
-*	Kinézet, dizájnnal kapcsolatos
+Fontos a felhasználók által visszajelzett problémákat,hibákat,észrevételeket megfogadni és kijavítani,hogy javítsuk a felhasználói élményt és az esetleges támadásokat kivédeni,hogy ne legyen sérülékeny a weboldalunk.Érdemes követni a programnyelvek aktuális verziószámait,hogy naprakész legyen.
