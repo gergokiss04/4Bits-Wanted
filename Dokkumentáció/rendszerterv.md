@@ -42,14 +42,20 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
 ### Funkcionális követelmények
 
 | ID | Megnevezés | Leírás |
-| --- | --- | --- |
-| K1 | ... | ... |
+| K1 | Böngészés regisztráció nélkül | A felhasználók regisztráció nélkül is böngészhetik az apróhirdetéseket, kereshetnek és szűrhetnek a hirdetések között. |
+| K2 | Regisztráció és Bejelentkezés | A felhasználók fiókot hozhatnak létre és bejelentkezhetnek, ami szükséges a hirdetések feladásához vagy vásárlásához |
+| K3 | hirdetés létrehozása	| A regisztrált felhasználók új hirdetéseket hozhatnak létre címmel, árral, leírással, képekkel és címkékkel. |
+| K4 | Vásárlás és eladó értékelése | A felhasználók vásárolhatnak termékeket és vásárlás után értékelhetik az eladót 1-5 csillagig |
+| K5 | Hirdetések keresése | A felhasználók kereshetnek hirdetéseket cím, címke és ártartomány alapján. |
+| K6 | Felhasználói profil | A regisztrált felhasználók megnézhetik a profilukat, ahol megtalálható a nevük, profilképük, profilleírásuk, értékeléseik átlaga és aktív hirdetéseik. |
+| K7 | Hirdetés törlése	| Az eladó eltávolíthatja a saját hirdetését, amíg az nem került megvásárlásra. |
 
 ### Nemfunkcionális követelmények
 
 | ID | Megnevezés | Leírás |
-| --- | --- | --- |
-| K4 | ... | ... |
+| K1 | Rendszer stabilitás | A rendszernek stabilnak kell lennie, hogy a felhasználók zavartalanul használhassák a weboldalt |
+| K2 | Teljesítmény | A weboldalnak gyors válaszidőt kell biztosítania |
+| K3 | Adatbiztonság | A felhasználók adatait biztonságosan kell kezelni, GDPR-nak meg kell felelni |
 
 ### Támogatott eszközök
 
