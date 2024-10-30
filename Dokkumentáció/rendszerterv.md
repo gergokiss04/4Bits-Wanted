@@ -5,7 +5,7 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
 
 ### 2.1 Projektszerepkörök, felelőségek:
    * Scrum masters: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
-   * Product owner: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente****
+   * Product owner: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
    * Üzleti szereplő: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
      
 ### 2.2 Projektmunkások és felelőségek:
