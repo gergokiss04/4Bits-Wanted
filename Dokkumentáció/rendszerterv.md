@@ -86,6 +86,31 @@ A web alkalmazás React JS keretrendszer használatával készül el. Az API-hoz
 hozzáférni, ez biztosítja, hogy illetéktelen felhasználók ne csinálhassanak olyanokat, amiket nem lenne nekik szabad.
 
 ## 9. Adatbázis terv
+Az adatbázis két táblával rendelkezik:
+   - User (felhasználó adatai)
+      - id (PK)
+         - NN
+         - Unique
+      - name
+         - NN
+      - profile_pic
+      - bio
+      - email
+         - NN
+      - password
+         - NN
+   - Ad (apróhirdetés adatai)
+      - id (PK)
+         - NN
+      - title
+         - NN
+      - price
+         - NN
+      - description
+      - pics []
+      - tags []
+      - buyer_id ?
+      - stars ?
 
 ## 10. Implementációs terv
 
