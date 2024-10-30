@@ -11,6 +11,9 @@ A felgyorsult világban előtérbe került az online vásárlásokkal foglalkoz�
 
 ## 4. Jelenlegi üzleti folyamatok modellje
 
+A mai kereskedelemre, eladásra/vásárlásra szolgáló weboldalak és szolgáltatások nagyrésze mind óriásvállalatok kreációi, sokszor a saját, általuk közvetített termékek megvételére van csak lehetőség. Az ilyen oldalak sokszor a már meglévő cég valamely más szolgáltatásával áll kapcsolatban, és azon a platformon való regisztráció szükséges.
+Ezzel szemben megrendelőnk kérésére egy olyan weboldalt fejlesztünk, amely teljesen független minden más szolgáltatástól, csupán erre a platformra való regisztráció szükséges a termékek árusításához. Egy központi rendszer helyett minden felhasználó a saját termékeit hirdetheti, amelyeket szintén egyéb felhasználók vásárolhatnak meg.
+
 ## 5. Igényelt üzleti folyamatok modellje
 
 ## 6. Követelménylista
