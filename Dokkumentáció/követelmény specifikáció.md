@@ -18,6 +18,10 @@ Ezzel szemben megrendelőnk kérésére egy olyan weboldalt fejlesztünk, amely 
 
 ## 5. Igényelt üzleti folyamatok modellje
 
+A weboldal felkeresését követően betöltődik a főoldal, ahol a már meglévő hirdetéseket láthatjuk. Ezeket bárki láthatja, aki ellátogat az oldalra, viszont nem vásárolhatja meg azokat, és újabb hirdetéseket sem hozhat létre. Mindehhez regisztráció szükséges, amely egy felhasználónév, email cím és jelszó megadása után lehetséges, továbbá hozzáadhat egy profilképet és egy profilleírást.
+A regisztrációt követően a felhasználónak lehetősége lesz a hirdetések böngészése közben megvásárolni a termékeket. Vásárlást követően értékelheti az eladót, azonban ez opcionális. 
+Apróhirdetés létrehozásakor a felhasználó megadhatja a termék nevét, egy rövid leírást, illetve képeket tölthet fel hozzájuk, amelyek közül az első kép jelenik meg a főoldalon való böngészés során. Továbbá lehetőség van különböző címkék hozzáadásához, amelyekkel a hasonló termékek keresésekor megjelenhet az ő hirdetése, így a kategorizálás könnyebb lesz. Ezt a hirdetést az eladó szerkesztheti, törölheti, mindaddig, amíg azt nem vásárolja meg valaki.
+A cél az, hogy az oldal egyszerű, intuitív és modern legyen, hogy vetélkedhessen más hasonló termékekkel, mint az eBay vagy a Facebook Marketplace.
 ## 6. Követelménylista
 
 | Id | Modul | Név | Leírás |
