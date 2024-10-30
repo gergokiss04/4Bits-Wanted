@@ -10,6 +10,10 @@ A mostani marketplace weboldalak túlnyomó része nem valós profilból létreh
 
 ## 4. Igényelt üzleti folyamatok modellje
 
+A weboldal felhasználóinak egy olyan szolgáltatást kell nyújtanunk, amely segítségével egyszerűen és intuitívan vásárolhatnak és árulhatnak különböző termékeket.
+A cél, hogy a vásárlók számára megbízható és transzparens szolgáltatást nyújtsunk, ne kelljen attól rettegniük, hogy csalás áldozatai lehetnek, az eladó értékelései megtekintésével biztos lehet abban, hogy milyen személytől fog vásárolni. Ennek érdekében továbbá a vásárló csak akkor fizet, amikor megérkezett hozzá a termék, hogy biztos legyen abban, hogy azt kapja amit megrendelt.
+Az eladó számára is kényelmes rendszert kell kialakítanunk, apróhirdetéseit nehézségmentesen és tisztán tudja létrehozni, valamint a profilján látható értékelések pedig mutatják, hogy megbízható személyről van szó. 
+
 ## 5. Követelménylista
 
 | Id | Modul | Név | Leírás |
@@ -22,13 +26,77 @@ A mostani marketplace weboldalak túlnyomó része nem valós profilból létreh
 
 ## 6. Használati esetek
 
+```
+                                                          .#            .#  
+                                                          #.            #.  
+                                                                            
+###### ###### #      #    #   ##     ###: ###### ##   #   ##   #        ##  
+#      #      #      #    #   ##   #   .#        ##.  #   ##   #      :#  #:
+#      #      #      #    #  :##:  #         :#  #:   #  :##:  #      #.  .#
+#      #      #      #    #   ::   # .       #:  # #  #   ::   #      #    #
+###### ###### #      ######  #..#    ##          #    #  #..#  #      #    #
+#      #      #      #    #  #  #       #  :#    #  # #  #  #  #      #    #
+#      #      #      #    # :####:      #  #:    #   :# :####: #      #.  .#
+#      #      #      #    #  :  :  #.   # #      #  .##  :  :  #      :#  #:
+#      ###### ###### #    # #.  .# :####. ###### #   ## #.  .# ######   ##  
+```
+A felhasználó felhasználhatja az alkalmazást. Létrehozhat apróhirdetést, ilyenkor ELADÓi szerepkört tölt be, vagy kereshet és találhat és megvásárolhat, ilyenkor VÁSÁRLÓi szerepkörű.
+
+
+```
+                              .#  
+                              #.  
+                                  
+###### #        ##   ####:    ##  
+#      #        ##   #  :#. :#  #:
+#      #       :##:  #   :# #.  .#
+#      #        ::   #    # #    #
+###### #       #..#  #    # #    #
+#      #       #  #  #    # #    #
+#      #      :####: #   :# #.  .#
+#      #       :  :  #  :#. :#  #:
+###### ###### #.  .# ####:    ##  
+```
+Az eladó eltávolíthatja a hirdetését, amíg az nem kelt el. Pénzt kap, ha megveszik a hirdetését.
+
+```
+         .#            .#                   .#  
+         #.            #.                   #.  
+                                                
+#.  .#   ##     ###:   ##   #####  #        ##  
+ :  :    ##   #   .#   ##   #    # #      :#  #:
+:#  #:  :##:  #       :##:  #    # #      #.  .#
+ #  #    ::   # .      ::   #   :# #      #    #
+ #..#   #..#    ##    #..#  #####  #      #    #
+  ::    #  #       #  #  #  #  .#: #      #    #
+ :##:  :####:      # :####: #   .# #      #.  .#
+  ##    :  :  #.   #  :  :  #    # #      :#  #:
+  ##   #.  .# :####. #.  .# #    : ######   ##  
+```
+A vásárlónak alapvető jogában áll a saját pénzének elköltése.
+
 ## 7. Megfeleltetés, hogyan fedik le a használati eseteket a követelményeket
+
+A felhasználó lefedi az első három követelményt, az eladó a negyediket, az 5-6-7-et pedig a vásárló fedi le.
 
 ## 8. Képernyőtervek
 
-![képnév](gitlink ahol a kép van)
+![Profil](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/profil.jpg)
+![Bejelentkezés](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/bejelentkez%C3%A9s.jpg)
+![Fiók bejelentkezve](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/Fiok_bejelentkezve.jpg)
+![Hirdetés feladása](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/Hirdetes_feladasa.jpg)
+![Kezdőlap](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/kezdolap.jpg)
+![Regisztráció](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/regisztracio.jpg)
+![Termékek](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/termekek.jpg)
 
 ## 9. Forgatókönyvek
+
+4 szereplő van: A felhasználó, a web app, a backend szerver, és az adatbázis.
+
+- Felhasználó: Ő dönti el, mit akar csinálni.
+- Web app: Ez a porcelán a backend API-ja fölé, ahol tud kattintgatni a felhasználó.
+- Backend szerver: Feldolgozza a kéréseket.
+- Adatbázis: Túlbonyolított csv fájlként működve eltárolja a backend számára az adatokat.
 
 ## 10. Funkció - követelmény megfeleltetése
 
