@@ -123,6 +123,9 @@ például. Teszt #01 | Regisztráció | A felhasználó az adatok megadásával 
 Fizikai telepítési terv: 
 
 Szoftver telepítési terv: 
+A szoftver webes felületen működik, ehhez csak egy ajánlott böngésző telepítése szükséges 
+(Google Chrome, Safari, Opera), külön szoftver nem kell hozzá.
+A webszerverre közvetlenül az internetről kapcsolódnak a kliensek.
 
 ## 13. Karbantartási terv
 Fontos a felhasználók által visszajelzett problémákat,hibákat,észrevételeket megfogadni és kijavítani,hogy javítsuk a felhasználói élményt és az esetleges támadásokat kivédeni,hogy ne legyen sérülékeny a weboldalunk.Érdemes követni a programnyelvek aktuális verziószámait,hogy naprakész legyen.
