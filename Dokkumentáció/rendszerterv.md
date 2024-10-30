@@ -42,18 +42,12 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
     * Regisztrált és bejelentkezett felhasználó aki képes hirdetéseket létrehozni.
 
 ### 3.2 Üzleti folyamatok
-  1. Regisztráció
-    * A felhasználó fiókot hoz létre felhasználónév, email cím és jelszó megadásával. A regisztráció után hozzáférést kap termékek eladásához és vételéhez.
-  2. Bejelentkezés
-    * A regisztrált felhasználó megadja az email címét és jelszavát, hogy hozzáférjen további szolgáltatásokhoz.
-  3. Hirdetés létrehozása
-    * Az eladó új hirdetést hoz létre, ahol megadja a termék címét, árát, leírását, képeit és címkéit. A hirdetés bármikor módosítható vagy törölhető mindaddig, amíg nincs megvásárolva.
-  4. Hirdetések keresése
-    * A látogatók és regisztrált felhasználók böngészhetik a hirdetéseket, illetve szűrhetnek cím, címke és ártartomány alapján.
-  5. Vásárlás
-    * A vevő végrehajtja a vásárlást a kiválasztott terméken. A vásárlás után az eladó értesítést kap, hogy terméke eladásra került, a hirdetés pedig inaktívvá válik.
-  6. Eladó értékelése
-    * A sikeres vásárlást követően a vevő lehetőséget kap az eladó értékelésére 1–5 csillagos skálán. Az értékelések átlaga megjelenik az eladó profilján.
+  1. Regisztráció: A felhasználó fiókot hoz létre felhasználónév, email cím és jelszó megadásával. A regisztráció után hozzáférést kap termékek eladásához és vételéhez.
+  2. Bejelentkezés: A regisztrált felhasználó megadja az email címét és jelszavát, hogy hozzáférjen további szolgáltatásokhoz.
+  3. Hirdetés létrehozása:  Az eladó új hirdetést hoz létre, ahol megadja a termék címét, árát, leírását, képeit és címkéit. A hirdetés bármikor módosítható vagy törölhető mindaddig, amíg nincs megvásárolva.
+  4. Hirdetések keresése: A látogatók és regisztrált felhasználók böngészhetik a hirdetéseket, illetve szűrhetnek cím, címke és ártartomány alapján.
+  5. Vásárlás: A vevő végrehajtja a vásárlást a kiválasztott terméken. A vásárlás után az eladó értesítést kap, hogy terméke eladásra került, a hirdetés pedig inaktívvá válik.
+  6. Eladó értékelése: A sikeres vásárlást követően a vevő lehetőséget kap az eladó értékelésére 1–5 csillagos skálán. Az értékelések átlaga megjelenik az eladó profilján.
 ## 4. Követelmények
 
 ### Funkcionális követelmények
