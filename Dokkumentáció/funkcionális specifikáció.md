@@ -22,6 +22,55 @@ A mostani marketplace weboldalak túlnyomó része nem valós profilból létreh
 
 ## 6. Használati esetek
 
+```
+                                                          .#            .#  
+                                                          #.            #.  
+                                                                            
+###### ###### #      #    #   ##     ###: ###### ##   #   ##   #        ##  
+#      #      #      #    #   ##   #   .#        ##.  #   ##   #      :#  #:
+#      #      #      #    #  :##:  #         :#  #:   #  :##:  #      #.  .#
+#      #      #      #    #   ::   # .       #:  # #  #   ::   #      #    #
+###### ###### #      ######  #..#    ##          #    #  #..#  #      #    #
+#      #      #      #    #  #  #       #  :#    #  # #  #  #  #      #    #
+#      #      #      #    # :####:      #  #:    #   :# :####: #      #.  .#
+#      #      #      #    #  :  :  #.   # #      #  .##  :  :  #      :#  #:
+#      ###### ###### #    # #.  .# :####. ###### #   ## #.  .# ######   ##  
+```
+A felhasználó felhasználhatja az alkalmazást. Létrehozhat apróhirdetést, ilyenkor ELADÓi szerepkört tölt be, vagy kereshet és találhat és megvásárolhat, ilyenkor VÁSÁRLÓi szerepkörű.
+
+
+```
+                              .#  
+                              #.  
+                                  
+###### #        ##   ####:    ##  
+#      #        ##   #  :#. :#  #:
+#      #       :##:  #   :# #.  .#
+#      #        ::   #    # #    #
+###### #       #..#  #    # #    #
+#      #       #  #  #    # #    #
+#      #      :####: #   :# #.  .#
+#      #       :  :  #  :#. :#  #:
+###### ###### #.  .# ####:    ##  
+```
+Az eladó eltávolíthatja a hirdetését, amíg az nem kelt el. Pénzt kap, ha megveszik a hirdetését.
+
+```
+         .#            .#                   .#  
+         #.            #.                   #.  
+                                                
+#.  .#   ##     ###:   ##   #####  #        ##  
+ :  :    ##   #   .#   ##   #    # #      :#  #:
+:#  #:  :##:  #       :##:  #    # #      #.  .#
+ #  #    ::   # .      ::   #   :# #      #    #
+ #..#   #..#    ##    #..#  #####  #      #    #
+  ::    #  #       #  #  #  #  .#: #      #    #
+ :##:  :####:      # :####: #   .# #      #.  .#
+  ##    :  :  #.   #  :  :  #    # #      :#  #:
+  ##   #.  .# :####. #.  .# #    : ######   ##  
+```
+A vásárlónak alapvető jogában áll a saját pénzének elköltése.
+
 ## 7. Megfeleltetés, hogyan fedik le a használati eseteket a követelményeket
 
 ## 8. Képernyőtervek
