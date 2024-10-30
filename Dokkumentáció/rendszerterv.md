@@ -14,7 +14,7 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
       a JSON-alapú REST API fejlesztése, amely a frontend és a backend közötti kommunikációt biztosítja.
    * Backend: Müller Krisztián, Fidrus Bence
      * Feladatuk a backend fejlesztése Node.js-ben, amely a szerveroldali működésért felelős, illetve az SQL alapú adatbázis     létrehozása és kezelése, amely a rendszer adatainak tárolását végzi. 
-   * Tesztelés:
+   * Tesztelés: A tesztelés során ellenőrizzük, hogy a felhasználói felület megfelelően működik különböző eszközökön, a REST API kommunikációja stabil, és az adatbázisban helyesen tárolódnak az adatok.
      
 ### 2.3 Ütemterv:
 
