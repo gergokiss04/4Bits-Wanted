@@ -81,6 +81,13 @@ A felhasználó lefedi az első három követelményt, az eladó a negyediket, a
 
 ## 9. Forgatókönyvek
 
+4 szereplő van: A felhasználó, a web app, a backend szerver, és az adatbázis.
+
+- Felhasználó: Ő dönti el, mit akar csinálni.
+- Web app: Ez a porcelán a backend API-ja fölé, ahol tud kattintgatni a felhasználó.
+- Backend szerver: Feldolgozza a kéréseket.
+- Adatbázis: Túlbonyolított csv fájlként működve eltárolja a backend számára az adatokat.
+
 ## 10. Funkció - követelmény megfeleltetése
 
 | Id | Követelmény | Funkció |
