@@ -37,6 +37,7 @@ A cél az, hogy az oldal egyszerű, intuitív és modern legyen, hogy vetélkedh
 ## 7. Fogalomtár
 
 | Bonyolult fogalom | Magyarázat |
+| :---: | --- |
 | ártartomány | Valós számokból álló formális kettes, mely az ár aktuális értékét inkluzív minimum- és maximum közé limitálja. |
 | csillag | Öt ágú, hegyes alakzat, valahogy így néz ki: ⭐. |
 | apróhirdetés | Kis méretű hirdetés. |
