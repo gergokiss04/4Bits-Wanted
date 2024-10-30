@@ -82,6 +82,12 @@ A felhasználó lefedi az első három követelményt, az eladó a negyediket, a
 ## 8. Képernyőtervek
 
 ![Profil](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/profil.jpg)
+![Bejelentkezés](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/bejelentkezes.jpg)
+![Fiók bejelentkezve](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/fiok_bejelentkezve.jpg)
+![Hirdetés feladása](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/hirdetes_feladasa.jpg)
+![Kezdőlap](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/kezdolap.jpg)
+![Regisztráció](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/regisztracio.jpg)
+![Termékek](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/termekek.jpg)
 
 ## 9. Forgatókönyvek
 
