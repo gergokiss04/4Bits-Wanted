@@ -4,13 +4,16 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
 ## 2. Projektterv
 
 ### 2.1 Projektszerepkörök, felelőségek:
-   * Scrum masters:
-   * Product owner: 
-   * Üzleti szereplő:
+   * Scrum masters: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
+   * Product owner: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente****
+   * Üzleti szereplő: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
      
 ### 2.2 Projektmunkások és felelőségek:
-   * Frontend:
-   * Backend:
+   * Frontend: Kiss Gergő Zsolt, Rácz Levente
+     * Feladatuk a weboldal felhasználói felületének fejlesztése és kialakítása, React keretrendszer alkalmazásával, illetve
+      a JSON-alapú REST API fejlesztése, amely a frontend és a backend közötti kommunikációt biztosítja.
+   * Backend: Müller Krisztián, Fidrus Bence
+     * Feladatuk a backend fejlesztése Node.js-ben, amely a szerveroldali működésért felelős, illetve az SQL alapú adatbázis     létrehozása és kezelése, amely a rendszer adatainak tárolását végzi. 
    * Tesztelés:
      
 ### 2.3 Ütemterv:
