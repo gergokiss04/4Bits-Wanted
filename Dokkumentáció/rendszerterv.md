@@ -82,6 +82,11 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
   * Profil - Saját profil megtekintése és hirdetések kezelése
 
 ## 6. Fizikai környezet
+  * Az alkalmazás web platformra készül.
+  * Nincsenek megvásárolt komponenseink
+  * Fejlesztői eszközök:
+    * MySQL Workbench
+    * Visual Studio Code
 
 ### Vásárolt softwarekomponensek és külső rendszerek
 Nincsenek vásárolt softwarekomponensek és külső rendszerek.
@@ -178,4 +183,10 @@ A szoftver webes felületen működik, ehhez csak egy ajánlott böngésző tele
 A webszerverre közvetlenül az internetről kapcsolódnak a kliensek.
 
 ## 13. Karbantartási terv
-Fontos a felhasználók által visszajelzett problémákat,hibákat,észrevételeket megfogadni és kijavítani,hogy javítsuk a felhasználói élményt és az esetleges támadásokat kivédeni,hogy ne legyen sérülékeny a weboldalunk.Érdemes követni a programnyelvek aktuális verziószámait,hogy naprakész legyen.
+
+Fontos ellenőrizni:
+
+Figyelembe kell venni a felhasználó által jött visszajelzést is a programmal kapcsolatban.
+Ha hibát talált, mielőbb orvosolni kell, lehet az:
+*	Működéssel kapcsolatos
+*	Kinézet, dizájnnal kapcsolatos
