@@ -73,6 +73,8 @@ A vásárlónak alapvető jogában áll a saját pénzének elköltése.
 
 ## 7. Megfeleltetés, hogyan fedik le a használati eseteket a követelményeket
 
+A felhasználó lefedi az első három követelményt, az eladó a negyediket, az 5-6-7-et pedig a vásárló fedi le.
+
 ## 8. Képernyőtervek
 
 ![képnév](gitlink ahol a kép van)
