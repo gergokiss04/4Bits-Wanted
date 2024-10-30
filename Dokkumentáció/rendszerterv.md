@@ -1,6 +1,6 @@
 # Rendszerterv
 ## 1. A rendszer célja
-
+A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felhasználók különböző árucikkeket vásárolhatnak és adhatnak el. Az alkalmazás lehetővé teszi bárki számára a hirdetések böngészését, de hirdetések feladásához vagy termékek megvásárlásához regisztrálni kell egy fiókot. Minden vásárlást követően a vevők értékelhetik az eladót 1–5 csillagig. A felhasználói profilok tartalmazzák a felhasználó nevét, profilképét, egy rövid leírást róluk, az elérhető hirdetéseiket illetve a kapott csillagok átlagát, amely megmutatja az eladó megbízhatóságát. A hirdetéseknek egyedi címet, árat, részletes leírást és kategorizáló címkéket lehet megadni, valamint képeket csatolni. A keresési funkció lehetőséget ad arra, hogy cím, címkék és ártartomány szerint szűrjünk a termékekre. Az eladók a saját hirdetéseiket szabadon szerkeszthetik és törölhetik, addig amíg az adott hirdetést nem vásárolták meg.
 ## 2. Projektterv
 
 ### 2.1 Projektszerepkörök, felelőségek:
