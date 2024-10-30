@@ -57,6 +57,11 @@
 ### 5.2 Menühierarchiák
 
 ## 6. Fizikai környezet
+  * Az alkalmazás web platformra készül.
+  * Nincsenek megvásárolt komponenseink
+  * Fejlesztői eszközök:
+    * MySQL Workbench
+    * Visual Studio Code
 
 ### Vásárolt softwarekomponensek és külső rendszerek
 
