@@ -74,10 +74,16 @@ Az adatbázis minden olyan rendszeren fut, amely támogatja azt.
 ## 8. Architekturális terv
 
 ### Webszerver
+A webszerver NodeJS-sel működik, JSON objektumokkal kommunikál a böngészőben futó klienssel.
 
 ### Adatbázis rendszer
+A rendszerhez szükség van egy adatbázis szerverre, ebben az esetben
+MariaDB-t használunk. A kliens oldali programokat egy Node-os API
+szolgálja ki, ez csatlakozik az adatbázis szerverhez.
 
 ### A program elérése, kezelése
+A web alkalmazás React JS keretrendszer használatával készül el. Az API-hoz a user belépését követően egyedi kúlcs segítségével lehet
+hozzáférni, ez biztosítja, hogy illetéktelen felhasználók ne csinálhassanak olyanokat, amiket nem lenne nekik szabad.
 
 ## 9. Adatbázis terv
 
