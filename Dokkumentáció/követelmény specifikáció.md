@@ -22,7 +22,13 @@ Ezzel szemben megrendelőnk kérésére egy olyan weboldalt fejlesztünk, amely 
 
 | Id | Modul | Név | Leírás |
 | :---: | --- | --- | --- |
-| K1 | ... | ... | ... |
+| K1 | Backend | Regisztráció | A felhasználó létrehozhat új fiókat. |
+| K2 | Backend | Bejelentkezés | A fiókkal rendelkező felhasználó be tud jelentkezni fiókjába, fiókja jelszavának ismeretében. |
+| K3 | Backend | Profil törlése | Ha a felhasználó be van jelentkezve, törölheti fiókját. |
+| K4 | Backend | Apróhirdetés | Lehet csinálni új apróhirdetést, ha be van jelentkezve a felhasználó. |
+| K5 | Backend | Keresés | Lehet keresni ajánlatokat. |
+| K6 | Backend | Vásárlás | Meg lehet venni a még el nem kelt ajánlatokat. |
+| K7 | Backend | Értékelés | Vásárlás után egyszer értékelhető az eladó. |
 
 ## 7. Fogalomtár
 
