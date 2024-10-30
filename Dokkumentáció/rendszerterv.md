@@ -1,6 +1,6 @@
 # Rendszerterv
 ## 1. A rendszer célja
-
+A rendszer célja, hogy a felhasználók kényelmesen és könnyedén adhassák el az általuk már nem használt ruháikat, kellékeiket, ezzel lehetőséget teremtve az újrahasznosításra.
 ## 2. Projektterv
 
 ### 2.1 Projektszerepkörök, felelőségek:
