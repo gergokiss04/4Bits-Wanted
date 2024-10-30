@@ -59,13 +59,17 @@
 ## 6. Fizikai környezet
 
 ### Vásárolt softwarekomponensek és külső rendszerek
+Nincsenek vásárolt softwarekomponensek és külső rendszerek.
 
 ### Hardver topológia
-
-### Fizikai alrendszerek
+Bármilyen böngészőben fut a web app.
+A backend bármilyen NodeJS-sel rendelkező rendszeren fut.
+Az adatbázis minden olyan rendszeren fut, amely támogatja azt.
 
 ### Fejlesztő eszközök
-
+- VS Code
+- MariaDB GUI
+- NVim
 
 ## 8. Architekturális terv
 
