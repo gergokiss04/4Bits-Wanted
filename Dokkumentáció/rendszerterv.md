@@ -1,17 +1,17 @@
 # Rendszerterv
 ## 1. A rendszer célja
-A rendszer célja, hogy a felhasználók kényelmesen és könnyedén adhassák el az általuk már nem használt ruháikat, kellékeiket, ezzel lehetőséget teremtve az újrahasznosításra.
+
 ## 2. Projektterv
 
 ### 2.1 Projektszerepkörök, felelőségek:
-   * Scrum masters:
-   * Product owner: 
-   * Üzleti szereplő:
+   * Scrum masters: Kiss Gergő Zsolt, Fidrus Bence, Müller Krisztián, Rácz Levente
+   * Product owner: Kiss Gergő Zsolt, Fidrus Bence, Müller Krisztián, Rácz Levente
+   * Üzleti szereplő: Kiss Gergő Zsolt, Fidrus Bence, Müller Krisztián, Rácz Levente
      
 ### 2.2 Projektmunkások és felelőségek:
-   * Frontend:
-   * Backend:
-   * Tesztelés:
+   * Frontend: Kiss Gergő Zsolt, Rácz Levente
+   * Backend: Müller Krisztián, Fidrus Bence
+   * Tesztelés: Kiss Gergő Zsolt, Fidrus Bence, Müller Krisztián, Rácz Levente
      
 ### 2.3 Ütemterv:
 
