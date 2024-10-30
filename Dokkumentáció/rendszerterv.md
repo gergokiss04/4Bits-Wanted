@@ -65,7 +65,21 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
 
 ### 5.1 Rendszerszereplők
 
+1. Vendég felhasználó
+  * Böngészhet a hirdetések között.
+  * Kereshet hirdetéseket.
+2. Regisztrált felhasználó
+  * Böngészhet és kereshet a hirdetések között.
+  * Új hirdetéseket hozhat létre
+  * Megtekintheti a saját profilját.
+  * Vásárolhat termékeket és értékelhet más eladókat.
+
 ### 5.2 Menühierarchiák
+
+  * Főoldal - A hirdetések listázása.
+  * Keresés - Hirdetések keresése név, címke, ár alapján.
+  * Bejelentkezés/Regisztráció - Fiók létrehozása vagy már meglévő fiókba belépés.
+  * Profil - Saját profil megtekintése és hirdetések kezelése
 
 ## 6. Fizikai környezet
 
