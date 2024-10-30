@@ -81,7 +81,7 @@ A felhasználó lefedi az első három követelményt, az eladó a negyediket, a
 
 ## 8. Képernyőtervek
 
-![képnév](gitlink ahol a kép van)
+![Profil](https://github.com/gergokiss04/4Bits-Wanted/blob/dokkument%C3%A1ci%C3%B3/Dokkument%C3%A1ci%C3%B3/Kepernyoterv/profil.jpg)
 
 ## 9. Forgatókönyvek
 
