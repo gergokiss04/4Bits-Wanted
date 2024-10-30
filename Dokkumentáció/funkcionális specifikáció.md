@@ -10,6 +10,10 @@ A mostani marketplace weboldalak túlnyomó része nem valós profilból létreh
 
 ## 4. Igényelt üzleti folyamatok modellje
 
+A weboldal felhasználóinak egy olyan szolgáltatást kell nyújtanunk, amely segítségével egyszerűen és intuitívan vásárolhatnak és árulhatnak különböző termékeket.
+A cél, hogy a vásárlók számára megbízható és transzparens szolgáltatást nyújtsunk, ne kelljen attól rettegniük, hogy csalás áldozatai lehetnek, az eladó értékelései megtekintésével biztos lehet abban, hogy milyen személytől fog vásárolni. Ennek érdekében továbbá a vásárló csak akkor fizet, amikor megérkezett hozzá a termék, hogy biztos legyen abban, hogy azt kapja amit megrendelt.
+Az eladó számára is kényelmes rendszert kell kialakítanunk, apróhirdetéseit nehézségmentesen és tisztán tudja létrehozni, valamint a profilján látható értékelések pedig mutatják, hogy megbízható személyről van szó. 
+
 ## 5. Követelménylista
 
 | Id | Modul | Név | Leírás |
