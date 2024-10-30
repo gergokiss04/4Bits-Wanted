@@ -89,6 +89,11 @@ hozzáférni, ez biztosítja, hogy illetéktelen felhasználók ne csinálhassan
 
 ## 10. Implementációs terv
 
+- Web: Valamilyen okból kifolyólag React-et használunk, mert jó kihívást láttunk benne, modern frontend fejlesztői keretrendszernek hittük, mely jó kihívást nyújt mindannyiunk számára.
+- Backend: NodeJS-t használunk. TypeScript-et használunk, hogy nehezebb legyen magunkat lábon lőni a JavaScript gonosz, nonszensz quirkjeivel.
+- Adatbázis: MariaDB-t használunk, mert szabad (*ingyenes*) szoftver, és a már jól ismert és közkedvelt SQL-t használja.
+
+
 ## 11. Tesztterv
 
 A tesztelések célja a rendszer és komponensei funkcionalitásának teljes vizsgálata,
