@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Header() {
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+      <nav className="navbar navbar-expand-lg headerfootercolor">
         <div className="container-fluid">
           {/* Bal oldalon a Termékek és Hirdetés feladása */}
           <button
@@ -39,6 +39,7 @@ function Header() {
                   <li><NavLink className="dropdown-item" to="/products/books">Könyvek</NavLink></li>
                   <li><NavLink className="dropdown-item" to="/products/games">Társasjátékok</NavLink></li>
                   <li><NavLink className="dropdown-item" to="/products/clothing">Ruhák</NavLink></li>
+                  
                 </ul>
               </li>
               
@@ -47,11 +48,11 @@ function Header() {
                 <NavLink className="nav-link" to="/post-ad">Hirdetés feladása</NavLink>
               </li>
             </ul>
-
+          
             {/* Középen a logó */}
             <NavLink className="navbar-brand mx-auto" to="/">
               <img
-                src="/img/logo.webp"
+                src="img/logo.jpg"
                 alt="Logó"
                 width="120"
                 height="40"
