@@ -7,7 +7,7 @@ function Header() {
     <header>
       <nav className="navbar navbar-expand-lg headerfootercolor">
         <div className="container-fluid">
-          {/* Bal oldalon a Termékek és Hirdetés feladása */}
+          {/* Navbar toggler (mobile view) */}
           <button
             className="navbar-toggler"
             type="button"
@@ -21,6 +21,7 @@ function Header() {
           </button>
           
           <div className="collapse navbar-collapse" id="navbarNav">
+            {/* Bal oldali linkek */}
             <ul className="navbar-nav me-auto">
               {/* Termékek lenyíló menü */}
               <li className="nav-item dropdown">
@@ -39,7 +40,6 @@ function Header() {
                   <li><NavLink className="dropdown-item" to="/products/books">Könyvek</NavLink></li>
                   <li><NavLink className="dropdown-item" to="/products/games">Társasjátékok</NavLink></li>
                   <li><NavLink className="dropdown-item" to="/products/clothing">Ruhák</NavLink></li>
-                  
                 </ul>
               </li>
               
@@ -60,10 +60,13 @@ function Header() {
               />
             </NavLink>
 
-            {/* Jobb oldalon a Bejelentkezés/Regisztráció */}
+            {/* Jobb oldali linkek (Bejelentkezés és Regisztráció) */}
             <ul className="navbar-nav ms-auto">
               <li className="nav-item">
-                <NavLink className="nav-link" to="/login">Bejelentkezés/Regisztráció</NavLink>
+                <NavLink className="nav-link" to="/login">Bejelentkezés</NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/registry">Regisztráció</NavLink>
               </li>
             </ul>
           </div>

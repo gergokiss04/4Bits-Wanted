@@ -1,14 +1,7 @@
-import React, { useEffect } from "react";
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function Home() {
-  //Az oldal tetejére ugrik kattintásra:
-  useEffect(() => {
-    window.scrollTo({
-      top: 50,
-      behavior: "instant",
-    });
-  }, []);
-
   return (
     <div className="p-5 m-auto text-center content bg-lavender img-down">
       <div
