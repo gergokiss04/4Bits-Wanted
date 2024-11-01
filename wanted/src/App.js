@@ -1,10 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
+import Home from './Home';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
-function Home() { return <h2>Főoldal</h2>; }
+//function Home() { return <h2>Főoldal</h2>; }
 function Electronics() { return <h2>Műszaki cikkek</h2>; }
 function Books() { return <h2>Könyvek</h2>; }
 function Games() { return <h2>Társasjátékok</h2>; }
@@ -25,6 +27,7 @@ function App() {
         <Route path="/post-ad" element={<PostAd />} />
         <Route path="/login" element={<Login />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }
