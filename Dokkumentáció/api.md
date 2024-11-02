@@ -4,6 +4,26 @@ Minden API útvonal a `/api`-hoz képest van, tehát a `/minta` a `http://webhel
 
 **A webszerver még nincs implementálva, tehát ez még csak ötletelés**
 
+# Egyedek
+
+User:
+- felhasználónév -> szöveg
+- jelszó (titkos) -> szöveg
+- pénz -> valós
+- átlagos csillag (számított mező) -> valós
+- profilleírás -> hosszú szöveg
+- profilkép -> uri
+
+Offer:
+- eladó -> &User
+- cím -> szöveg
+- címkék -> szöveg[]
+- hosszas leírás -> hosszú szöveg
+- ár -> valós
+- képek -> uri[]
+- vásárló (null, ha még nem kelt el) -> &User?
+- vásárló értékelése (null, ha a vásárló még nem értékelte) -> valós?
+
 
 ## /auth
 
