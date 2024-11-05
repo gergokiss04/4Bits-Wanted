@@ -6,6 +6,11 @@ Minden API útvonal a `/api`-hoz képest van, tehát a `/minta` a `http://webhel
 
 # Egyedek
 
+Kulcs:
+- típus?: lehet null
+- &típus: hivatkozás
+- típus[]: több lehet
+
 User:
 - felhasználónév -> szöveg
 - jelszó (titkos) -> szöveg
@@ -25,6 +30,29 @@ Offer:
 - vásárló értékelése (null, ha a vásárló még nem értékelte) -> valós?
 
 
+# Gyakori hibák
+
+- `400 Bad Request`: Ha rossz a kérés. Lehet, hogy jár hozzá egy `text/plain` body
+- `401 Unauthorized`: Ha bejelentkezés szükséges, és a nem vagy bejelentkezve.
+- `403 Forbidden`: Ha másnak a dolgát akarjuk piszkálni.
+
+Ha nem `200 OK`, akkor lehet, hogy van `text/plain` hibaüzenet a válaszban. Ez fejleszési célú, ne írjuk ki közvetlenül a felhasználónak!
+
+
+## POST /register
+
+Új fiókot regisztrál. Csak kijelentkezve működik. Ha már van ilyen nevű felhasználó, akkor `400 Bad Request`, tehát előtte érdemes egy `GET /users/filter=Minta_123`-mal ellenőrizni, hogy létezik-e már.
+
+Minta kérés:
+```
+{
+  "email": "minta123@example.com",
+  "login": "Minta_123",
+  "pass": "alma"
+}
+```
+
+
 ## POST /auth
 
 Megpróbál bejelentkezni, vagy meghosszabbítja a meglévő sessiont.
@@ -40,7 +68,7 @@ Minta kérés kijelentkezve:
 Ha a bejelentkezési adatok jók, akkor lesz egy Set-Cookie header a válaszban, ami beállítja a `session_token`t:
 `Set-Cookie: session_token=asdfghjl123; HttpOnly;`
 
-Ha rosszak az adatok, akkor `401 Unauthorized`.
+Ha rosszak az adatok, akkor `403 Forbidden`.
 
 
 Minta kérés bejelentkezve:
@@ -93,10 +121,26 @@ Query paraméterek:
   "name": "Minta_123", // Alfanumerikus, kis- és nagybetű, kötőjel, alávonás
   "averageStars": 4.5333334, // Valós szám 0-tól 5-ig (inkluzív)
   "bio": "Profilleírás, hosszú szöveg,\nújsorokkal, <b>bármilyen szöveggel! Ez nem szabad, hogy félkövéren jelenjen meg!</b>", // Profilleírás, max. 4000 byte (UTF8-ként)
-  "pictureUrl": "/content/zi35th3hgq93hg945tt45whfasdfasdf.jpg" // A profilkép URL-je
+  "pictureUri": "/content/zi35th3hgq93hg945tt45whfasdfasdf.jpg" // A profilkép URI-je. Ezzel már jobbak vagyunk, mint a kanban.
 }
 ```
 
+## PUT /users/ID/bio
+
+Frissíthetjük saját profilleírásunkat. Vigyázz! Ez **nem `application/json`**, hanem `text/plain`!
+
+```
+Profilleírás, hosszú szöveg,
+újsorokkal, <b>bármilyen szöveggel! Ez nem szabad, hogy félkövéren jelenjen meg!</b>
+```
+
+## POST /users/ID/picture
+
+Frissíthetjük saját profilképünket. Ez azért nem PUT, mert nem idempotens. (minden kérés után változik a `pictureUri`-nk, még akkor is, ha ugyan azt a képet töltjük fel)
+
+```
+(a request body egy kép)
+```
 
 ## PUT /users/ID/password
 
@@ -108,11 +152,16 @@ Frissíti a felhasználó jelszavát. Csak akkor használható, ha jelenleg be v
 }
 ```
 
+## DELETE /users/ID
+
+Magunkat törölhetjük ezzel, persze csak ha be vagyunk jelentkezve.
+
 
 ## GET /tags
 
-Hasonló, mint a `GET /users`. Ábécérendben van.
+Hasonló, mint a `GET /users`. Ábécérendben van. Ez az egyedi címkéket adja vissza.
 
+Query paraméterek:
 - page
   - Ugyan úgy működik, mint a felhasználóknál.
 - filter
@@ -160,9 +209,36 @@ Query paraméterek:
 ```
 {
   "id": 149,
+  "created": 1730810798, // UTC Unix időbélyeg, ekkor jött létre
   "title": "Hagyományos mosópor kedvező Áron",
   "sellerId": 36, // A létrehozó felhasználó idje
   "buyerId": 1, // Csak akkor van jelen, ha már elkelt
+  "created": 1730810798, // UTC Unix időbélyeg, ekkor kelt el. Csak akkor van jelen, ha már elkelt
+  "price": 1000, // Nemnegatív egész szám
+  "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
+  "tags": [ // 0 vagy több címke
+    "anyós",
+    "hagymás",
+    "hagyományos",
+    "mosópor"
+  ],
+  "pictureUris": [ // 0 vagy több uri
+    "/media/q394ghq39ztq3t4q3t5.jpg",
+    "/media/77385fz8732z68732z634t8.png",
+    "/media/w3v896z3948v9zv9vt.webp"
+  ]
+}
+```
+
+## POST /offers
+
+Új offert hoz létre. A képek a médiaelőkészítőből jönnek, mely egyben ki is ürül az offer létrejöttének hatására.
+
+**FONTOS**: A képeket először bele kell rakni a médiaelőkészítőbe! (lásd `/mediastager` lentebb)
+
+```
+{
+  "title": "Hagyományos mosópor kedvező Áron",
   "price": 1000, // Nemnegatív egész szám
   "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
   "tags": [ // 0 vagy több címke
@@ -173,3 +249,53 @@ Query paraméterek:
   ]
 }
 ```
+
+## DELETE /offers/ID
+
+Csak akkor használható, ha mi hoztuk létre az offert, és még nem kelt el.
+
+## GET /offers/ID/rating
+
+Csak akkor hozzáférhető, ha az offert megvásárolt felhaszálóként vagyunk bejelentkezve, és már értékeltük ezt az offert. Ha még nem értékeltük, akkor `404 Not Found`.
+
+```
+{
+  "stars": 4 // 0, 1, 2, 3, 4, vagy 5
+}
+```
+
+## POST /offers/ID/rating
+
+Csak akkor hozható létre, hogyha az offert megvásárolt felhaszálóként vagyunk bejelentkezve, és még nem értékeltük ezt az offert. Nyílván csak egyszer lehet értékelni, mivel miután ide POSToltunk, már értékelve lesz. A formátum ugyan az, mint a GET.
+
+
+## GET /mediastager
+
+Megnézi, mik vannak az előkészítőben. Amikor új offert hozunk létre, akkor az összes médiaelőkészítőben tárolt kép kivevődik, és azok lesznek az offer képei.
+
+```
+{
+  "imagesLeft": 7 // Még hány képet lehet hozzáadni, mielőtt megtelik.
+  "uris": [
+    "/media/q394ghq39ztq3t4q3t5.jpg",
+    "/media/77385fz8732z68732z634t8.png",
+    "/media/w3v896z3948v9zv9vt.webp"
+  ]
+}
+```
+
+## POST /mediastager
+
+Beletesz egy képet a médiaelőkészítőbe. Ha már nincs hely (az imagesLeft 0), akkor `400 Bad Request`.
+
+```
+(a request body egy kép, amit hozzá szeretnénk adni az előkészítőhöz)
+```
+
+## DELETE /mediastager/INDEX
+
+Kidobja az `INDEX`-edik médiát az előkészítőből. Ha nem létezőt próbálunk meg törölni, akkor `404 Not Found`.
+
+## DELETE /mediastager
+
+Kidob mindent az előkészítőből.
