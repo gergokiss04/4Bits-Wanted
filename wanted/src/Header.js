@@ -52,7 +52,7 @@ function Header() {
             {/* Középen a logó */}
             <NavLink className="navbar-brand mx-auto" to="/">
               <img
-                src="img/logo.jpg"
+                src="../img/logo.jpg"
                 alt="Logó"
                 width="120"
                 height="40"
