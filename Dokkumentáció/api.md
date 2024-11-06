@@ -189,6 +189,21 @@ Query paraméterek:
 - minPrice, maxPrice
   - Legalacsonyabb, legmagasabb megengedett ár. Nemnegatív egész számok.
 
+## GET /offers/random
+
+Visszaadja néhány random offer ID-jét.
+
+Query paraméterek:
+- count
+    - Legfeljebb ennyit ad vissza. Alapértelmezett: 10.
+
+`GET /offers/random?count=5`
+```
+[1, 54, 149]
+```
+
+Nem biztos, hogy tényleg létezik annyi offer, amennyit kérsz!
+
 
 ## GET /offers/ID
 
