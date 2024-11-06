@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function PostAdd() {
   return (
     <div className="p-5 m-auto text-center content bg-lavender img-down">
-      <div id="home" className="container-fluid text-white scrollspy dark-brown-background-color">
+      <div id="postadd" className="container-fluid text-white scrollspy dark-brown-background-color">
       <div className="container mt-5">
       <h1 className="text-center mb-4">Hirdetés feladása</h1>
       <hr></hr>

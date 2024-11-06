@@ -8,6 +8,7 @@ import Registry from './Registry';
 import PostAdd from './PostAdd';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Product from './Product';
+import Profile from './Profile';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/post-ad" element={<PostAdd />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registry" element={<Registry />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <Footer />
     </Router>
