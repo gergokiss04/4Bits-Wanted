@@ -4,14 +4,15 @@ Minden API útvonal a `/api`-hoz képest van, tehát a `/minta` a `http://webhel
 
 A "hanyadik" **indexek 0-tól kezdődnek**, tehát az `["Egyéb", "Műszaki cikkek"]` 1. eleme a `"Műszaki cikkek"`!
 
-**A webszerver még nincs implementálva, tehát ez még csak ötletelés**
+**A webszerver még nincs implementálva, de az API már kb. végleges**
 
 # Egyedek
 
-Kulcs:
-- típus?: lehet null
-- &típus: hivatkozás
-- típus[]: több lehet
+| Jel | magyarázat |
+| --- | --- |
+| típus? | lehet null |
+| &típus | hivatkozás |
+| típus[] | több lehet |
 
 User:
 - felhasználónév -> szöveg
