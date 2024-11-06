@@ -2,6 +2,8 @@ Ez nem kötelező *dokk*umentáció, csak szerintem hasznos, ha pontosan lejegye
 
 Minden API útvonal a `/api`-hoz képest van, tehát a `/minta` a `http://webhely.example/api/minta` cím alatt érhető el. Természetesen mi nem áldozunk pénzt domain névre, tehát a gyakorlatban a `webhely.example` helyett valószínűleg `127.0.0.1` lesz.
 
+A "hanyadik" **indexek 0-tól kezdődnek**, tehát az `["Egyéb", "Műszaki cikkek"]` 1. eleme a `"Műszaki cikkek"`!
+
 **A webszerver még nincs implementálva, tehát ez még csak ötletelés**
 
 # Egyedek
@@ -181,8 +183,8 @@ Query paraméterek:
   - Megjelenjenek-e a már elkelt ajánlatok. Alapból false.
 - filterTitle
   - Cím alapján szűr.
-- filterTags
-  - Címkék alapján szűr. Több címkét pontosvesszővel elválasztva lehet megadni.
+- filterCategory
+  - Kategória sorszáma alapján szűr.
 - minPrice, maxPrice
   - Legalacsonyabb, legmagasabb megengedett ár. Nemnegatív egész számok.
 
@@ -196,7 +198,7 @@ Query paraméterek:
   "title": "Hagyományos mosópor kedvező Áron",
   "sellerId": 36, // A létrehozó felhasználó idje
   "buyerId": 1, // Csak akkor van jelen, ha már elkelt
-  "created": 1730810798, // UTC Unix időbélyeg, ekkor kelt el. Csak akkor van jelen, ha már elkelt
+  "sold": 1730810798, // UTC Unix időbélyeg, ekkor kelt el. Csak akkor van jelen, ha már elkelt
   "price": 1000, // Nemnegatív egész szám
   "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
   "categoryId": 1, // Hanyadik kategória a /categories-ből
