@@ -22,12 +22,15 @@ User:
 Offer:
 - eladó -> &User
 - cím -> szöveg
-- címkék -> szöveg[]
+- kategória -> &Kategória
 - hosszas leírás -> hosszú szöveg
 - ár -> valós
 - képek -> uri[]
 - vásárló (null, ha még nem kelt el) -> &User?
 - vásárló értékelése (null, ha a vásárló még nem értékelte) -> valós?
+
+Kategória:
+- név -> szöveg
 
 
 # Gyakori hibák
@@ -157,32 +160,12 @@ Frissíti a felhasználó jelszavát. Csak akkor használható, ha jelenleg be v
 Magunkat törölhetjük ezzel, persze csak ha be vagyunk jelentkezve.
 
 
-## GET /tags
-
-Hasonló, mint a `GET /users`. Ábécérendben van. Ez az egyedi címkéket adja vissza.
-
-Query paraméterek:
-- page
-  - Ugyan úgy működik, mint a felhasználóknál.
-- filter
-  - Címke címe alapján szűr.
+## GET /categories
 
 ```
 [
-  "anyós",
-  "aranyér",
-  "automata",
-  "cipő",
-  "hagymás",
-  "hagyományos",
-  "kabát",
-  "lengőteke",
-  "lőfegyver",
-  "mosópor",
-  "nem lopott",
-  "robotgép",
-  "teke",
-  "tekegolyó"
+  "Egyéb",
+  "Műszaki cikkek"
 ]
 ```
 
@@ -216,12 +199,7 @@ Query paraméterek:
   "created": 1730810798, // UTC Unix időbélyeg, ekkor kelt el. Csak akkor van jelen, ha már elkelt
   "price": 1000, // Nemnegatív egész szám
   "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
-  "tags": [ // 0 vagy több címke
-    "anyós",
-    "hagymás",
-    "hagyományos",
-    "mosópor"
-  ],
+  "categoryId": 1, // Hanyadik kategória a /categories-ből
   "pictureUris": [ // 0 vagy több uri
     "/media/q394ghq39ztq3t4q3t5.jpg",
     "/media/77385fz8732z68732z634t8.png",
@@ -241,12 +219,7 @@ Query paraméterek:
   "title": "Hagyományos mosópor kedvező Áron",
   "price": 1000, // Nemnegatív egész szám
   "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
-  "tags": [ // 0 vagy több címke
-    "anyós",
-    "hagymás",
-    "hagyományos",
-    "mosópor"
-  ]
+  "categoryId": 1, // Hanyadik kategória a /categories-ből
 }
 ```
 
