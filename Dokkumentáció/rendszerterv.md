@@ -185,9 +185,6 @@ például. Teszt #01 | Regisztráció | A felhasználó az adatok megadásával 
 ... | ... | ... | ... | ...
 
 ## 12. Telepítési terv
-
-Fizikai telepítési terv: 
-
 Szoftver telepítési terv: 
 A szoftver webes felületen működik, ehhez csak egy ajánlott böngésző telepítése szükséges 
 (Google Chrome, Safari, Opera), külön szoftver nem kell hozzá.
