@@ -1,10 +1,13 @@
 
-class Config {
+export class Config {
 
-  listenHostname: number
+  listenHostname: string
+  listenPort: number
 
 
   constructor(dict: {}) {
+    this.listenHostname = Config.require(dict, ['listen', 'hostname'])
+    this.listenPort = Config.require(dict, ['listen', 'port'])
   }
 
 
