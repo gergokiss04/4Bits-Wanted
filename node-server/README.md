@@ -12,3 +12,4 @@ Minden parancs ennek a fájlnak a mappájában futtatandó, kivéve, ha kifejeze
 ## Indítás
 1. `npx tsc` - A `src/` mappában lévő TypeScriptek átfordulnak JavaScripté a `build/`-be
 2. `node build/main.js` - A Node elkezdi futtatni az átfordított kódot
+(protip: `npx tsc && node build/main.js`)
