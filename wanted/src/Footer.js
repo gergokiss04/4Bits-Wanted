@@ -11,7 +11,7 @@ function Footer() {
         {/* Elérhetőségek */}
         <ul className="list-unstyled">
           <li className="mb-2">
-            <strong>Email:</strong> <a href="mailto:info@ceg.hu" className="text-dark text-decoration-none">wantedsupport@gmail.com</a>
+            <strong>Email:</strong> <a href="mailto:wantedsupport@gmail.com" className="text-dark text-decoration-none">wantedsupport@gmail.com</a>
           </li>
           <li className="mb-2">
             <strong>Telefonszám:</strong> <a href="tel:+36123456789" className="text-dark text-decoration-none">+36 1 234 5678</a>
