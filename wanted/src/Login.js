@@ -9,6 +9,7 @@ function Login() {
         className="container-fluid text-white scrollspy dark-brown-background-color"
       >
         <h1>Bejelentkezés</h1>
+        <p>Lépj be, és adj el használt termékeidet díjmentesen</p>
         <hr />
 
         <form className="d-flex flex-column align-items-center">

@@ -9,6 +9,7 @@ function Registry() {
         className="container-fluid text-white scrollspy dark-brown-background-color"
       >
         <h1>Regisztráció</h1>
+        <p>Csatlakozz, és adj el használt termékeidet díjmentesen</p>
         <hr />
 
         <form className="d-flex flex-column align-items-center">

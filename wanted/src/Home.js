@@ -17,7 +17,7 @@ export function Home() {
             <img src="img/carousel3.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Slide 3" />
           </div>
         </div>
-        
+
         {/* Carousel Controls */}
         <button className="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
           <span className="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -31,10 +31,7 @@ export function Home() {
 
       {/* Keresősáv */}
       <div className="p-5 m-auto text-center content bg-lavender img-down">
-        <div
-          id="login"
-          className="container-fluid text-white scrollspy dark-brown-background-color"
-        >
+        <div id="login" className="container-fluid text-white scrollspy dark-brown-background-color">
           <h1>Milyen terméket keres?</h1>
           <hr />
           <div className="d-flex justify-content-center mt-4">
@@ -50,6 +47,60 @@ export function Home() {
                 Keresés
               </button>
             </form>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 m-auto text-center content bg-lavender img-down">
+        <div id="login" className="container-fluid text-white scrollspy dark-brown-background-color">
+          <h1>Kiemelt termékeink</h1>
+          <hr />
+          <div className="row">
+            <div className="col-md-4 mb-4">
+              <div className="card h-100 shadow-sm">
+                {/* Image helye */}
+                <div className="card-body">
+                  <h5 className="card-title">Card Title 1</h5>
+                  <p className="card-text"><strong>Ár:</strong> Value</p>
+                  <p className="card-text"><strong>Típus:</strong> Category</p>
+                  <p className="card-text">Description</p>
+                </div>
+                <div className="card-footer text-center">
+                  <button className="btn btn-primary">Megvásárol</button>
+                </div>
+              </div>
+            </div>
+
+
+            <div className="col-md-4 mb-4">
+              <div className="card h-100 shadow-sm">
+                {/* Image helye */}
+                <div className="card-body">
+                  <h5 className="card-title">Card Title 2</h5>
+                  <p className="card-text"><strong>Ár:</strong> Value</p>
+                  <p className="card-text"><strong>Típus:</strong> Category</p>
+                  <p className="card-text">Description</p>
+                </div>
+                <div className="card-footer text-center">
+                  <button className="btn btn-primary">Megvásárol</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4 mb-4">
+              <div className="card h-100 shadow-sm">
+                {/* Image helye */}
+                <div className="card-body">
+                  <h5 className="card-title">Card Title 3</h5>
+                  <p className="card-text"><strong>Ár:</strong> Value</p>
+                  <p className="card-text"><strong>Típus:</strong> Category</p>
+                  <p className="card-text">Description</p>
+                </div>
+                <div className="card-footer text-center">
+                  <button className="btn btn-primary">Megvásárol</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
