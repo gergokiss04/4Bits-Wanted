@@ -15,25 +15,28 @@ A "hanyadik" **indexek 0-tól kezdődnek**, tehát az `["Egyéb", "Műszaki cikk
 | típus[] | több lehet |
 
 User:
-- felhasználónév -> szöveg
-- jelszó (titkos) -> szöveg
+- id -> egész
+- name -> szöveg
+- password (titkos) -> szöveg
 - pénz -> valós
-- átlagos csillag (számított mező) -> valós
-- profilleírás -> hosszú szöveg
-- profilkép -> uri
+- average_rating (számított mező) -> valós
+- bio -> hosszú szöveg
+- profile_pic -> uri
 
 Offer:
-- eladó -> &User
-- cím -> szöveg
-- kategória -> &Kategória
-- hosszas leírás -> hosszú szöveg
-- ár -> valós
-- képek -> uri[]
-- vásárló (null, ha még nem kelt el) -> &User?
-- vásárló értékelése (null, ha a vásárló még nem értékelte) -> valós?
+- id -> egész
+- seller_id -> &User
+- title -> szöveg
+- category -> &Kategória
+- description -> hosszú szöveg
+- price -> valós
+- pictures -> uri[]
+- buyer_id (null, ha még nem kelt el) -> &User?
+- buyer_rating (null, ha a vásárló még nem értékelte) -> valós?
 
 Kategória:
-- név -> szöveg
+- id -> egész
+- category_name -> szöveg
 
 
 # Gyakori hibák
