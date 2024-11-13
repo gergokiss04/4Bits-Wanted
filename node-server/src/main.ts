@@ -20,8 +20,9 @@ const config = new Config(
 async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: string): Promise<void> {
   let file: fs.FileHandle | undefined
   try {
+    // TODO kitalálni neki a content-typeot
     file = await fs.open(path.join(config.staticDirectory, url), 'r')
-    res.write(await file.read())
+    res.end((await file.read()).buffer)
   } catch(error) {
     if(error instanceof Error) {
       switch((error as NodeJS.ErrnoException).code) {
@@ -31,6 +32,7 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
           return
       }
     }
+    throw error
   } finally {
     file?.close()
   }
@@ -42,7 +44,7 @@ const server = http.createServer()
 server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
   const url = path.normalize(req.url ?? '/')
 
-  log.info(`Request: ${log.sanitize(url)}`)
+  log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)}`)
 
   if(url.startsWith(config.apiPath)) {
     const apiPath: string = path.normalize(url.substring(config.apiPath.length))
@@ -52,10 +54,10 @@ server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<
   }
 
   // Set the response HTTP header with HTTP status and Content type
-  res.writeHead(200, { "Content-Type": "text/plain" })
+  //res.writeHead(200, { "Content-Type": "text/plain" })
 
   // Send the response body "Hello World"
-  res.end("Hello World\n")
+  //res.end("Hello World\n")
 
 })
 
