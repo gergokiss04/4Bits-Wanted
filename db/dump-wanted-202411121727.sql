@@ -51,7 +51,7 @@ CREATE TABLE `offers` (
   `price` float NOT NULL,
   `description` varchar(1000) NOT NULL,
   `pictures` varchar(1000) NOT NULL,
-  `category` varchar(100) NOT NULL,
+  `category_id` INT NOT NULL,
   `seller_id` int(11) NOT NULL,
   `buyer_id` int(11) DEFAULT NULL,
   `buyer_rating` float DEFAULT NULL,
