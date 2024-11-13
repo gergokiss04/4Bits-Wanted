@@ -5,5 +5,8 @@
   },
   "static": {
     "directory": "../wanted/build/"
+  },
+  "api": {
+    "path": "/api"
   }
 }

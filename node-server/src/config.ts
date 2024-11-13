@@ -4,10 +4,18 @@ export class Config {
   listenHostname: string
   listenPort: number
 
+  staticDirectory: string
+
+  apiPath: string
+
 
   constructor(dict: {}) {
     this.listenHostname = Config.require(dict, ['listen', 'hostname'])
     this.listenPort = Config.require(dict, ['listen', 'port'])
+
+    this.staticDirectory = Config.require(dict, ['static', 'directory'])
+
+    this.apiPath = Config.require(dict, ['api', 'path'])
   }
 
 
