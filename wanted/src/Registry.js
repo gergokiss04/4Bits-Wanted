@@ -1,7 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function Registry() {
+async function Registry() {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  try {
+    const checkUser = await fetch(`http://127.0.0.1/api/users/filter=${username}`);
+    if (checkUser.ok){
+      const userExists = await checkUser.json();
+      if (userExists) {
+        alert('Foglalt felhasználónév!')
+        return;
+      }
+    }
+    const response = await fetch(`http://127.0.0.1/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        login: username,
+        pass: password,
+      }),
+    });
+
+    if (response.ok) {
+      alert('sikeres regisztráció');
+    }
+    else{
+      alert('Nem sikerült a regisztráció');
+    }
+  } catch (error){
+    console.error('Hiba a regisztráció során:', error);
+  };
   return (
     <div className="p-5 m-auto text-center content bg-lavender img-down">
       <div
@@ -21,6 +55,8 @@ function Registry() {
               className="form-control" 
               id="username" 
               placeholder="Felhasználónév"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
@@ -32,6 +68,8 @@ function Registry() {
               className="form-control" 
               id="email" 
               placeholder="Email cím"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -43,6 +81,8 @@ function Registry() {
               className="form-control" 
               id="password" 
               placeholder="Jelszó"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
