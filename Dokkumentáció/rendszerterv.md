@@ -127,7 +127,7 @@ A web alkalmazás React JS keretrendszer használatával készül el. Az API-hoz
 hozzáférni, ez biztosítja, hogy illetéktelen felhasználók ne csinálhassanak olyanokat, amiket nem lenne nekik szabad.
 
 ## 9. Adatbázis terv
-Az adatbázis két táblával rendelkezik:
+Az adatbázis három táblával rendelkezik:
    - Users (felhasználó adatai)
       - id 
          - egész
@@ -147,7 +147,6 @@ Az adatbázis két táblával rendelkezik:
       - password
          - szöveg
          - NN
-
 
    - Offers (apróhirdetés adatai)
       - id
@@ -175,6 +174,18 @@ Az adatbázis két táblával rendelkezik:
       - buyer_rating
          - valós
          - NULL, ha még nem vették meg
+
+   - Categories (kategóriák különszedve)
+      - id
+         - egész
+         - PK
+         - auto increment
+      - category_name 
+         - szöveg
+         - NN
+
+A különböző felhasználó által generált adatok (pl. képek) a React projekt mappájában tárolandóak, ezek helyei vannak eltárolva az adatbázisban!
+
 
 ## 10. Implementációs terv
 
