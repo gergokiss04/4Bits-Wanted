@@ -4,6 +4,7 @@
     "port": 8000
   },
   "static": {
+    "rootFile": "index.html",
     "roots": ["../wanted/build/"]
   },
   "api": {

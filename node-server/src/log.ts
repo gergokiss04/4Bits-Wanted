@@ -1,4 +1,4 @@
-import colors from 'colors/safe'
+import colors from 'colors/safe.js'
 
 // TODO: ki-be lehet kapcsolni egyes logolási szinteket
 // TODO: fájlba, stderr-re
