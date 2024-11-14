@@ -4,7 +4,7 @@
     "port": 8000
   },
   "static": {
-    "directory": "../wanted/build/"
+    "roots": ["../wanted/build/"]
   },
   "api": {
     "path": "/api"

@@ -7,18 +7,18 @@ export function sanitize(msg: any): string {
   return JSON.stringify(msg);
 }
 
-export function log(msg: string): void {
+export function write(msg: string): void {
   console.log(msg)
 }
 
 export function info(msg: string): void {
-  log(colors.gray(msg))
+  write(colors.gray(msg))
 }
 
 export function warn(msg: string): void {
-  log(colors.yellow(msg))
+  write(colors.yellow(msg))
 }
 
 export function error(msg: string): void {
-  log(colors.red(msg))
+  write(colors.red(msg))
 }

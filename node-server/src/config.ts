@@ -4,7 +4,7 @@ export class Config {
   listenHostname: string
   listenPort: number
 
-  staticDirectory: string
+  staticRoots: string[]
 
   apiPath: string
 
@@ -13,7 +13,7 @@ export class Config {
     this.listenHostname = Config.require(dict, ['listen', 'hostname'])
     this.listenPort = Config.require(dict, ['listen', 'port'])
 
-    this.staticDirectory = Config.require(dict, ['static', 'directory'])
+    this.staticRoots = Config.require(dict, ['static', 'directory'])
 
     this.apiPath = Config.require(dict, ['api', 'path'])
   }
@@ -24,7 +24,6 @@ export class Config {
       dict = dict[path[i]]
     }
 
-    // TODO
     return dict[path[path.length - 1]]
   }
 

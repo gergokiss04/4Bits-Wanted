@@ -8,7 +8,12 @@ import * as fsSync from 'fs'
 
 import * as log from './log'
 import { Config } from './config'
+import { Api } from './api'
 
+
+
+const configPath = process.env.WANTED_CONFIG || 'wanted-config.json';
+log.info(`Reading config at '${configPath}'`)
 
 const config = new Config(
                  JSON.parse(
