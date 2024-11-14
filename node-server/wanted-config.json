@@ -1,0 +1,13 @@
+{
+  "listen": {
+    "hostname": "127.0.0.1",
+    "port": 8000
+  },
+  "static": {
+    "rootFile": "index.html",
+    "roots": ["../wanted/build/"]
+  },
+  "api": {
+    "path": "/api"
+  }
+}
