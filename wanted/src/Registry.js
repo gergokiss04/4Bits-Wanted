@@ -1,52 +1,44 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-async function Registry() {
+function Registry() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  try {
-    const checkUser = await fetch(`http://127.0.0.1/api/users/filter=${username}`);
-    if (checkUser.ok){
-      const userExists = await checkUser.json();
-      if (userExists) {
-        alert('Foglalt felhasználónév!')
-        return;
-      }
-    }
-    const response = await fetch(`http://127.0.0.1/api/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email,
-        login: username,
-        pass: password,
-      }),
-    });
+  async function SignUp() {
+    let item = { email: email, login: username, pass: password };
+    try {
+      let response = await fetch("http://127.0.0.1/api/register", {
+        method: 'POST',
+        body: JSON.stringify(item),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json',
+        },
+      });
 
-    if (response.ok) {
-      alert('sikeres regisztráció');
+      if (!response.ok) {
+        throw new Error('Hiba miatt nem sikerült a regisztráció!');
+      }
+    } catch (error) {
+      alert(error.message);
     }
-    else{
-      alert('Nem sikerült a regisztráció');
-    }
-  } catch (error){
-    console.error('Hiba a regisztráció során:', error);
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    SignUp();
   };
+
   return (
     <div className="p-5 m-auto text-center content bg-lavender img-down">
-      <div
-        id="register"
-        className="container-fluid text-white scrollspy dark-brown-background-color"
-      >
+      <div id="register" className="container-fluid text-white scrollspy dark-brown-background-color">
         <h1>Regisztráció</h1>
         <p>Csatlakozz, és adj el használt termékeidet díjmentesen</p>
         <hr />
 
-        <form className="d-flex flex-column align-items-center">
+        <form className="d-flex flex-column align-items-center" onSubmit={handleSubmit}>
           {/* Felhasználónév mező */}
           <div className="mb-3" style={{ width: '100%', maxWidth: '300px' }}>
             <label htmlFor="username" className="form-label">Felhasználónév</label>
