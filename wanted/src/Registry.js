@@ -6,7 +6,7 @@ function Registry() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  async function SignUp() {
+  async function Register() {
     let item = { email: email, login: username, pass: password };
     try {
       let response = await fetch("http://127.0.0.1/api/register", {
@@ -28,7 +28,7 @@ function Registry() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    SignUp();
+    Register();
   };
 
   return (
