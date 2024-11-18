@@ -1,6 +1,10 @@
 // A /wanted/build-be teszi a react a build eredményét.
 
-// Load HTTP module
+// Lekérdezések amik kelleni fognak:
+// - get/set rekord (egy tranzakcióba akár több, atomikusan!)
+// - használják-e ezt a kép URL-t bárhol? (garbic collector)
+// - user/más létrehozása, hogy legyen idje
+
 import http from 'http'
 import * as path from 'path'
 import * as fs from 'fs/promises'
@@ -26,6 +30,7 @@ const config = new Config(
 async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: string): Promise<void> {
   let file: fs.FileHandle | undefined
   try {
+    // Nézzük, melyik root alatt található meg
     let filePath : string | undefined = undefined
     for(const root of config.staticRoots) {
       const trialPath = path.join(root, url)
@@ -87,8 +92,8 @@ server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<
 
   log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)}`)
 
-  if(url.startsWith(config.apiPath)) {
-    const apiPath: string = path.normalize(url.substring(config.apiPath.length))
+  if(url.startsWith(config.apiPrefix)) {
+    const apiPath: string = path.normalize(url.substring(config.apiPrefix.length))
     log.info(`API call: ${log.sanitize(apiPath)}`)
   } else {
     if(url == '/' && config.rootFile) url = config.rootFile
