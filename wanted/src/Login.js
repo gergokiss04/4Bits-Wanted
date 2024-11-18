@@ -20,6 +20,7 @@ function Login() {
               className="form-control" 
               id="username" 
               placeholder="Felhasználónév"
+              required
             />
           </div>
           <div className="mb-3" style={{ width: '100%', maxWidth: '300px' }}>
@@ -29,6 +30,7 @@ function Login() {
               className="form-control" 
               id="password" 
               placeholder="Jelszó"
+              required
             />
           </div>
           <button type="submit" className="btn btn-primary w-100" style={{ maxWidth: '300px' }}>Bejelentkezés</button>

@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 function Header() {
   return (
@@ -67,6 +69,9 @@ function Header() {
               </li>
               <li className="nav-item">
                 <NavLink className="nav-link" to="/registry">Regisztráció</NavLink>
+              </li>
+              <li className="nav-item">   
+                <NavLink className="nav-link" to="/basket"><i class="bi bi-basket"></i></NavLink>
               </li>
             </ul>
           </div>

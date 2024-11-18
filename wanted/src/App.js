@@ -9,6 +9,8 @@ import PostAdd from './PostAdd';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Product from './Product';
 import Profile from './Profile';
+import Basket from './Basket';
+import Order from './Order';
 
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registry" element={<Registry />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/basket" element={<Basket />} />
+        <Route path="/order" element={<Order />} />
       </Routes>
       <Footer />
     </Router>

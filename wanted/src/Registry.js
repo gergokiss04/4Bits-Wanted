@@ -47,6 +47,7 @@ function Registry() {
               className="form-control" 
               id="username" 
               placeholder="Felhasználónév"
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -60,6 +61,7 @@ function Registry() {
               className="form-control" 
               id="email" 
               placeholder="Email cím"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -74,6 +76,7 @@ function Registry() {
               id="password" 
               placeholder="Jelszó"
               value={password}
+              required
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
