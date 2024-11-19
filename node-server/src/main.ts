@@ -20,6 +20,7 @@ import { Api } from './api.js'
 const configPath = process.env.WANTED_CONFIG || 'wanted-config.json';
 log.info(`Reading config at '${configPath}'`)
 
+// Konfinguráció betöltése
 const config = new Config(
                  JSON.parse(
                  fsSync.readFileSync(
