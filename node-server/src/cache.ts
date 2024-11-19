@@ -34,6 +34,14 @@ export class Cache<TKey, TValue> {
     return this.semaphore.runExclusive(callback, Cache.BIG_LIMIT, Cache.WRITE_PRIORITY)
   }
 
+
+  dropUnsynchronized(key: TKey): boolean {
+    const val = this.dict.get
+    const result = this.dict.delete(key)
+    this.onDroppedCallback()
+    return result
+  }
+
   public async insert(key: TKey, value: TValue) {
     await this.runExclusiveWrite(
       () => {
@@ -41,7 +49,7 @@ export class Cache<TKey, TValue> {
         if(this.maxElements !== undefined && this.maxElements >= 0 && this.dict.size >= this.maxElements) {
           for(const key of this.dict.keys()) {
             console.log(`${key} -> ${this.dict.get(key)?.value} dropped`) // HACK
-            this.dict.delete(key) // Genuis! Elvileg insertion order szerint adja vissza a keys().
+            this.dropUnsynchronized(key) // Genuis! Elvileg insertion order szerint adja vissza a keys().
             if(this.dict.size < this.maxElements) break
           }
         }
@@ -79,7 +87,7 @@ export class Cache<TKey, TValue> {
         }
 
         for(const expiredKey of expired) {
-          if(!this.dict.delete(expiredKey)) throw new Error()
+          if(!this.dropUnsynchronized(expiredKey)) throw new Error()
         }
       }
     )

@@ -16,20 +16,16 @@ export abstract class Record<TId> {
   **/
   abstract serializePublic(): string
 
+  public entangle(other: Record<any>) {
+    this.entangled.add(other)
+  }
+
 }
 
 
 // A getInstancék csak azért létezhetnek, mert elvileg nem létezhet körkörös/nagyon nagy referenciahálózat!
 
 export class User extends Record<number> {
-
-  static instances: {[key: number]: User}
-
-  public static getInstance(id: number): User {
-    // TODO
-    throw new Error("Method not implemented.")
-  }
-
 
   id: number
   name: string
