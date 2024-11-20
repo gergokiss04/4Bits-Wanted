@@ -20,6 +20,7 @@ export abstract class Record<TId> {
 
   public entangle(other: Record<any>) {
     this.entangled.add(other)
+    other.entangled.add(this)
   }
 
 }
