@@ -2,6 +2,8 @@ import * as dictutil from './dictutil.js'
 
 
 
+type RecordResolver<TId, TRecord extends Record<TId>> = (id: TId) => TRecord
+
 export abstract class Record<TId> {
 
   readonly id: TId
@@ -22,8 +24,6 @@ export abstract class Record<TId> {
 
 }
 
-
-// A getInstancék csak azért létezhetnek, mert elvileg nem létezhet körkörös/nagyon nagy referenciahálózat!
 
 export class User extends Record<number> {
 
@@ -63,14 +63,6 @@ export class User extends Record<number> {
 
 export class Offer extends Record<number> {
 
-  static instances: {[key: number]: Offer}
-
-  public static getInstance(id: number): Offer {
-    // TODO
-    throw new Error("Method not implemented.")
-  }
-
-
   createdTimestamp: number
   seller: User
   title: string
@@ -83,18 +75,18 @@ export class Offer extends Record<number> {
   buyerRating: number | null
 
 
-  constructor(id: number, dict: {}) {
+  constructor(id: number, dict: {}, userResolver: RecordResolver<number, User>, categoryResolver: RecordResolver<number, Category>) {
     super(id)
 
     this.createdTimestamp = dictutil.require<number>(dict, ['created'])
-    this.seller = User.getInstance(dictutil.require<number>(dict, ['sellerId']))
+    this.seller = userResolver(dictutil.require<number>(dict, ['sellerId']))
     this.title = dictutil.require(dict, ['title'])
-    this.category = Category.getInstance(dictutil.require<number>(dict, ['categoryId']))
+    this.category = categoryResolver(dictutil.require<number>(dict, ['categoryId']))
     this.description = dictutil.require(dict, ['description'])
     this.price = dictutil.require(dict, ['price'])
     this.pictureUris = dictutil.require(dict, ['pictureUris'])
     const buyerId: number = dictutil.require(dict, ['buyerId'])
-    this.buyer = buyerId ? User.getInstance(buyerId) : null
+    this.buyer = buyerId ? userResolver(buyerId) : null
     this.soldTimestamp = dictutil.require<number>(dict, ['sold'])
     this.buyerRating = dictutil.optional(dict, ['buyerRating'])
   }
@@ -120,14 +112,6 @@ export class Offer extends Record<number> {
 }
 
 export class Category extends Record<number> {
-
-  static instances: {[key: number]: Category}
-
-  public static getInstance(id: number): Category {
-    // TODO
-    throw new Error("Method not implemented.")
-  }
-
 
   name: string
 
