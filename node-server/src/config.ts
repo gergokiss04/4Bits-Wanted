@@ -9,7 +9,7 @@ export class Config {
   rootFile: string | null
   staticRoots: string[]
 
-  apiPrefix: string
+  apiPrefixParts: string[]
 
 
   constructor(dict: {}) {
@@ -19,7 +19,18 @@ export class Config {
     this.rootFile = dictutil.optional(dict, ['static', 'rootFile'])
     this.staticRoots = dictutil.require(dict, ['static', 'roots'])
 
-    this.apiPrefix = dictutil.require(dict, ['api', 'prefix'])
+    this.apiPrefixParts = dictutil.require<string>(dict, ['api', 'prefix']).split('/')
+  }
+
+
+  maybeApiPath(path: string[]): string[] | false {
+    if(path.length < this.apiPrefixParts.length) return false
+
+    for(const i in this.apiPrefixParts) {
+      if(path[i] != this.apiPrefixParts[i]) return false
+    }
+
+    return path.slice(this.apiPrefixParts.length)
   }
 
 }

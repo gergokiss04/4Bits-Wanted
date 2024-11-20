@@ -30,6 +30,8 @@ const api = new MemoryApi()
 
 
 async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: string): Promise<void> {
+  // FONTOS!! Még joinolás előtt normalizáljuk, nehogy működjön ez: /%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
+  url = path.normalize(url)
   let file: fs.FileHandle | undefined
   try {
     // Nézzük, melyik root alatt található meg
@@ -91,19 +93,22 @@ const server = http.createServer()
 
 server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
   try {
-    // TODO unescapelni (split után) az uri entitásokat
-    let url = path.normalize(req.url ?? '/')
+    const pathParts: string[] = []
+    for(const part of path.normalize(req.url ?? '/').split('/')) {
+      if(part.length <= 0) continue
+      pathParts.push(decodeURIComponent(part))
+    }
+    const url = path.join(...pathParts)
 
-    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)}`)
+    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)} ${JSON.stringify(pathParts)}`)
 
-    if(url.startsWith(config.apiPrefix)) {
-      const apiPath: string = path.normalize(url.substring(config.apiPrefix.length))
-      log.info(`API call: ${log.sanitize(apiPath)}`)
-      // TODO az első üres nem kell bele
-      api.handle(req, res, apiPath.split('/'))
+    const maybeApiPath = config.maybeApiPath(pathParts)
+    if(maybeApiPath !== false) {
+      log.info(`API call: ${log.sanitize(maybeApiPath)}`)
+      api.handle(req, res, pathParts)
     } else {
-      if(url == '/' && config.rootFile) url = config.rootFile
-      serveStatic(res, url)
+      if(url == '.' && config.rootFile) serveStatic(res, config.rootFile)
+      else serveStatic(res, url)
     }
   } catch(e) {
     if(e instanceof Error) {

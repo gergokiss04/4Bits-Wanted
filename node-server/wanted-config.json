@@ -8,6 +8,6 @@
     "roots": ["../wanted/build/"]
   },
   "api": {
-    "prefix": "/api"
+    "prefix": "api"
   }
 }
