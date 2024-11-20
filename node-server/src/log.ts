@@ -11,6 +11,11 @@ export function write(msg: string): void {
   console.log(msg)
 }
 
+
+export function normal(msg: string): void {
+  write(msg)
+}
+
 export function info(msg: string): void {
   write(colors.gray(msg))
 }
@@ -21,4 +26,9 @@ export function warn(msg: string): void {
 
 export function error(msg: string): void {
   write(colors.red(msg))
+}
+
+
+export function exception(e: Error): void {
+  error(`Exception: ${sanitize(e)}`)
 }

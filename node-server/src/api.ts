@@ -8,7 +8,9 @@ export abstract class Api {
     // do nothing
   }
 
-  async handle(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>): Promise<void> {
+  async handle(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, path: string[]): Promise<void> {
+    res.write(JSON.stringify(path))
+    res.end()
     // TODO
   }
 

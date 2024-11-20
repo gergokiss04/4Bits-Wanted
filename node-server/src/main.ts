@@ -13,12 +13,11 @@ import Mime from 'mime/lite'
 
 import * as log from './log.js'
 import { Config } from './config.js'
-import { Api } from './api.js'
+import { MemoryApi } from './apis/memory.js'
 
 
-
-const configPath = process.env.WANTED_CONFIG || 'wanted-config.json';
-log.info(`Reading config at '${configPath}'`)
+const configPath = process.env.WANTED_CONFIG || 'wanted-config.json'
+log.normal(`Reading config at '${configPath}'`)
 
 // Konfinguráció betöltése
 const config = new Config(
@@ -26,6 +25,8 @@ const config = new Config(
                  fsSync.readFileSync(
                  process.env.WANTED_CONFIG || 'wanted-config.json', 'utf-8')
 ))
+
+const api = new MemoryApi()
 
 
 async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: string): Promise<void> {
@@ -89,27 +90,31 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
 const server = http.createServer()
 
 server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
-  let url = path.normalize(req.url ?? '/')
+  try {
+    // TODO unescapelni (split után) az uri entitásokat
+    let url = path.normalize(req.url ?? '/')
 
-  log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)}`)
+    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)}`)
 
-  if(url.startsWith(config.apiPrefix)) {
-    const apiPath: string = path.normalize(url.substring(config.apiPrefix.length))
-    log.info(`API call: ${log.sanitize(apiPath)}`)
-  } else {
-    if(url == '/' && config.rootFile) url = config.rootFile
-    serveStatic(res, url)
+    if(url.startsWith(config.apiPrefix)) {
+      const apiPath: string = path.normalize(url.substring(config.apiPrefix.length))
+      log.info(`API call: ${log.sanitize(apiPath)}`)
+      // TODO az első üres nem kell bele
+      api.handle(req, res, apiPath.split('/'))
+    } else {
+      if(url == '/' && config.rootFile) url = config.rootFile
+      serveStatic(res, url)
+    }
+  } catch(e) {
+    if(e instanceof Error) {
+      log.exception(e)
+    } else {
+      log.error('Unknown exception occurred (not instanceof Error)')
+    }
   }
-
-  // Set the response HTTP header with HTTP status and Content type
-  //res.writeHead(200, { "Content-Type": "text/plain" })
-
-  // Send the response body "Hello World"
-  //res.end("Hello World\n")
 
 })
 
-// Prints a log once the server starts listening
 server.listen(config.listenPort, config.listenHostname, function () {
-  console.log(`Server listening on http://${config.listenHostname}:${config.listenPort}/`)
+  log.normal(`Server listening on http://${config.listenHostname}:${config.listenPort}/`)
 })
