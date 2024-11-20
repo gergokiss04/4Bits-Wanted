@@ -1,4 +1,5 @@
 -- parancsok mock adatok beillesztésére az adatbázisba
+-- ez csak például szolgál, hogy milyen formában lesznek az adatok, nem végleges, változhat!!
 
 insert into categories (category_name)
 values

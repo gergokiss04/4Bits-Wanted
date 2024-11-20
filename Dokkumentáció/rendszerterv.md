@@ -184,7 +184,8 @@ Az adatbázis három táblával rendelkezik:
          - szöveg
          - NN
 
-A különböző felhasználó által generált adatok (pl. képek) a React projekt mappájában tárolandóak, ezek helyei vannak eltárolva az adatbázisban!
+A különböző felhasználó által generált adatok (pl. képek) a React projekt mappájában tárolandóak,
+ezek helyei vannak eltárolva az adatbázisban!
 
 
 ## 10. Implementációs terv
