@@ -14,7 +14,8 @@ export class Cache<TKey, TValue> {
   maxElements?: number = 256
   dict: Map<TKey, {timestamp: bigint, value: TValue}> = new Map()
   semaphore = new Semaphore(Cache.BIG_LIMIT)
-  onDroppedCallback?: (value: TValue) => void
+  onDroppedCallback?: (key: TKey, value: TValue) => void
+  logCallback?: (msg: string) => void
 
 
   static now(): bigint {
@@ -23,6 +24,10 @@ export class Cache<TKey, TValue> {
 
   static elapsedSeconds(from: bigint, till: bigint): number {
     return Number((till - from) / 1_000_000_000n)
+  }
+
+  log(msg: string) {
+      if(this.logCallback) this.logCallback(msg)
   }
 
 
@@ -35,20 +40,50 @@ export class Cache<TKey, TValue> {
   }
 
 
-  dropUnsynchronized(key: TKey): boolean {
-    const val = this.dict.get
+  public dropUnsynchronized(key: TKey): TValue | undefined {
+    const val = this.dict.get(key)?.value
+    this.log(`Drop ${key} -> ${val}`)
+
     const result = this.dict.delete(key)
-    this.onDroppedCallback()
-    return result
+    if(result && val && this.onDroppedCallback) this.onDroppedCallback(key, val)
+
+    return val
+  }
+
+  public async drop(key: TKey): Promise<TValue | undefined> {
+    return await this.runExclusiveWrite(
+      () => {
+        return this.dropUnsynchronized(key)
+      }
+    )
+  }
+
+  public async flush() {
+    return await this.runExclusiveWrite(
+      () => {
+        this.log('Flush')
+        while(this.dict.size > 0) {
+          let someKey: TKey | undefined
+          for(const key of this.dict.keys()) {
+            someKey = key
+            break
+          }
+          if(!someKey) throw new Error('It should be impossible for this to be undefined.')
+
+          this.dropUnsynchronized(someKey)
+        }
+      }
+    )
   }
 
   public async insert(key: TKey, value: TValue) {
     await this.runExclusiveWrite(
       () => {
+        this.log(`Insert ${key} -> ${value}`)
         // Ha túl sok van, kezdd el kidobálni a régieket
         if(this.maxElements !== undefined && this.maxElements >= 0 && this.dict.size >= this.maxElements) {
           for(const key of this.dict.keys()) {
-            console.log(`${key} -> ${this.dict.get(key)?.value} dropped`) // HACK
+            this.log('Need to drop due to capacity')
             this.dropUnsynchronized(key) // Genuis! Elvileg insertion order szerint adja vissza a keys().
             if(this.dict.size < this.maxElements) break
           }
@@ -72,6 +107,8 @@ export class Cache<TKey, TValue> {
       () => {
         if(this.expireSeconds === undefined) return
 
+        this.log('GC')
+
         const now = Cache.now()
 
         let expired: Array<TKey> = []
@@ -81,7 +118,7 @@ export class Cache<TKey, TValue> {
           if(!valWithTime) throw new Error()
 
           if(Cache.elapsedSeconds(valWithTime.timestamp, now) > this.expireSeconds) {
-            console.log(`${key} -> ${valWithTime.value} expired`) // HACK
+            this.log(`${key} -> ${valWithTime.value} expired`)
             expired.push(key)
           }
         }
@@ -99,7 +136,7 @@ export class Cache<TKey, TValue> {
         this.garbicCollect()
         this.setGcInterval()
       },
-      (this.expireSeconds ?? 10) / 2
+      (this.expireSeconds ?? 10) * 1000 / 2
     )
   }
 
