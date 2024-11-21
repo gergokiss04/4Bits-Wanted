@@ -12,6 +12,32 @@ export class MemoryApi extends Api {
   categories = new Map<number, Category>()
 
 
+  loadTestData() {
+    this.users.set(1,
+      new User(1,
+        {
+          name: 'bob',
+          password: 123,
+          averageRating: 2.5,
+          bio: "Hi!\n\nI'm Bob.\n<script>alert(1)</script>",
+          profilePicUri: ""
+        }
+      )
+    )
+    this.users.set(3,
+      new User(3,
+        {
+          name: 'asd123',
+          password: 123,
+          averageRating: 0.0,
+          bio: "",
+          profilePicUri: ""
+        }
+      )
+    )
+  }
+
+
   ;*yieldUserIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {

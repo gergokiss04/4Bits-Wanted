@@ -9,9 +9,8 @@ export abstract class Api {
   }
 
   async handle(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, path: string[]): Promise<void> {
-    res.write(JSON.stringify(path))
+    res.statusCode = 404
     res.end()
-    // TODO
   }
 
 
