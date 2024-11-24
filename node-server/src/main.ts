@@ -102,13 +102,13 @@ server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<
 
     log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)} ${JSON.stringify(pathParts)}`)
 
-    const maybeApiPath = config.maybeApiPath(pathParts)
+    const maybeApiPath: string[] | false = config.maybeApiPath(pathParts)
     if(maybeApiPath !== false) {
       log.info(`API call: ${log.sanitize(maybeApiPath)}`)
-      api.handle(req, res, pathParts)
+      await api.handle(req, res, maybeApiPath)
     } else {
-      if(url == '.' && config.rootFile) serveStatic(res, config.rootFile)
-      else serveStatic(res, url)
+      if(url == '.' && config.rootFile) await serveStatic(res, config.rootFile)
+      else await serveStatic(res, url)
     }
   } catch(e) {
     if(e instanceof Error) {
