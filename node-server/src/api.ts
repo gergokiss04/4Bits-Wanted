@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import * as log from './log.js'
 import { Request } from './main.js'
+import { Cache } from './cache.js'
 import { User, Offer, Category, Record } from './records.js'
 
 
@@ -26,11 +27,22 @@ type Endpoint = {path: string[], method: ApiMethod}
 
 export abstract class Api {
 
+  userCache = new Cache<number, User>()
+  offerCache = new Cache<number, Offer>()
+  categoryCache = new Cache<number, Category>()
+
   endpoints: Array<Endpoint> = Array()
   reportErrors = true // TODO konfigurálható
 
 
   constructor() {
+    this.userCache.populateCallback = this.fetchUser
+    this.userCache.onDroppedCallback = (_, value: User) => value.dropEntangled(this.userCache)
+    this.offerCache.populateCallback = this.fetchOffer
+    this.offerCache.onDroppedCallback = (_, value: Offer) => value.dropEntangled(this.offerCache)
+    this.categoryCache.populateCallback = this.fetchCategory
+    this.categoryCache.onDroppedCallback = (_, value: Category) => value.dropEntangled(this.categoryCache)
+
     this.addEndpoint(['users'], this.getUsers)
     this.addEndpoint(['users', '$'], this.getUser)
   }
@@ -74,6 +86,7 @@ export abstract class Api {
 
       const call = new ApiCall(request, variables)
       try {
+        log.info(JSON.stringify(matchedEndpoint)) // HACK
         const result = await matchedEndpoint.method(call)
         request.res.statusCode = result.code
         if(result.body !== undefined) await request.writePatiently(JSON.stringify(result.body))
@@ -93,10 +106,22 @@ export abstract class Api {
 
 
   async getUsers(call: ApiCall): Promise<Result> {
-    // HACK
+    // TODO flitter
+    let pagesToTurn: number = Number(call.request.query["page"]) ?? 0
+
+    const gen = this.yieldUserIds(undefined)
+    while(pagesToTurn-- > 0) {
+      for(let i = 0; i < 100; i++) {
+        if(!gen.next()) break
+      }
+    }
+
+    const arr = Array.from(gen)
+    console.log(arr)
+
     return {
       code: StatusCodes.OK,
-      body: call.request.query
+      body: arr
     }
   }
 

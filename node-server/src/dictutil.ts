@@ -24,7 +24,7 @@ function get(dict: {[key: string]: any}, path: string[]): any {
 export function require<T>(dict: {[key: string]: any}, path: string[]): T {
   // TODO típusellenőrzés
   const found = get(dict, path)
-  if(!found) throw new Error(`Required configuration element missing: ${JSON.stringify(path)}`)
+  if(found === undefined) throw new Error(`Required element missing: ${JSON.stringify(path)}`)
   return found
 }
 

@@ -1,4 +1,5 @@
 import * as dictutil from './dictutil.js'
+import { Cache } from './cache.js'
 
 
 
@@ -21,6 +22,14 @@ export abstract class Record<TId> {
   public entangle(other: Record<any>) {
     this.entangled.add(other)
     other.entangled.add(this)
+  }
+
+  public dropEntangled<T extends Record<TId>>(cache: Cache<TId, T>) {
+    if(!cache.dropUnsynchronized(this.id)) return // Kataklizma megakadályozása
+
+    for(const other of this.entangled) {
+      other.dropEntangled(cache)
+    }
   }
 
 }

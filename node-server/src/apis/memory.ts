@@ -18,9 +18,9 @@ export class MemoryApi extends Api {
         {
           name: 'bob',
           password: 123,
-          averageRating: 2.5,
+          averageStars: 2.5,
           bio: "Hi!\n\nI'm Bob.\n<script>alert(1)</script>",
-          profilePicUri: ""
+          pictureUri: ""
         }
       )
     )
@@ -29,9 +29,9 @@ export class MemoryApi extends Api {
         {
           name: 'asd123',
           password: 123,
-          averageRating: 0.0,
+          averageStars: 0.0,
           bio: "",
-          profilePicUri: ""
+          pictureUri: ""
         }
       )
     )

@@ -18,6 +18,13 @@ import { Config } from './config.js'
 import { MemoryApi } from './apis/memory.js'
 
 
+process.on('unhandledRejection', (reason, promise) => {
+  log.error(`Unhandled rejection in ${promise}, because: ${reason}`)
+})
+
+let fos = () => { throw new Error() }
+fos()
+
 const configPath = process.env.WANTED_CONFIG || 'wanted-config.json'
 log.normal(`Reading config at '${configPath}'`)
 
@@ -29,6 +36,7 @@ const config = new Config(
 ))
 
 const api = new MemoryApi()
+api.loadTestData()
 
 
 export class Request {
@@ -71,6 +79,7 @@ export class Request {
 
 }
 
+// FIXME MÉG MINDIG A GC ZÁRJA BE NÉHA
 async function serveStatic(request: Request, url: string): Promise<void> {
   // FONTOS!! Még joinolás előtt normalizáljuk, nehogy működjön ez: /%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
   url = path.normalize(url)
@@ -125,7 +134,7 @@ async function serveStatic(request: Request, url: string): Promise<void> {
     }
     throw error
   } finally {
-    await file?.close()
+    if(file) await file.close()
   }
 }
 
