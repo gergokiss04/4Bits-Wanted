@@ -1,18 +1,18 @@
 import http from 'http'
 import { StatusCodes } from 'http-status-codes'
+
 import * as log from './log.js'
+import { Request } from './main.js'
 import { User, Offer, Category, Record } from './records.js'
 
 
 class ApiCall {
 
-  req: http.IncomingMessage
-  res: http.ServerResponse<http.IncomingMessage>
+  request: Request
   variables: string[]
 
-  constructor(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, variables: string[]) {
-    this.req = req
-    this.res = res
+  constructor(request: Request, variables: string[]) {
+    this.request = request
     this.variables = variables
   }
 
@@ -40,23 +40,17 @@ export abstract class Api {
     this.endpoints.push({path, method})
   }
 
-  async writePatiently(res: http.ServerResponse<http.IncomingMessage>, chunk: any) : Promise<void> {
-    // TODO ez jelzi a hibát ha nincs callbackje?
-    const wrote: boolean = res.write(chunk)
-    if(!wrote) await new Promise(resolve => res.once('drain', resolve))
-  }
 
-
-  async handle(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, path: string[]): Promise<void> {
+  async handle(request: Request, apiPath: string[]): Promise<void> {
 
     // Megkeressük, melyik endpoint útvonala illeszkedik a kérés útvonalával
     let matchedEndpoint: Endpoint | null = null
     for(let endpoint of this.endpoints) {
-      if(endpoint.path.length != path.length) continue
+      if(endpoint.path.length != apiPath.length) continue
 
       let good = true
       for(let i in endpoint.path) {
-        if(endpoint.path[i] != '$' && path[i] != endpoint.path[i]) {
+        if(endpoint.path[i] != '$' && apiPath[i] != endpoint.path[i]) {
           good = false
           break
         }
@@ -73,28 +67,28 @@ export abstract class Api {
       let variables: string[] = []
       for(let i in matchedEndpoint.path) {
         if(matchedEndpoint.path[i] == '$') {
-          variables.push(path[i])
+          variables.push(apiPath[i])
           break
         }
       }
 
-      const call = new ApiCall(req, res, variables)
+      const call = new ApiCall(request, variables)
       try {
         const result = await matchedEndpoint.method(call)
-        res.statusCode = result.code
-        if(result.body !== undefined) await this.writePatiently(res, JSON.stringify(result.body))
+        request.res.statusCode = result.code
+        if(result.body !== undefined) await request.writePatiently(JSON.stringify(result.body))
       } catch(e) {
-        res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-        if(this.reportErrors) await this.writePatiently(res, JSON.stringify(e))
+        request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
+        if(this.reportErrors) await request.writePatiently(JSON.stringify(e))
       }
 
     } else {
-      log.info(`No suitable API endpoint for ${log.sanitize(path)}`)
-      res.statusCode = StatusCodes.NOT_FOUND
-      await this.writePatiently(res, 'No such API endpoint.')
+      log.info(`No suitable API endpoint for ${log.sanitize(apiPath)}`)
+      request.res.statusCode = StatusCodes.NOT_FOUND
+      await request.writePatiently('No such API endpoint.')
     }
 
-    res.end()
+    request.res.end()
   }
 
 

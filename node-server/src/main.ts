@@ -7,6 +7,7 @@
 
 import http from 'http'
 import url from 'url'
+import { ParsedUrlQuery } from 'querystring'
 import * as path from 'path'
 import * as fs from 'fs/promises'
 import * as fsSync from 'fs'
@@ -30,7 +31,47 @@ const config = new Config(
 const api = new MemoryApi()
 
 
-async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: string): Promise<void> {
+export class Request {
+
+  req: http.IncomingMessage
+  res: http.ServerResponse<http.IncomingMessage>
+  cleanPath: string
+  pathParts: string[]
+  query: ParsedUrlQuery
+
+
+  constructor(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, cleanPath: string, urlParts: string[], query: ParsedUrlQuery) {
+    this.req = req
+    this.res = res
+    this.cleanPath = cleanPath
+    this.pathParts = urlParts
+    this.query = query
+  }
+
+  static constructFromReqRes(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>): Request {
+    const parsed = url.parse(req.url ?? '/', true)
+
+    const pathParts: string[] = []
+    for(const part of path.normalize(parsed.pathname ?? '/').split('/')) {
+      if(part.length <= 0) continue
+      pathParts.push(decodeURIComponent(part))
+    }
+    let reqUrl = path.join(...pathParts)
+    const reqQuery: ParsedUrlQuery = parsed.query
+
+    return new Request(req, res, reqUrl, pathParts, reqQuery)
+  }
+
+
+  async writePatiently(chunk: any) : Promise<void> {
+    // TODO ez jelzi a hibát ha nincs callbackje?
+    const wrote: boolean = this.res.write(chunk)
+    if(!wrote) await new Promise(resolve => this.res.once('drain', resolve)) // Ez nagyon fontos! A write visszatérési értékét nem szabad figyelmen kívül hagyni.
+  }
+
+}
+
+async function serveStatic(request: Request, url: string): Promise<void> {
   // FONTOS!! Még joinolás előtt normalizáljuk, nehogy működjön ez: /%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
   url = path.normalize(url)
   let file: fs.FileHandle | undefined
@@ -45,8 +86,8 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
       }
     }
 
-    // Egyik root alatt sem létezik
     if(!filePath) {
+      // Egyik root alatt sem létezik
       let err = new Error() as NodeJS.ErrnoException
       err.code = 'ENOENT'
       throw err
@@ -58,18 +99,17 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
     const expectedLength = (await file.stat()).size
     let totalBytes = 0
 
-    res.setHeader('Content-Length', expectedLength)
-    res.setHeader('Content-Type', mimeType)
+    request.res.setHeader('Content-Length', expectedLength)
+    request.res.setHeader('Content-Type', mimeType)
     const buffer: Buffer = Buffer.alloc(2**16)
     while(true) {
       const result: fs.FileReadResult<Buffer> = await file.read(buffer, 0, buffer.length)
       totalBytes += result.bytesRead
       if(result.bytesRead <= 0) break
 
-      const wrote: boolean = res.write(buffer.subarray(0, result.bytesRead))
-      if(!wrote) await new Promise(resolve => res.once('drain', resolve)) // Ez nagyon fontos! A write visszatérési értékét nem szabad figyelmen kívül hagyni.
+      await request.writePatiently(buffer.subarray(0, result.bytesRead))
     }
-    res.end()
+    request.res.end()
 
     if(totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading ${log.sanitize(url)}`)
   } catch(error) {
@@ -78,8 +118,8 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
         case 'ENOENT':
         case 'ERR_FS_EISDIR':
           log.info(`Not found or is a directory: ${log.sanitize(url)}`)
-          res.statusCode = 404
-          res.end()
+          request.res.statusCode = 404
+          request.res.end()
           return
       }
     }
@@ -94,32 +134,20 @@ const server = http.createServer()
 
 server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
   try {
-    const parsed = url.parse(req.url ?? '/', true)
+    const request = Request.constructFromReqRes(req, res)
+    log.info(`Request from ${log.sanitize(request.req.socket.remoteAddress)} for ${log.sanitize(req.url)} ${JSON.stringify(request.pathParts)}`)
 
-    const pathParts: string[] = []
-    for(const part of path.normalize(parsed.pathname ?? '/').split('/')) {
-      if(part.length <= 0) continue
-      pathParts.push(decodeURIComponent(part))
-    }
-    let reqUrl = path.join(...pathParts)
-    const reqQuery = parsed.query
-
-    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(reqUrl)} ${JSON.stringify(pathParts)}`)
-
-    const maybeApiPath: string[] | false = config.maybeApiPath(pathParts)
+    const maybeApiPath: string[] | false = config.maybeApiPath(request.pathParts)
     if(maybeApiPath !== false) {
       log.info(`API call: ${log.sanitize(maybeApiPath)}`)
-      await api.handle(req, res, maybeApiPath)
+      await api.handle(request, maybeApiPath)
     } else {
-      if(reqUrl == '.' && config.rootFile) await serveStatic(res, config.rootFile)
-      else await serveStatic(res, reqUrl)
+      if(request.cleanPath == '.' && config.rootFile) await serveStatic(request, config.rootFile)
+      else await serveStatic(request, request.cleanPath)
     }
-
-    if(global.gc) global.gc(true) // HACK
   } catch(e) {
     log.exception(e)
   }
-
 })
 
 server.listen(config.listenPort, config.listenHostname, function () {
