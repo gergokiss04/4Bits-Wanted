@@ -139,7 +139,7 @@ server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<
 
     const maybeApiPath: string[] | false = config.maybeApiPath(request.pathParts)
     if(maybeApiPath !== false) {
-      log.info(`API call: ${log.sanitize(maybeApiPath)}`)
+      log.info(`API call: ${log.sanitize(maybeApiPath)}, query: ${log.sanitize(request.query)}`)
       await api.handle(request, maybeApiPath)
     } else {
       if(request.cleanPath == '.' && config.rootFile) await serveStatic(request, config.rootFile)

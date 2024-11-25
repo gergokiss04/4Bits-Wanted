@@ -96,7 +96,7 @@ export abstract class Api {
     // HACK
     return {
       code: StatusCodes.OK,
-      body: [149]
+      body: call.request.query
     }
   }
 
