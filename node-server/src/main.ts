@@ -6,6 +6,7 @@
 // - user/más létrehozása, hogy legyen idje
 
 import http from 'http'
+import url from 'url'
 import * as path from 'path'
 import * as fs from 'fs/promises'
 import * as fsSync from 'fs'
@@ -84,7 +85,7 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
     }
     throw error
   } finally {
-    file?.close()
+    await file?.close()
   }
 }
 
@@ -93,29 +94,30 @@ const server = http.createServer()
 
 server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
   try {
+    const parsed = url.parse(req.url ?? '/', true)
+
     const pathParts: string[] = []
-    for(const part of path.normalize(req.url ?? '/').split('/')) {
+    for(const part of path.normalize(parsed.pathname ?? '/').split('/')) {
       if(part.length <= 0) continue
       pathParts.push(decodeURIComponent(part))
     }
-    const url = path.join(...pathParts)
+    let reqUrl = path.join(...pathParts)
+    const reqQuery = parsed.query
 
-    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)} ${JSON.stringify(pathParts)}`)
+    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(reqUrl)} ${JSON.stringify(pathParts)}`)
 
     const maybeApiPath: string[] | false = config.maybeApiPath(pathParts)
     if(maybeApiPath !== false) {
       log.info(`API call: ${log.sanitize(maybeApiPath)}`)
       await api.handle(req, res, maybeApiPath)
     } else {
-      if(url == '.' && config.rootFile) await serveStatic(res, config.rootFile)
-      else await serveStatic(res, url)
+      if(reqUrl == '.' && config.rootFile) await serveStatic(res, config.rootFile)
+      else await serveStatic(res, reqUrl)
     }
+
+    if(global.gc) global.gc(true) // HACK
   } catch(e) {
-    if(e instanceof Error) {
-      log.exception(e)
-    } else {
-      log.error('Unknown exception occurred (not instanceof Error)')
-    }
+    log.exception(e)
   }
 
 })

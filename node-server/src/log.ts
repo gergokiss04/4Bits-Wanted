@@ -29,6 +29,7 @@ export function error(msg: string): void {
 }
 
 
-export function exception(e: Error): void {
-  error(`Exception: ${sanitize(e)}`)
+export function exception(e: Error | any, flavorText: string | null = null): void {
+  flavorText ??= 'Unhandled exception';
+  error(`${flavorText}: ${sanitize(e)}`)
 }
