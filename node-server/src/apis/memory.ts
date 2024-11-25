@@ -37,8 +37,7 @@ export class MemoryApi extends Api {
     )
   }
 
-
-  ;*yieldUserIds(
+  override *yieldUserIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
     for(const kvp of this.users) {
@@ -47,20 +46,20 @@ export class MemoryApi extends Api {
     }
   }
 
-  fetchUser(id: number): User | undefined {
+  override fetchUser(id: number): User | undefined {
     return this.users.get(id)
   }
 
-  commitUser(val: User): void {
+  override commitUser(val: User): void {
     this.users.set(val.id, val)
   }
 
-  dropUser(id: number): void {
+  override dropUser(id: number): void {
     this.users.delete(id)
   }
 
 
-  ;*yieldOfferIds(
+  override *yieldOfferIds(
     titleRegex: RegExp | undefined = undefined,
     categoryFilter: number | undefined,
     minPrice: number | undefined,
@@ -99,20 +98,20 @@ export class MemoryApi extends Api {
     }
   }
 
-  fetchOffer(id: number): Offer | undefined {
+  override fetchOffer(id: number): Offer | undefined {
     return this.offers.get(id)
   }
 
-  commitOffer(val: Offer): void {
+  override commitOffer(val: Offer): void {
     this.offers.set(val.id, val)
   }
 
-  dropOffer(id: number): void {
+  override dropOffer(id: number): void {
     this.offers.delete(id)
   }
 
 
-  ;*yieldCategoryIds(
+  override *yieldCategoryIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
     for(const kvp of this.categories) {
@@ -121,21 +120,22 @@ export class MemoryApi extends Api {
     }
   }
 
-  fetchCategory(id: number): Category | undefined {
+  override fetchCategory(id: number): Category | undefined {
     return this.categories.get(id)
   }
 
-  commitCategory(val: Category): void {
+  override commitCategory(val: Category): void {
     this.categories.set(val.id, val)
   }
 
-  dropCategory(id: number): void {
+  override dropCategory(id: number): void {
     this.categories.delete(id)
   }
 
 
-  ;*yieldUnusedMediaUrls(): Generator<string> {
+  override *yieldUnusedMediaUrls(): Generator<string> {
     // TODO
+    throw new Error('Not implemented')
   }
 
 }

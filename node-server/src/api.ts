@@ -87,10 +87,15 @@ export abstract class Api {
       const call = new ApiCall(request, variables)
       try {
         log.info(JSON.stringify(matchedEndpoint)) // HACK
-        const result = await matchedEndpoint.method(call)
+        const bound = matchedEndpoint.method.bind(this)
+        const result = await bound(call)
         request.res.statusCode = result.code
         if(result.body !== undefined) await request.writePatiently(JSON.stringify(result.body))
       } catch(e) {
+        let msg = `Unhandled exception during API call: ${e}`
+        if(e instanceof Error) msg += `\n${e.stack}`;
+        log.error(msg)
+
         request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
         if(this.reportErrors) await request.writePatiently(JSON.stringify(e))
       }
@@ -132,7 +137,6 @@ export abstract class Api {
       body: call.variables
     }
   }
-
 
   /**
     Visszaadja növekvő sorrendben az összes megfelelő User id-jét.

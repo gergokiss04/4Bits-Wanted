@@ -22,9 +22,6 @@ process.on('unhandledRejection', (reason, promise) => {
   log.error(`Unhandled rejection in ${promise}, because: ${reason}`)
 })
 
-let fos = () => { throw new Error() }
-fos()
-
 const configPath = process.env.WANTED_CONFIG || 'wanted-config.json'
 log.normal(`Reading config at '${configPath}'`)
 
