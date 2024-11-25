@@ -7,26 +7,26 @@ import { User, Offer, Category } from '../records.js';
 **/
 export class DatabaseApi extends Api {
 
-  ;*yieldUserIds(
+  override *yieldUserIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
     throw new Error('Not implemented.') // TODO
   }
 
-  fetchUser(id: number): User | undefined {
+  override fetchUser(id: number): User | undefined {
     throw new Error('Not implemented.') // TODO
   }
 
-  commitUser(val: User): void {
+  override commitUser(val: User): void {
     throw new Error('Not implemented.') // TODO
   }
 
-  dropUser(id: number): void {
+  override dropUser(id: number): void {
     throw new Error('Not implemented.') // TODO
   }
 
 
-  ;*yieldOfferIds(
+  override *yieldOfferIds(
     titleRegex: RegExp | undefined = undefined,
     categoryFilter: number | undefined,
     minPrice: number | undefined,
@@ -37,39 +37,39 @@ export class DatabaseApi extends Api {
     throw new Error('Not implemented.') // TODO
   }
 
-  fetchOffer(id: number): Offer | undefined {
+  override fetchOffer(id: number): Offer | undefined {
     throw new Error('Not implemented.') // TODO
   }
 
-  commitOffer(val: Offer): void {
+  override commitOffer(val: Offer): void {
     throw new Error('Not implemented.') // TODO
   }
 
-  dropOffer(id: number): void {
+  override dropOffer(id: number): void {
     throw new Error('Not implemented.') // TODO
   }
 
 
-  ;*yieldCategoryIds(
+  override *yieldCategoryIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
     throw new Error('Not implemented.') // TODO
   }
 
-  fetchCategory(id: number): Category | undefined {
+  override fetchCategory(id: number): Category | undefined {
     throw new Error('Not implemented.') // TODO
   }
 
-  commitCategory(val: Category): void {
+  override commitCategory(val: Category): void {
     throw new Error('Not implemented.') // TODO
   }
 
-  dropCategory(id: number): void {
+  override dropCategory(id: number): void {
     throw new Error('Not implemented.') // TODO
   }
 
 
-  ;*yieldUnusedMediaUrls(): Generator<string> {
+  override *yieldUnusedMediaUrls(): Generator<string> {
     throw new Error('Not implemented.') // TODO
   }
 
