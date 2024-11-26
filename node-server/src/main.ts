@@ -45,7 +45,7 @@ let api: Api
 switch(config.apiDriver) {
   case 'memory':
     log.normal('Using MemoryApi')
-    const memApi = new MemoryApi()
+    const memApi = new MemoryApi(config.apiSecret)
     memApi.logCallback = (msg) => log.info(`[MemoryApi] ${msg}`)
     memApi.loadTestData()
     api = memApi
@@ -54,7 +54,7 @@ switch(config.apiDriver) {
   case 'db':
     log.normal('Using DatabaseApi')
     log.warn('DatabaseApi isn\'t implemented yet')
-    const dbApi = new DatabaseApi()
+    const dbApi = new DatabaseApi(config.apiSecret)
     api = dbApi
     break
 }
@@ -62,6 +62,8 @@ switch(config.apiDriver) {
 
 
 export class Request {
+
+  static readonly BODY_SIZE_LIMIT: number = 1024*1024 // 1M
 
   req: http.IncomingMessage
   res: http.ServerResponse<http.IncomingMessage>
@@ -93,10 +95,35 @@ export class Request {
   }
 
 
-  async writePatiently(chunk: any) : Promise<void> {
+  async writePatiently(chunk: any): Promise<void> {
     // TODO ez jelzi a hibát ha nincs callbackje?
     const wrote: boolean = this.res.write(chunk)
     if(!wrote) await new Promise(resolve => this.res.once('drain', resolve)) // Ez nagyon fontos! A write visszatérési értékét nem szabad figyelmen kívül hagyni.
+  }
+
+  async readBody(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let body: string = ''
+      let oversized = false
+      this.req.on('data', chunk => {
+        if(oversized) return
+
+        if(body.length > Request.BODY_SIZE_LIMIT) {
+          log.warn(`Oversized request (>${Request.BODY_SIZE_LIMIT}) truncated`)
+          oversized = true
+          resolve(body)
+          return
+        }
+        const chunkString = chunk.toString()
+        body += chunkString
+      })
+      this.req.on('end', () => {
+        resolve(body)
+      })
+      this.req.on('error', err => {
+        reject(err)
+      })
+    })
   }
 
 }

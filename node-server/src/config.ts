@@ -17,6 +17,8 @@ export class Config {
 
   apiPrefixParts: string[]
   apiDriver: 'memory' | 'db'
+  apiSecret: string
+  apiAllowDebt: boolean
 
 
   constructor(dict: {}) {
@@ -32,6 +34,8 @@ export class Config {
       if(val === 'memory' || val === 'db') this.apiDriver = val
       else throw new Error('Invalid API driver')
     }
+    this.apiSecret = dictutil.require<string>(dict, ['api', 'secret'])
+    this.apiAllowDebt = dictutil.optional<boolean>(dict, ['api', 'allowDebt']) ?? false
 
     this.logNormal = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})
     this.logInfo = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})

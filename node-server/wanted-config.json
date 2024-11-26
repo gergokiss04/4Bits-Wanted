@@ -31,6 +31,8 @@
   },
   "api": {
     "prefix": "api",
-    "driver": "memory"
+    "driver": "memory",
+    "secret": "password1234",
+    "allowDebt": true
   }
 }

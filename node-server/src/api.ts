@@ -1,4 +1,5 @@
 import http from 'http'
+import * as crypto from 'crypto'
 import { StatusCodes } from 'http-status-codes'
 
 import * as log from './log.js'
@@ -11,6 +12,7 @@ class ApiCall {
 
   request: Request
   variables: string[]
+  loggedInAs: User | null = null
 
   constructor(request: Request, variables: string[]) {
     this.request = request
@@ -36,6 +38,8 @@ type Endpoint = {path: string[], method: ApiMethod}
 
 export abstract class Api {
 
+  private readonly secret: string
+
   userCache = new Cache<number, User>()
   offerCache = new Cache<number, Offer>()
   categoryCache = new Cache<number, Category>()
@@ -43,8 +47,12 @@ export abstract class Api {
   endpoints: Array<Endpoint> = Array()
   reportErrors = true // TODO konfigurálható
 
+  allowDebt = false
 
-  constructor() {
+
+  constructor(secret: string) {
+    this.secret = secret
+
     this.userCache.populateCallback = this.fetchUser.bind(this)
     this.userCache.onDroppedCallback = (_, value: User) => { this.commitUser(value); value.dropEntangled(this.userCache) }
     this.userCache.expireSeconds = 1
@@ -58,8 +66,10 @@ export abstract class Api {
     this.categoryCache.onDroppedCallback = (_, value: Category) => value.dropEntangled(this.categoryCache)
     this.categoryCache.setGcInterval()
 
-    this.addEndpoint(['users'], this.getUsers)
-    this.addEndpoint(['users', '$'], this.getUser)
+    this.addEndpoint(['users'], this.epUserList)
+    this.addEndpoint(['users', '$'], this.epGetUser)
+    this.addEndpoint(['auth'], this.epAuth)
+    this.addEndpoint(['whoami'], this.epWhoAmI)
   }
 
 
@@ -101,6 +111,22 @@ export abstract class Api {
 
       const call = new ApiCall(request, variables)
       try {
+        const cookieString = request.req.headers.cookie
+        console.log(cookieString) // HACK
+        if(typeof cookieString === 'string' && cookieString.length > 1) {
+          if((typeof cookieString) !== 'string') throw new Error()
+          const cookie = JSON.parse(cookieString as string)
+          const forUser: User | undefined = await this.userCache.tryGet(cookie['id'])
+          if(forUser !== undefined && this.isSignatureValid(forUser, cookie['signature'])) {
+            call.loggedInAs = forUser
+          }
+        }
+      } catch(e) {
+        request.res.appendHeader('Set-Cookie', 'x')
+        log.info('Client sent cookie with invalid JSON')
+      }
+
+      try {
         const bound = matchedEndpoint.method.bind(this)
         const result = await bound(call)
         request.res.statusCode = result.code
@@ -136,8 +162,37 @@ export abstract class Api {
     return iter
   }
 
+  errorMissingProp(name: string): Result {
+    return new Result(StatusCodes.BAD_REQUEST, `Missing required property "${name}"`)
+  }
 
-  async getUsers(call: ApiCall): Promise<Result> {
+  hashPassword(pass: string, salt: number): string {
+    return crypto.createHash('sha256' /* TODO konfigurálható */)
+    .update(this.secret)
+    .update(salt.toString())
+    .update(pass)
+    .digest('hex')
+  }
+
+  getTokenSignature(user: User): string {
+    return crypto.createHash('sha256')
+    .update(this.secret)
+    .update(user.name)
+    .update(user.password) // Genuis! Ha megváltoztatja a jelszavát, akkor többé nem lesz jó a signature
+    .digest('hex')
+  }
+
+  isSignatureValid(user: User, signature: string): boolean {
+    let result = false
+    // Ez a ciklus azért jó, mert szórakozik a metódus futásidejével.
+    for(let i = 0; i < 1 && Math.random() > 0.1; i++) {
+      result = this.getTokenSignature(user) === signature
+    }
+    return result
+  }
+
+
+  async epUserList(call: ApiCall): Promise<Result> {
     const pagesToTurn: number = Number(call.request.query['page']) ?? 0
 
     const filter = call.request.query['filter']
@@ -151,7 +206,7 @@ export abstract class Api {
     return new Result(StatusCodes.OK, arr)
   }
 
-  async getUser(call: ApiCall): Promise<Result> {
+  async epGetUser(call: ApiCall): Promise<Result> {
     const id = Number(call.variables[0])
     if(!Number.isSafeInteger(id)) {
       return new Result(StatusCodes.BAD_REQUEST, 'ID must be an integer')
@@ -164,6 +219,40 @@ export abstract class Api {
 
     return new Result(StatusCodes.OK, user.serializePublic())
   }
+
+  async epAuth(call: ApiCall): Promise<Result> {
+    const body = JSON.parse(await call.request.readBody())
+
+    if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
+    if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
+
+    let foundUser: User | undefined
+    for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
+      if(foundUser !== undefined) break
+      foundUser = await this.userCache.tryGet(id)
+    }
+
+    if(foundUser === undefined || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
+      //console.log(this.hashPassword(body.pass, foundUser!.id))
+      return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
+    } else {
+      const token = JSON.stringify(
+        {
+          'id': foundUser.id,
+          'signature': this.getTokenSignature(foundUser)
+        }
+      )
+      //call.request.res.setHeader('Set-Cookie', `key=${token}; Domain=127.0.0.1;`) // TODO domain
+      call.request.res.setHeader('Set-Cookie', "sessionId=abcd")
+
+      return new Result(StatusCodes.OK, 'Login succesful, enjoy your cookie!')
+    }
+  }
+
+  async epWhoAmI(call: ApiCall): Promise<Result> {
+    return new Result(StatusCodes.IM_A_TEAPOT, call.loggedInAs?.name ?? 'not logged in')
+  }
+
 
   /**
     Visszaadja növekvő sorrendben az összes megfelelő User id-jét.

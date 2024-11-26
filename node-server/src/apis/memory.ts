@@ -22,9 +22,9 @@ export class MemoryApi extends Api {
       new User(1,
         {
           name: 'bob',
-          password: 123,
+          password: '3c200ffd1c7a231c07431c118f2f37eed9504c88111a885dbdf6207ce1c98547',
           averageStars: 2.5,
-          bio: "Hi!\n\nI'm Bob.\n<script>alert(1)</script>",
+          bio: "Hi!\n\nI'm Bob.\n<script>alert(1)</script>(btw my password is 123)",
           pictureUri: ""
         }
       )
@@ -33,7 +33,7 @@ export class MemoryApi extends Api {
       new User(3,
         {
           name: 'asd123',
-          password: 123,
+          password: 'not valid hex >:)',
           averageStars: 0.0,
           bio: "",
           pictureUri: ""
