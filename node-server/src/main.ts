@@ -33,6 +33,7 @@ const config = new Config(
 ))
 
 const api = new MemoryApi()
+api.logCallback = (msg) => log.info(`[MemoryApi] ${msg}`)
 api.loadTestData()
 
 

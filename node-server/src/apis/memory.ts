@@ -7,6 +7,11 @@ import { User, Offer, Category } from '../records.js';
 **/
 export class MemoryApi extends Api {
 
+  logCallback?: (msg: string) => void
+  log(msg: string) {
+    if(this.logCallback) this.logCallback(msg)
+  }
+
   users = new Map<number, User>()
   offers = new Map<number, Offer>()
   categories = new Map<number, Category>()
@@ -40,6 +45,7 @@ export class MemoryApi extends Api {
   override *yieldUserIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
+    this.log('Yield user IDs')
     for(const kvp of this.users) {
       if(nameRegex && !nameRegex.test(kvp[1].name)) continue
       yield kvp[0]
@@ -47,14 +53,17 @@ export class MemoryApi extends Api {
   }
 
   override fetchUser(id: number): User | undefined {
+    this.log(`Fetch user ${id}`)
     return this.users.get(id)
   }
 
   override commitUser(val: User): void {
+    this.log(`Commit user ${val.id}`)
     this.users.set(val.id, val)
   }
 
   override dropUser(id: number): void {
+    this.log(`Drop user ${id}`)
     this.users.delete(id)
   }
 
@@ -67,6 +76,8 @@ export class MemoryApi extends Api {
     orderBy: "id" | "price" | "random",
     descending: boolean
   ): Generator<number> {
+    this.log('Yield offer IDs')
+
     let copy: Offer[] = []
     for(const kvp of this.offers) {
       copy.push(kvp[1])
@@ -99,14 +110,17 @@ export class MemoryApi extends Api {
   }
 
   override fetchOffer(id: number): Offer | undefined {
+    this.log(`Fetch offer ${id}`)
     return this.offers.get(id)
   }
 
   override commitOffer(val: Offer): void {
+    this.log(`Commit offer ${val.id}`)
     this.offers.set(val.id, val)
   }
 
   override dropOffer(id: number): void {
+    this.log(`Drop offer ${id}`)
     this.offers.delete(id)
   }
 
@@ -114,6 +128,7 @@ export class MemoryApi extends Api {
   override *yieldCategoryIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
+    this.log('Yield category IDs')
     for(const kvp of this.categories) {
       if(nameRegex && !nameRegex.test(kvp[1].name)) continue
       yield kvp[0]
@@ -121,19 +136,23 @@ export class MemoryApi extends Api {
   }
 
   override fetchCategory(id: number): Category | undefined {
+    this.log(`Fetch category ${id}`)
     return this.categories.get(id)
   }
 
   override commitCategory(val: Category): void {
+    this.log(`Commit category ${val.id}`)
     this.categories.set(val.id, val)
   }
 
   override dropCategory(id: number): void {
+    this.log(`Drop category ${id}`)
     this.categories.delete(id)
   }
 
 
   override *yieldUnusedMediaUrls(): Generator<string> {
+    this.log(`Yield unused media URLs`)
     // TODO
     throw new Error('Not implemented')
   }
