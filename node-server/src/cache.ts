@@ -28,7 +28,7 @@ export class Cache<TKey, TValue> {
   }
 
   log(msg: string) {
-      if(this.logCallback) this.logCallback(msg)
+    if(this.logCallback) this.logCallback(msg)
   }
 
 

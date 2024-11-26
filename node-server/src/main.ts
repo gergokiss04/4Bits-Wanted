@@ -15,7 +15,9 @@ import Mime from 'mime/lite'
 
 import * as log from './log.js'
 import { Config } from './config.js'
+import { Api } from './api.js'
 import { MemoryApi } from './apis/memory.js'
+import { DatabaseApi } from './apis/database.js'
 
 
 process.on('unhandledRejection', (reason, promise) => {
@@ -23,7 +25,6 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 const configPath = process.env.WANTED_CONFIG || 'wanted-config.json'
-log.normal(`Reading config at '${configPath}'`)
 
 // Konfinguráció betöltése
 const config = new Config(
@@ -32,9 +33,32 @@ const config = new Config(
                  process.env.WANTED_CONFIG || 'wanted-config.json', 'utf-8')
 ))
 
-const api = new MemoryApi()
-api.logCallback = (msg) => log.info(`[MemoryApi] ${msg}`)
-api.loadTestData()
+log.LogOptions.info = config.logInfo
+log.LogOptions.normal = config.logNormal
+log.LogOptions.warn = config.logWarn
+log.LogOptions.error = config.logError
+
+log.normal(`Reading config at '${configPath}'`)
+
+// Kitaláljuk, melyik API implementációt akarjuk
+let api: Api
+switch(config.apiDriver) {
+  case 'memory':
+    log.normal('Using MemoryApi')
+    const memApi = new MemoryApi()
+    memApi.logCallback = (msg) => log.info(`[MemoryApi] ${msg}`)
+    memApi.loadTestData()
+    api = memApi
+    break
+
+  case 'db':
+    log.normal('Using DatabaseApi')
+    log.warn('DatabaseApi isn\'t implemented yet')
+    const dbApi = new DatabaseApi()
+    api = dbApi
+    break
+}
+
 
 
 export class Request {

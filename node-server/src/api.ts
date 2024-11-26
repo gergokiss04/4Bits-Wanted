@@ -20,7 +20,16 @@ class ApiCall {
 }
 
 
-type Result = {code: StatusCodes, body: any | null}
+class Result {
+  code: StatusCodes
+  body: any | null
+
+  constructor(code: StatusCodes, body: any | null) {
+    this.code = code
+    this.body = body
+  }
+
+}
 type ApiMethod = (call: ApiCall) => Promise<Result>
 type Endpoint = {path: string[], method: ApiMethod}
 
@@ -36,12 +45,18 @@ export abstract class Api {
 
 
   constructor() {
-    this.userCache.populateCallback = this.fetchUser
-    this.userCache.onDroppedCallback = (_, value: User) => value.dropEntangled(this.userCache)
-    this.offerCache.populateCallback = this.fetchOffer
+    this.userCache.populateCallback = this.fetchUser.bind(this)
+    this.userCache.onDroppedCallback = (_, value: User) => { this.commitUser(value); value.dropEntangled(this.userCache) }
+    this.userCache.expireSeconds = 1
+    this.userCache.setGcInterval()
+
+    this.offerCache.populateCallback = this.fetchOffer.bind(this)
     this.offerCache.onDroppedCallback = (_, value: Offer) => value.dropEntangled(this.offerCache)
-    this.categoryCache.populateCallback = this.fetchCategory
+    this.offerCache.setGcInterval()
+
+    this.categoryCache.populateCallback = this.fetchCategory.bind(this)
     this.categoryCache.onDroppedCallback = (_, value: Category) => value.dropEntangled(this.categoryCache)
+    this.categoryCache.setGcInterval()
 
     this.addEndpoint(['users'], this.getUsers)
     this.addEndpoint(['users', '$'], this.getUser)
@@ -86,7 +101,6 @@ export abstract class Api {
 
       const call = new ApiCall(request, variables)
       try {
-        log.info(JSON.stringify(matchedEndpoint)) // HACK
         const bound = matchedEndpoint.method.bind(this)
         const result = await bound(call)
         request.res.statusCode = result.code
@@ -103,39 +117,52 @@ export abstract class Api {
     } else {
       log.info(`No suitable API endpoint for ${log.sanitize(apiPath)}`)
       request.res.statusCode = StatusCodes.NOT_FOUND
-      await request.writePatiently('No such API endpoint.')
+      await request.writePatiently('No such API endpoint')
     }
 
     request.res.end()
   }
 
 
-  async getUsers(call: ApiCall): Promise<Result> {
-    // TODO flitter
-    let pagesToTurn: number = Number(call.request.query["page"]) ?? 0
+  skipPages<T>(iter: Iterator<T>, count: number): Iterator<T> {
+    const PAGE_SIZE = 100
 
-    const gen = this.yieldUserIds(undefined)
-    while(pagesToTurn-- > 0) {
-      for(let i = 0; i < 100; i++) {
-        if(!gen.next()) break
+    while(count-- > 0) {
+      for(let i = 0; i < PAGE_SIZE; i++) {
+        if(!iter.next()) break
       }
     }
 
-    const arr = Array.from(gen)
-    console.log(arr)
+    return iter
+  }
 
-    return {
-      code: StatusCodes.OK,
-      body: arr
-    }
+
+  async getUsers(call: ApiCall): Promise<Result> {
+    const pagesToTurn: number = Number(call.request.query['page']) ?? 0
+
+    const filter = call.request.query['filter']
+    const regex = (typeof filter === 'string') ? RegExp(filter, 'i') : undefined
+
+    const gen = this.yieldUserIds(regex)
+    this.skipPages(gen, pagesToTurn)
+
+    const arr = Array.from(gen)
+
+    return new Result(StatusCodes.OK, arr)
   }
 
   async getUser(call: ApiCall): Promise<Result> {
-    // HACK
-    return {
-      code: StatusCodes.OK,
-      body: call.variables
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) {
+      return new Result(StatusCodes.BAD_REQUEST, 'ID must be an integer')
     }
+
+    const user = await this.userCache.tryGet(id)
+    if(user === undefined) {
+      return new Result(StatusCodes.NOT_FOUND, 'No user with this ID exists')
+    }
+
+    return new Result(StatusCodes.OK, user.serializePublic())
   }
 
   /**

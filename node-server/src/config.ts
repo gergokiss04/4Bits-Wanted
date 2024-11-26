@@ -1,7 +1,13 @@
 import * as dictutil from './dictutil.js'
+import { LogOptions } from './log.js'
 
 
 export class Config {
+
+  logNormal: LogOptions
+  logInfo: LogOptions
+  logWarn: LogOptions
+  logError: LogOptions
 
   listenHostname: string
   listenPort: number
@@ -10,6 +16,7 @@ export class Config {
   staticRoots: string[]
 
   apiPrefixParts: string[]
+  apiDriver: 'memory' | 'db'
 
 
   constructor(dict: {}) {
@@ -20,6 +27,16 @@ export class Config {
     this.staticRoots = dictutil.require(dict, ['static', 'roots'])
 
     this.apiPrefixParts = dictutil.require<string>(dict, ['api', 'prefix']).split('/')
+    {
+      const val = dictutil.require<string>(dict, ['api', 'driver'])
+      if(val === 'memory' || val === 'db') this.apiDriver = val
+      else throw new Error('Invalid API driver')
+    }
+
+    this.logNormal = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})
+    this.logInfo = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})
+    this.logWarn = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})
+    this.logError = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})
   }
 
 
