@@ -12,6 +12,7 @@ import * as path from 'path'
 import * as fs from 'fs/promises'
 import * as fsSync from 'fs'
 import Mime from 'mime/lite'
+import * as cookie from 'cookie'
 
 import * as log from './log.js'
 import { Config } from './config.js'
@@ -70,6 +71,7 @@ export class Request {
   cleanPath: string
   pathParts: string[]
   query: ParsedUrlQuery
+  cookies: Record<string, string | undefined>
 
 
   constructor(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, cleanPath: string, urlParts: string[], query: ParsedUrlQuery) {
@@ -78,6 +80,7 @@ export class Request {
     this.cleanPath = cleanPath
     this.pathParts = urlParts
     this.query = query
+    this.cookies = cookie.parse(req.headers.cookie ?? '')
   }
 
   static constructFromReqRes(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>): Request {
@@ -124,6 +127,10 @@ export class Request {
         reject(err)
       })
     })
+  }
+
+  setCookie(name: string, value: string) {
+      this.res.setHeader('Set-Cookie', `${name}=${value};`)
   }
 
 }

@@ -14,6 +14,9 @@ class ApiCall {
   variables: string[]
   loggedInAs: User | null = null
 
+  contentTypeOverride: string | null = null
+
+
   constructor(request: Request, variables: string[]) {
     this.request = request
     this.variables = variables
@@ -39,6 +42,7 @@ type Endpoint = {path: string[], method: ApiMethod}
 export abstract class Api {
 
   private readonly secret: string
+  sessionCookieName: string = 'wanted-session'
 
   userCache = new Cache<number, User>()
   offerCache = new Cache<number, Offer>()
@@ -69,6 +73,7 @@ export abstract class Api {
     this.addEndpoint(['users'], this.epUserList)
     this.addEndpoint(['users', '$'], this.epGetUser)
     this.addEndpoint(['auth'], this.epAuth)
+    this.addEndpoint(['authform'], this.epAuthForm)
     this.addEndpoint(['whoami'], this.epWhoAmI)
   }
 
@@ -111,33 +116,40 @@ export abstract class Api {
 
       const call = new ApiCall(request, variables)
       try {
-        const cookieString = request.req.headers.cookie
-        console.log(cookieString) // HACK
-        if(typeof cookieString === 'string' && cookieString.length > 1) {
-          if((typeof cookieString) !== 'string') throw new Error()
-          const cookie = JSON.parse(cookieString as string)
-          const forUser: User | undefined = await this.userCache.tryGet(cookie['id'])
-          if(forUser !== undefined && this.isSignatureValid(forUser, cookie['signature'])) {
+        const cookieString = request.cookies[this.sessionCookieName]
+        if(cookieString !== undefined && cookieString != 'x') {
+          const token = JSON.parse(cookieString)
+          const forUser: User | undefined = await this.userCache.tryGet(token['id'])
+          if(forUser !== undefined && this.isSignatureValid(forUser, token['signature'])) {
             call.loggedInAs = forUser
           }
         }
       } catch(e) {
-        request.res.appendHeader('Set-Cookie', 'x')
-        log.info('Client sent cookie with invalid JSON')
+        if(e instanceof Error && e.name == 'SyntaxError') {
+          request.setCookie(this.sessionCookieName, 'x')
+          log.info('Client sent cookie with invalid JSON')
+        } else {
+          throw e
+        }
       }
 
       try {
         const bound = matchedEndpoint.method.bind(this)
         const result = await bound(call)
         request.res.statusCode = result.code
-        if(result.body !== undefined) await request.writePatiently(JSON.stringify(result.body))
-      } catch(e) {
+        request.res.setHeader('Content-Type', call.contentTypeOverride ?? 'application/json')
+        const body = (call.contentTypeOverride === null ? JSON.stringify(result.body) : result.body.toString())
+        if(result.body !== undefined) await request.writePatiently(body)
+      } catch(e: any) {
         let msg = `Unhandled exception during API call: ${e}`
         if(e instanceof Error) msg += `\n${e.stack}`;
         log.error(msg)
 
         request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-        if(this.reportErrors) await request.writePatiently(JSON.stringify(e))
+        if(this.reportErrors) {
+          request.res.setHeader('Content-Type', call.contentTypeOverride ?? 'application/json')
+          await request.writePatiently(JSON.stringify(e))
+        }
       }
 
     } else {
@@ -221,7 +233,16 @@ export abstract class Api {
   }
 
   async epAuth(call: ApiCall): Promise<Result> {
-    const body = JSON.parse(await call.request.readBody())
+    let body
+    try {
+      body = JSON.parse(await call.request.readBody())
+    } catch(e) {
+      if(e instanceof Error && e.name == 'SyntaxError') {
+        return new Result(StatusCodes.BAD_REQUEST, 'You did not send valid JSON')
+      } else {
+        throw e
+      }
+    }
 
     if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
     if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
@@ -232,7 +253,7 @@ export abstract class Api {
       foundUser = await this.userCache.tryGet(id)
     }
 
-    if(foundUser === undefined || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
+    if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
       //console.log(this.hashPassword(body.pass, foundUser!.id))
       return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
     } else {
@@ -242,15 +263,45 @@ export abstract class Api {
           'signature': this.getTokenSignature(foundUser)
         }
       )
-      //call.request.res.setHeader('Set-Cookie', `key=${token}; Domain=127.0.0.1;`) // TODO domain
-      call.request.res.setHeader('Set-Cookie', "sessionId=abcd")
+      call.request.setCookie(this.sessionCookieName, token)
 
       return new Result(StatusCodes.OK, 'Login succesful, enjoy your cookie!')
     }
   }
 
+  async epAuthForm(call: ApiCall): Promise<Result> {
+    // This is stupid
+    call.contentTypeOverride = 'text/html'
+    return new Result(StatusCodes.OK,
+      "<html><body>\
+      <form id=\"form\" method=\"post\" action=\"/api/auth\" accept-charset=\"utf-8\">\
+      <label for=\"login\">login</label>\
+      <input name=\"login\" id=\"login\" type=\"text\">\
+      <label for=\"pass\">pass</label>\
+      <input name=\"pass\" id=\"pass\" type=\"password\">\
+      <input type=\"submit\">\
+      </form>\
+      <script>\
+        document.getElementById('form').addEventListener('submit', function(event) {\
+          event.preventDefault();\
+          const formData = new FormData(event.target);\
+          const data = Object.fromEntries(formData.entries());\
+          const jsonData = JSON.stringify(data);\
+          fetch(form.action, {\
+              method: form.method,\
+              headers: {\
+                  'Content-Type': 'application/json'\
+              },\
+              body: jsonData\
+          });\
+        });\
+      </script>\
+      </body></html>"
+    )
+  }
+
   async epWhoAmI(call: ApiCall): Promise<Result> {
-    return new Result(StatusCodes.IM_A_TEAPOT, call.loggedInAs?.name ?? 'not logged in')
+    return new Result(StatusCodes.OK, call.loggedInAs?.name ?? 'not logged in')
   }
 
 
