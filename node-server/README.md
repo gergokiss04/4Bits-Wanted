@@ -10,6 +10,7 @@ Minden parancs ennek a fájlnak a mappájában futtatandó, kivéve, ha kifejeze
 - Futtasd az `npm install`-t, hogy letöltődjenek a helyileg checkoutolt mappádba a `node_modules` cuccok (a `node_modules`t légyszi ne committold a verziókövetőbe)
 
 ## Indítás
+0. A frontendet (/wanted a repo gyökerébe) buildeld le a `npm run build` segítségével, hogy a statikus cuccok meglegyenek
 1. `npx tsc` - A `src/` mappában lévő TypeScriptek átfordulnak JavaScripté a `build/`-be
 2. `node build/main.js` - A Node elkezdi futtatni az átfordított kódot
 (protip: `npx tsc && node build/main.js`)

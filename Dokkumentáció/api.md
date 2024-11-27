@@ -134,6 +134,11 @@ Query paraméterek:
 }
 ```
 
+## GET /users/self
+
+Ha be vagyunk jelentkezve, akkor visszaadja a saját felhasználónkat ugyan úgy, mint az id alapján lekérés. Ha nem vagyunk bejelentkezve, akkor `404 Not Found`.
+
+
 ## PUT /users/ID/bio
 
 Frissíthetjük saját profilleírásunkat. Vigyázz! Ez **nem `application/json`**, hanem `text/plain`!
