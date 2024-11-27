@@ -1,10 +1,47 @@
 import { Api } from '../api.js';
 import { User, Offer, Category } from '../records.js';
 import mysql from 'mysql2/promise.js';
-
-// ideiglenes, kell?
 import deasync from 'deasync';
 
+
+/**
+ * Könnyítés képpen...
+ * 
+ * CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)
+
+
+ * 
+CREATE TABLE `offers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `price` float NOT NULL,
+  `description` varchar(1000) NOT NULL,
+  `pictures` varchar(1000) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `seller_id` int(11) NOT NULL,
+  `buyer_id` int(11) DEFAULT NULL,
+  `buyer_rating` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_offers_buyer_id` (`buyer_id`),
+  CONSTRAINT `FK_offers_buyer_id` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FK_offers_category_id` FOREIGN KEY (`id`) REFERENCES `categories` (`id`)
+)
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `profile_pic` varchar(1000) NOT NULL,
+  `bio` varchar(1000) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `average_rating` float NOT NULL,
+  PRIMARY KEY (`id`)
+)
+ */
 
 /**
   Az adatbázisban tárolja az adatokat.
