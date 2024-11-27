@@ -71,10 +71,10 @@ export abstract class Api {
     this.categoryCache.setGcInterval()
 
     this.addEndpoint(['users'], this.epUserList)
+    this.addEndpoint(['users', 'self'], this.epGetUserSelf)
     this.addEndpoint(['users', '$'], this.epGetUser)
     this.addEndpoint(['auth'], this.epAuth)
     this.addEndpoint(['authform'], this.epAuthForm)
-    this.addEndpoint(['whoami'], this.epWhoAmI)
   }
 
 
@@ -138,7 +138,7 @@ export abstract class Api {
         const result = await bound(call)
         request.res.statusCode = result.code
         request.res.setHeader('Content-Type', call.contentTypeOverride ?? 'application/json')
-        const body = (call.contentTypeOverride === null ? JSON.stringify(result.body) : result.body.toString())
+        const body = (call.contentTypeOverride === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString())
         if(result.body !== undefined) await request.writePatiently(body)
       } catch(e: any) {
         let msg = `Unhandled exception during API call: ${e}`
@@ -232,6 +232,15 @@ export abstract class Api {
     return new Result(StatusCodes.OK, user.serializePublic())
   }
 
+  async epGetUserSelf(call: ApiCall): Promise<Result> {
+    const self: User | null = call.loggedInAs
+    if(self !== null) {
+      return new Result(StatusCodes.OK, self.serializePublic())
+    } else {
+      return new Result(StatusCodes.NOT_FOUND, 'Not logged in')
+    }
+  }
+
   async epAuth(call: ApiCall): Promise<Result> {
     let body
     try {
@@ -298,10 +307,6 @@ export abstract class Api {
       </script>\
       </body></html>"
     )
-  }
-
-  async epWhoAmI(call: ApiCall): Promise<Result> {
-    return new Result(StatusCodes.OK, call.loggedInAs?.name ?? 'not logged in')
   }
 
 
