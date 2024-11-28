@@ -50,7 +50,7 @@ Ha nem `200 OK`, akkor lehet, hogy van `text/plain` hibaüzenet a válaszban. Ez
 
 ## POST /register
 
-Új fiókot regisztrál. Csak kijelentkezve működik. Ha már van ilyen nevű felhasználó, akkor `400 Bad Request`, tehát előtte érdemes egy `GET /users/filter=Minta_123`-mal ellenőrizni, hogy létezik-e már.
+Új fiókot regisztrál. Csak kijelentkezve működik. Ha már van ilyen nevű felhasználó vagy épp be vagyunk jelentkezve, akkor `400 Bad Request`, tehát előtte érdemes egy `GET /users/filter=Minta_123`-mal ellenőrizni, hogy létezik-e már.
 
 Minta kérés:
 ```
@@ -97,8 +97,8 @@ Minta kérés:
 {}
 ```
 
-A szerver megszűnteti az ő oldalán a sessiont, és valami érvénytelen cookiet küld vissza:
-`Set-Cookie: session_token=deleted;`
+A szerver valami érvénytelen cookiet küld vissza:
+`Set-Cookie: session_token=x;`
 
 
 ## GET /users

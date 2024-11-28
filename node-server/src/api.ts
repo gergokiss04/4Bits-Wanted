@@ -75,6 +75,8 @@ export abstract class Api {
     this.addEndpoint(['users', '$'], this.epGetUser)
     this.addEndpoint(['auth'], this.epAuth)
     this.addEndpoint(['authform'], this.epAuthForm)
+    this.addEndpoint(['logout'], this.epLogout)
+    this.addEndpoint(['register'], this.epRegister)
   }
 
 
@@ -203,6 +205,140 @@ export abstract class Api {
     return result
   }
 
+  async parseBody(request: Request): Promise<any | Result> {
+    let body
+    try {
+      body = JSON.parse(await request.readBody())
+    } catch(e) {
+      if(e instanceof Error && e.name == 'SyntaxError') {
+        return new Result(StatusCodes.BAD_REQUEST, 'You did not send valid JSON')
+      } else {
+        throw e
+      }
+    }
+    return body
+  }
+
+
+  // Bejelentkezős endpointok
+  async epRegister(call: ApiCall): Promise<Result> {
+    if(call.loggedInAs !== null) {
+      return new Result(StatusCodes.BAD_REQUEST, 'You\'re already logged in')
+    }
+
+    const body = await this.parseBody(call.request)
+    if(body instanceof Result) return body
+
+    if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
+    if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
+
+    let foundUser: User | undefined
+    for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
+      if(foundUser !== undefined) break
+      foundUser = await this.userCache.tryGet(id)
+    }
+
+    if(foundUser !== undefined && foundUser.name == body.login) {
+      return new Result(StatusCodes.BAD_REQUEST, 'A user with this name already exists')
+    } else {
+      let id = 1
+      for(const existingId of this.yieldUserIds(undefined)) {
+        if(id <= existingId) id = existingId + 1
+      }
+
+      const newUser = new User(
+        id,
+        {
+          name: body.login,
+          password: this.hashPassword(body.pass, id),
+          averageStars: 0,
+          bio: "",
+          pictureUri: ""
+        }
+      )
+      this.userCache.insert(id, newUser)
+      return new Result(StatusCodes.CREATED, 'User created')
+    }
+  }
+
+  async epAuth(call: ApiCall): Promise<Result> {
+    const giveToken = (user: User) => {
+      const token = JSON.stringify(
+        {
+          'id': user.id,
+          'signature': this.getTokenSignature(user)
+        }
+      )
+      call.request.setCookie(this.sessionCookieName, token)
+    }
+
+    if(call.loggedInAs !== null) {
+      giveToken(call.loggedInAs)
+      return new Result(StatusCodes.OK, 'You\'re already logged in')
+    }
+
+    const body = await this.parseBody(call.request)
+    if(body instanceof Result) return body
+
+    if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
+    if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
+
+    let foundUser: User | undefined
+    for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
+      if(foundUser !== undefined) break
+      foundUser = await this.userCache.tryGet(id)
+    }
+
+    if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
+      //console.log(this.hashPassword(body.pass, foundUser!.id))
+      return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
+    } else {
+      giveToken(foundUser)
+      return new Result(StatusCodes.OK, 'Login succesful, enjoy your cookie!')
+    }
+  }
+
+  async epAuthForm(call: ApiCall): Promise<Result> {
+    // This is stupid
+    call.contentTypeOverride = 'text/html'
+    return new Result(StatusCodes.OK,
+      "<html><body>\
+      <form id=\"form\" method=\"post\" action=\"/api/auth\" accept-charset=\"utf-8\">\
+      <label for=\"login\">login</label>\
+      <input name=\"login\" id=\"login\" type=\"text\">\
+      <label for=\"pass\">pass</label>\
+      <input name=\"pass\" id=\"pass\" type=\"password\">\
+      <input type=\"submit\">\
+      </form>\
+      <script>\
+        document.getElementById('form').addEventListener('submit', function(event) {\
+          event.preventDefault();\
+          const formData = new FormData(event.target);\
+          const data = Object.fromEntries(formData.entries());\
+          const jsonData = JSON.stringify(data);\
+          fetch(form.action, {\
+              method: form.method,\
+              headers: {\
+                  'Content-Type': 'application/json'\
+              },\
+              body: jsonData\
+          });\
+        });\
+      </script>\
+      </body></html>"
+    )
+  }
+
+  async epLogout(call: ApiCall): Promise<Result> {
+    call.request.setCookie(this.sessionCookieName, 'x')
+
+    if(call.loggedInAs !== null) {
+      return new Result(StatusCodes.OK, 'Cleared your session cookie')
+    } else {
+      return new Result(StatusCodes.OK, 'You weren\'t logged in, but cleared your session cookie anyways')
+    }
+  }
+
 
   async epUserList(call: ApiCall): Promise<Result> {
     const pagesToTurn: number = Number(call.request.query['page']) ?? 0
@@ -239,74 +375,6 @@ export abstract class Api {
     } else {
       return new Result(StatusCodes.NOT_FOUND, 'Not logged in')
     }
-  }
-
-  async epAuth(call: ApiCall): Promise<Result> {
-    let body
-    try {
-      body = JSON.parse(await call.request.readBody())
-    } catch(e) {
-      if(e instanceof Error && e.name == 'SyntaxError') {
-        return new Result(StatusCodes.BAD_REQUEST, 'You did not send valid JSON')
-      } else {
-        throw e
-      }
-    }
-
-    if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
-    if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
-
-    let foundUser: User | undefined
-    for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
-      if(foundUser !== undefined) break
-      foundUser = await this.userCache.tryGet(id)
-    }
-
-    if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
-      //console.log(this.hashPassword(body.pass, foundUser!.id))
-      return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
-    } else {
-      const token = JSON.stringify(
-        {
-          'id': foundUser.id,
-          'signature': this.getTokenSignature(foundUser)
-        }
-      )
-      call.request.setCookie(this.sessionCookieName, token)
-
-      return new Result(StatusCodes.OK, 'Login succesful, enjoy your cookie!')
-    }
-  }
-
-  async epAuthForm(call: ApiCall): Promise<Result> {
-    // This is stupid
-    call.contentTypeOverride = 'text/html'
-    return new Result(StatusCodes.OK,
-      "<html><body>\
-      <form id=\"form\" method=\"post\" action=\"/api/auth\" accept-charset=\"utf-8\">\
-      <label for=\"login\">login</label>\
-      <input name=\"login\" id=\"login\" type=\"text\">\
-      <label for=\"pass\">pass</label>\
-      <input name=\"pass\" id=\"pass\" type=\"password\">\
-      <input type=\"submit\">\
-      </form>\
-      <script>\
-        document.getElementById('form').addEventListener('submit', function(event) {\
-          event.preventDefault();\
-          const formData = new FormData(event.target);\
-          const data = Object.fromEntries(formData.entries());\
-          const jsonData = JSON.stringify(data);\
-          fetch(form.action, {\
-              method: form.method,\
-              headers: {\
-                  'Content-Type': 'application/json'\
-              },\
-              body: jsonData\
-          });\
-        });\
-      </script>\
-      </body></html>"
-    )
   }
 
 
