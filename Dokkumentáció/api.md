@@ -173,6 +173,8 @@ Magunkat törölhetjük ezzel, persze csak ha be vagyunk jelentkezve.
 
 ## GET /categories
 
+Itt is lehet filterezni amúgy.
+
 ```
 [
   "Egyéb",
