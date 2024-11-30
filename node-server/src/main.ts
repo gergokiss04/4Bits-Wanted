@@ -68,6 +68,7 @@ export class Request {
 
   req: http.IncomingMessage
   res: http.ServerResponse<http.IncomingMessage>
+  method: 'GET' | 'PUT' | 'POST' | 'DELETE' | undefined
   cleanPath: string
   pathParts: string[]
   query: ParsedUrlQuery
@@ -77,6 +78,11 @@ export class Request {
   constructor(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, cleanPath: string, urlParts: string[], query: ParsedUrlQuery) {
     this.req = req
     this.res = res
+
+    const meth = (req.method ?? '').toUpperCase()
+    if(['GET', 'PUT', 'POST', 'DELETE'].includes(meth ?? '')) this.method = meth as 'GET' | 'PUT' | 'POST' | 'DELETE'
+    else this.method = undefined
+
     this.cleanPath = cleanPath
     this.pathParts = urlParts
     this.query = query

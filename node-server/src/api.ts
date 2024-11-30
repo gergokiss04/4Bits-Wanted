@@ -70,13 +70,24 @@ export abstract class Api {
     this.categoryCache.onDroppedCallback = (_, value: Category) => value.dropEntangled(this.categoryCache)
     this.categoryCache.setGcInterval()
 
-    this.addEndpoint(['users'], this.epUserList)
-    this.addEndpoint(['users', 'self'], this.epGetUserSelf)
-    this.addEndpoint(['users', '$'], this.epGetUser)
+    this.addEndpoint(['register'], this.epRegister)
     this.addEndpoint(['auth'], this.epAuth)
     this.addEndpoint(['authform'], this.epAuthForm)
     this.addEndpoint(['logout'], this.epLogout)
-    this.addEndpoint(['register'], this.epRegister)
+    this.addEndpoint(['users'], this.epUserList)
+    this.addEndpoint(['users', 'self'], this.epGetUserSelf)
+    this.addEndpoint(['users', '$'], this.epUserById)
+    this.addEndpoint(['users', '$', 'bio'], this.epUserBio)
+    this.addEndpoint(['users', '$', 'picture'], this.epUserPicture)
+    this.addEndpoint(['users', '$', 'password'], this.epUserPassword)
+    this.addEndpoint(['categories'], this.epCategoryList)
+    this.addEndpoint(['offers'], this.epOfferList) // GET és POST is
+    this.addEndpoint(['offers', 'random'], this.epRandomOffers)
+    this.addEndpoint(['offers', '$'], this.epOfferById) // GET és DELETE is
+    this.addEndpoint(['offers', '$', 'buy'], this.epOfferBuy)
+    this.addEndpoint(['offers', '$', 'rating'], this.epOfferRating) // GET és POST is
+    this.addEndpoint(['mediastager'], this.epMediaStager) // GET, POST, DELETE
+    this.addEndpoint(['mediastager', '$'], this.epMediaStagerIndexed)
   }
 
 
@@ -89,20 +100,24 @@ export abstract class Api {
 
     // Megkeressük, melyik endpoint útvonala illeszkedik a kérés útvonalával
     let matchedEndpoint: Endpoint | null = null
+    let matchSlack: number = Infinity // Követi, hogy a legjobban illeszkedő endpointban hány $ van, hogy ha pl. van foo/$/bar, és a listában utána még szerepel a foo/mid/bar, akkor a második élvezzen előnyt, mert az specifikusabb.
     for(let endpoint of this.endpoints) {
       if(endpoint.path.length != apiPath.length) continue
 
       let good = true
+      let slackHere = 0
       for(let i in endpoint.path) {
+        if(endpoint.path[i] === '$') slackHere++
         if(endpoint.path[i] != '$' && apiPath[i] != endpoint.path[i]) {
           good = false
           break
         }
       }
 
-      if(good) {
+      if(good && slackHere < matchSlack) {
         matchedEndpoint = endpoint
-        break
+        matchSlack = slackHere
+        if(matchSlack <= 0) break // Ennél már nem lehet jobb match
       }
     }
 
@@ -176,8 +191,20 @@ export abstract class Api {
     return iter
   }
 
-  errorMissingProp(name: string): Result {
+  static errorMissingProp(name: string): Result {
     return new Result(StatusCodes.BAD_REQUEST, `Missing required property "${name}"`)
+  }
+
+  static errorMethodNotAllowed(): Result {
+    return new Result(StatusCodes.METHOD_NOT_ALLOWED, 'Method not allowed')
+  }
+
+  static errorAuthRequired(): Result {
+    return new Result(StatusCodes.UNAUTHORIZED, 'You must be logged in to do this')
+  }
+
+  isPasswordGood(pass: string): boolean {
+    return pass.length > 0
   }
 
   hashPassword(pass: string, salt: number): string {
@@ -222,6 +249,7 @@ export abstract class Api {
 
   // Bejelentkezős endpointok
   async epRegister(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'POST') return Api.errorMethodNotAllowed()
     if(call.loggedInAs !== null) {
       return new Result(StatusCodes.BAD_REQUEST, 'You\'re already logged in')
     }
@@ -229,8 +257,10 @@ export abstract class Api {
     const body = await this.parseBody(call.request)
     if(body instanceof Result) return body
 
-    if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
-    if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
+    if(typeof body.login !== 'string') return Api.errorMissingProp('login (string)')
+    if(typeof body.pass !== 'string') return Api.errorMissingProp('pass (string)')
+
+    if(!this.isPasswordGood(body.pass)) return new Result(StatusCodes.BAD_REQUEST, 'Your password doesn\'t meet some requirement')
 
     let foundUser: User | undefined
     for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
@@ -262,6 +292,7 @@ export abstract class Api {
   }
 
   async epAuth(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'POST') return Api.errorMethodNotAllowed()
     const giveToken = (user: User) => {
       const token = JSON.stringify(
         {
@@ -280,8 +311,8 @@ export abstract class Api {
     const body = await this.parseBody(call.request)
     if(body instanceof Result) return body
 
-    if(typeof body.login !== 'string') return this.errorMissingProp('login (string)')
-    if(typeof body.pass !== 'string') return this.errorMissingProp('pass (string)')
+    if(typeof body.login !== 'string') return Api.errorMissingProp('login (string)')
+    if(typeof body.pass !== 'string') return Api.errorMissingProp('pass (string)')
 
     let foundUser: User | undefined
     for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
@@ -299,6 +330,7 @@ export abstract class Api {
   }
 
   async epAuthForm(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
     // This is stupid
     call.contentTypeOverride = 'text/html'
     return new Result(StatusCodes.OK,
@@ -330,6 +362,8 @@ export abstract class Api {
   }
 
   async epLogout(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'POST') return Api.errorMethodNotAllowed()
+
     call.request.setCookie(this.sessionCookieName, 'x')
 
     if(call.loggedInAs !== null) {
@@ -340,7 +374,10 @@ export abstract class Api {
   }
 
 
+  // Useres endpointok
   async epUserList(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
+
     const pagesToTurn: number = Number(call.request.query['page']) ?? 0
 
     const filter = call.request.query['filter']
@@ -354,7 +391,9 @@ export abstract class Api {
     return new Result(StatusCodes.OK, arr)
   }
 
-  async epGetUser(call: ApiCall): Promise<Result> {
+  async epUserById(call: ApiCall): Promise<Result> {
+    if(!['GET', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
+
     const id = Number(call.variables[0])
     if(!Number.isSafeInteger(id)) {
       return new Result(StatusCodes.BAD_REQUEST, 'ID must be an integer')
@@ -365,7 +404,19 @@ export abstract class Api {
       return new Result(StatusCodes.NOT_FOUND, 'No user with this ID exists')
     }
 
-    return new Result(StatusCodes.OK, user.serializePublic())
+    switch(call.request.method) {
+      case 'GET': return new Result(StatusCodes.OK, user.serializePublic())
+      case 'DELETE': {
+        if(call.loggedInAs === null) return Api.errorAuthRequired()
+        if(call.loggedInAs?.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only delete yourself')
+        else {
+          this.dropUser(user.id)
+          call.request.setCookie(this.sessionCookieName, 'x')
+          return new Result(StatusCodes.OK, 'Harakiri successful')
+        }
+      }
+      default: throw new Error('Unreachable')
+    }
   }
 
   async epGetUserSelf(call: ApiCall): Promise<Result> {
@@ -375,6 +426,193 @@ export abstract class Api {
     } else {
       return new Result(StatusCodes.NOT_FOUND, 'Not logged in')
     }
+  }
+
+  async epUserBio(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'PUT') return Api.errorMethodNotAllowed()
+
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) {
+      return new Result(StatusCodes.BAD_REQUEST, 'ID must be an integer')
+    }
+
+    const user = await this.userCache.tryGet(id)
+    if(user === undefined) {
+      return new Result(StatusCodes.NOT_FOUND, 'No user with this ID exists')
+    }
+
+    if(call.loggedInAs === null) return Api.errorAuthRequired()
+    if(call.loggedInAs.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to yourself')
+
+    user.bio = await call.request.readBody()
+    return new Result(StatusCodes.OK, 'Profile bio updated')
+  }
+
+  async epUserPicture(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'PUT') return Api.errorMethodNotAllowed()
+
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) {
+      return new Result(StatusCodes.BAD_REQUEST, 'ID must be an integer')
+    }
+
+    const user = await this.userCache.tryGet(id)
+    if(user === undefined) {
+      return new Result(StatusCodes.NOT_FOUND, 'No user with this ID exists')
+    }
+
+    if(call.loggedInAs === null) return Api.errorAuthRequired()
+    if(call.loggedInAs.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to yourself')
+
+    // TODO
+  }
+
+  async epUserPassword(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'PUT') return Api.errorMethodNotAllowed()
+
+    const body = await this.parseBody(call.request)
+    if(body instanceof Result) return body
+
+    if(typeof body.pass !== 'string') return Api.errorMissingProp('pass (string)')
+
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) {
+      return new Result(StatusCodes.BAD_REQUEST, 'ID must be an integer')
+    }
+
+    const user = await this.userCache.tryGet(id)
+    if(user === undefined) {
+      return new Result(StatusCodes.NOT_FOUND, 'No user with this ID exists')
+    }
+
+    if(call.loggedInAs === null) return Api.errorAuthRequired()
+    if(call.loggedInAs.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to yourself')
+
+    if(!this.isPasswordGood(body.pass)) return new Result(StatusCodes.BAD_REQUEST, 'Your password doesn\'t meet some requirement')
+    user.password = this.hashPassword(body.pass, user.id)
+    call.request.setCookie(this.sessionCookieName, 'x')
+    return new Result(StatusCodes.OK, 'Password updated, please log in again')
+  }
+
+
+  // Kategóriás endpointok
+  async epCategoryList(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
+
+    const filter = call.request.query['filter']
+    const regex = (typeof filter === 'string') ? RegExp(filter, 'i') : undefined
+
+    const gen = this.yieldCategoryIds(regex)
+
+    const arr = Array.from(gen)
+
+    return new Result(StatusCodes.OK, arr)
+  }
+
+
+  // Offeres endpointok
+  async epOfferList(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
+
+    const optionalNum = function(name: string): number | undefined {
+      const val = call.request.query[name]
+      return (typeof val === 'number') ? val : undefined
+    }
+
+    const pagesToTurn: number = Number(call.request.query['page']) ?? 0
+
+    const includeSold: boolean = call.request.query['includeSold'] === 'true'
+
+    const titleFilter = call.request.query['filterTitle']
+    const titleRegex = (typeof titleFilter === 'string') ? RegExp(titleFilter, 'i') : undefined
+    const categoryId = optionalNum('filterCategory')
+
+    const minPrice = optionalNum('minPrice')
+    const maxPrice = optionalNum('maxPrice')
+
+    const gen = this.yieldOfferIds(
+      titleRegex,
+      categoryId,
+      minPrice,
+      maxPrice,
+      'id',
+      false
+    )
+
+    const thiis = this // Miért
+    this.skipPages<number>(
+      function*(): Iterator<number> {
+        for(const val of gen) {
+          if(includeSold || thiis.fetchOffer(val)?.buyer === null) {
+            yield val
+          }
+        }
+      }(), // Genuis!
+      pagesToTurn
+    )
+
+    const arr = Array.from(gen)
+
+    return new Result(StatusCodes.OK, arr)
+  }
+
+  async epRandomOffers(call: ApiCall): Promise<Result> {
+    if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
+
+    const optionalNum = function(name: string): number | undefined {
+      const val = call.request.query[name]
+      return (typeof val === 'number') ? val : undefined
+    }
+
+    let count = optionalNum('count') ?? 10
+
+    let gen = this.yieldOfferIds(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'random',
+      false
+    )
+
+    const arr: number[] = []
+    for(const val of gen) {
+      if(this.fetchOffer(val)?.buyer === null) {
+        arr.push(val)
+      }
+
+      count--
+      if(count <= 0) break
+    }
+
+    return new Result(StatusCodes.OK, arr)
+  }
+
+  async epOfferById(call: ApiCall): Promise<Result> {
+    if(!['GET', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
+    // TODO
+  }
+
+  async epOfferBuy(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'POST') return Api.errorMethodNotAllowed()
+    // TODO
+  }
+
+  async epOfferRating(call: ApiCall): Promise<Result> {
+    if(!['GET', 'POST'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
+    // TODO
+  }
+
+
+  // Media stager
+  async epMediaStager(call: ApiCall): Promise<Result> {
+    if(!['GET', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
+    // TODO
+  }
+
+  async epMediaStagerIndexed(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'DELETE') return Api.errorMethodNotAllowed()
+    // TODO
   }
 
 
