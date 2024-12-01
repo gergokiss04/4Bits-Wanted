@@ -20,6 +20,9 @@ export class Config {
   apiSecret: string
   apiAllowDebt: boolean
 
+  apiMediaRoot: string
+  apiMediaCapacity: number
+
 
   constructor(dict: {}) {
     this.listenHostname = dictutil.require(dict, ['listen', 'hostname'])
@@ -36,6 +39,8 @@ export class Config {
     }
     this.apiSecret = dictutil.require<string>(dict, ['api', 'secret'])
     this.apiAllowDebt = dictutil.optional<boolean>(dict, ['api', 'allowDebt']) ?? false
+    this.apiMediaRoot = dictutil.require<string>(dict, ['api', 'media', 'root'])
+    this.apiMediaCapacity = dictutil.optional<number>(dict, ['api', 'media', 'capacity']) ?? 10
 
     this.logNormal = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})
     this.logInfo = new LogOptions(dictutil.optional<{[key: string]: string}>(dict, ['log', 'normal']) ?? {})

@@ -33,6 +33,10 @@
     "prefix": "api",
     "driver": "memory",
     "secret": "password1234",
-    "allowDebt": true
+    "allowDebt": true,
+    "media": {
+      "root": "./media",
+      "capacity": 10
+    }
   }
 }

@@ -1,11 +1,12 @@
-import http from 'http'
 import * as crypto from 'crypto'
 import { StatusCodes } from 'http-status-codes'
 
 import * as log from './log.js'
+import { Config } from './config.js'
 import { Request } from './main.js'
 import { Cache } from './cache.js'
 import { User, Offer, Category, Record } from './records.js'
+import { MediaStager } from './mediastager.js'
 
 
 class ApiCall {
@@ -41,12 +42,13 @@ type Endpoint = {path: string[], method: ApiMethod}
 
 export abstract class Api {
 
-  private readonly secret: string
+  private readonly config: Config
   sessionCookieName: string = 'wanted-session'
 
   userCache = new Cache<number, User>()
   offerCache = new Cache<number, Offer>()
   categoryCache = new Cache<number, Category>()
+  mediaStagers = new Cache<number, MediaStager>()
 
   endpoints: Array<Endpoint> = Array()
   reportErrors = true // TODO konfigurálható
@@ -54,9 +56,10 @@ export abstract class Api {
   allowDebt = false
 
 
-  constructor(secret: string) {
-    this.secret = secret
+  constructor(config: Config) {
+    this.config = config
 
+    // HACK expires fast
     this.userCache.populateCallback = this.fetchUser.bind(this)
     this.userCache.onDroppedCallback = (_, value: User) => { this.commitUser(value); value.dropEntangled(this.userCache) }
     this.userCache.expireSeconds = 1
@@ -64,11 +67,16 @@ export abstract class Api {
 
     this.offerCache.populateCallback = this.fetchOffer.bind(this)
     this.offerCache.onDroppedCallback = (_, value: Offer) => value.dropEntangled(this.offerCache)
+    this.offerCache.expireSeconds = 1
     this.offerCache.setGcInterval()
 
     this.categoryCache.populateCallback = this.fetchCategory.bind(this)
     this.categoryCache.onDroppedCallback = (_, value: Category) => value.dropEntangled(this.categoryCache)
+    this.categoryCache.expireSeconds = 1
     this.categoryCache.setGcInterval()
+
+    this.mediaStagers.populateCallback = () => new MediaStager(this.config.apiMediaCapacity)
+    this.mediaStagers.expireSeconds = 100000
 
     this.addEndpoint(['register'], this.epRegister)
     this.addEndpoint(['auth'], this.epAuth)
@@ -88,6 +96,7 @@ export abstract class Api {
     this.addEndpoint(['offers', '$', 'rating'], this.epOfferRating) // GET és POST is
     this.addEndpoint(['mediastager'], this.epMediaStager) // GET, POST, DELETE
     this.addEndpoint(['mediastager', '$'], this.epMediaStagerIndexed)
+    this.addEndpoint(['mediastager', 'form'], this.epMediaStagerForm)
   }
 
 
@@ -209,7 +218,7 @@ export abstract class Api {
 
   hashPassword(pass: string, salt: number): string {
     return crypto.createHash('sha256' /* TODO konfigurálható */)
-    .update(this.secret)
+    .update(this.config.apiSecret)
     .update(salt.toString())
     .update(pass)
     .digest('hex')
@@ -217,7 +226,7 @@ export abstract class Api {
 
   getTokenSignature(user: User): string {
     return crypto.createHash('sha256')
-    .update(this.secret)
+    .update(this.config.apiSecret)
     .update(user.name)
     .update(user.password) // Genuis! Ha megváltoztatja a jelszavát, akkor többé nem lesz jó a signature
     .digest('hex')
@@ -229,6 +238,12 @@ export abstract class Api {
     for(let i = 0; i < 1 && Math.random() > 0.1; i++) {
       result = this.getTokenSignature(user) === signature
     }
+    return result
+  }
+
+  async getStager(user: User): Promise<MediaStager> {
+    const result = await this.mediaStagers.tryGet(user.id)
+    if(result === undefined) throw new Error('Unreachable')
     return result
   }
 
@@ -321,7 +336,7 @@ export abstract class Api {
     }
 
     if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
-      //console.log(this.hashPassword(body.pass, foundUser!.id))
+      log.warn(this.hashPassword(body.pass, foundUser!.id))
       return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
     } else {
       giveToken(foundUser)
@@ -410,6 +425,7 @@ export abstract class Api {
         if(call.loggedInAs === null) return Api.errorAuthRequired()
         if(call.loggedInAs?.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only delete yourself')
         else {
+          this.mediaStagers.drop(user.id)
           this.dropUser(user.id)
           call.request.setCookie(this.sessionCookieName, 'x')
           return new Result(StatusCodes.OK, 'Harakiri successful')
@@ -465,6 +481,7 @@ export abstract class Api {
     if(call.loggedInAs.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to yourself')
 
     // TODO
+    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
   }
 
   async epUserPassword(call: ApiCall): Promise<Result> {
@@ -504,7 +521,7 @@ export abstract class Api {
 
     const gen = this.yieldCategoryIds(regex)
 
-    const arr = Array.from(gen)
+    const arr = Array.from(gen).map((id) => this.fetchCategory(id)?.serializePublic(), this)
 
     return new Result(StatusCodes.OK, arr)
   }
@@ -553,6 +570,7 @@ export abstract class Api {
 
     const arr = Array.from(gen)
 
+    // TODO POST
     return new Result(StatusCodes.OK, arr)
   }
 
@@ -591,28 +609,88 @@ export abstract class Api {
   async epOfferById(call: ApiCall): Promise<Result> {
     if(!['GET', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
     // TODO
+    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
   }
 
   async epOfferBuy(call: ApiCall): Promise<Result> {
     if(call.request.method !== 'POST') return Api.errorMethodNotAllowed()
     // TODO
+    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
   }
 
   async epOfferRating(call: ApiCall): Promise<Result> {
     if(!['GET', 'POST'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
     // TODO
+    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
   }
 
 
   // Media stager
+  async epMediaStagerForm(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'GET') return Api.errorMethodNotAllowed()
+    call.contentTypeOverride = 'text/html'
+    return new Result(StatusCodes.OK, '<html><body><form action="/api/mediastager" method="POST" enctype="multipart/form-data"><input type="file" id="image" name="image" accept="image/*" required><button type="submit">Submit</button></form></body></html>')
+  }
+
   async epMediaStager(call: ApiCall): Promise<Result> {
-    if(!['GET', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
-    // TODO
+    if(!['GET', 'POST', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
+    if(call.loggedInAs === null) return Api.errorAuthRequired()
+
+    const stager = await this.getStager(call.loggedInAs)
+
+    switch(call.request.method) {
+      case 'GET': {
+        return new Result(
+          StatusCodes.OK,
+          {
+            imagesLeft: stager.capacity - stager.urls.length,
+            uris: stager.urls // TODO ne a filesystem pathek legyenek
+          }
+        )
+      }
+
+      case 'POST': {
+        if(stager.urls.length >= stager.capacity) return new Result(StatusCodes.BAD_REQUEST, 'Media stager is full')
+        const imagePath: string | undefined = await call.request.receiveImage()
+
+        if(imagePath === undefined) return new Result(StatusCodes.BAD_REQUEST, 'Image upload failed. You need to send the image as multipart/form-data, in an input named "image"')
+        log.info(`Received ${imagePath} from user ${call.loggedInAs.id}`)
+
+        // TODO elrakni a media rootba
+        stager.urls.push(imagePath)
+        return new Result(StatusCodes.OK, 'Upload succesful')
+      }
+
+      case 'DELETE': {
+        stager.urls = []
+        return new Result(StatusCodes.OK, 'Media stager cleared')
+      }
+
+      default: throw new Error('Unreachable')
+    }
   }
 
   async epMediaStagerIndexed(call: ApiCall): Promise<Result> {
     if(call.request.method !== 'DELETE') return Api.errorMethodNotAllowed()
-    // TODO
+    if(call.loggedInAs === null) return Api.errorAuthRequired()
+
+    const index = Number(call.variables[0])
+    if(!Number.isSafeInteger(index)) {
+      return new Result(StatusCodes.BAD_REQUEST, 'Index must be an integer')
+    }
+
+    const stager = await this.getStager(call.loggedInAs)
+
+    if(index < 0 || index >= stager.urls.length) return new Result(StatusCodes.BAD_REQUEST, 'Index out of range')
+
+    const newUrls: string[] = []
+    for(let i = 0; i < stager.urls.length; i++) {
+      if(i !== index) newUrls.push(stager.urls[i])
+    }
+
+    stager.urls = newUrls
+
+    return new Result(StatusCodes.OK, 'Deleted')
   }
 
 

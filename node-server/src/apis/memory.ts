@@ -36,10 +36,25 @@ export class MemoryApi extends Api {
           password: 'not valid hex >:)',
           averageStars: 0.0,
           bio: "",
-          pictureUri: ""
+          pictureUri: "abc123placeholder.jpg"
         }
       )
     )
+    this.users.set(4,
+      new User(4,
+        {
+          name: 'négyeske',
+          password: '',
+          averageStars: 0.0,
+          bio: "I don't share my password with anyone, except bob.",
+          pictureUri: "abc123placeholder.jpg"
+        }
+      )
+    )
+
+    this.categories.set(1, new Category(1, {name: 'Ez'}))
+    this.categories.set(2, new Category(2, {name: 'Az'}))
+    this.categories.set(3, new Category(3, {name: 'Amaz'}))
   }
 
   override *yieldUserIds(

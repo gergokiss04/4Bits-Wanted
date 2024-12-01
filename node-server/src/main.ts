@@ -13,6 +13,7 @@ import * as fs from 'fs/promises'
 import * as fsSync from 'fs'
 import Mime from 'mime/lite'
 import * as cookie from 'cookie'
+import * as formidable from 'formidable'
 
 import * as log from './log.js'
 import { Config } from './config.js'
@@ -46,7 +47,7 @@ let api: Api
 switch(config.apiDriver) {
   case 'memory':
     log.normal('Using MemoryApi')
-    const memApi = new MemoryApi(config.apiSecret)
+    const memApi = new MemoryApi(config)
     memApi.logCallback = (msg) => log.info(`[MemoryApi] ${msg}`)
     memApi.loadTestData()
     api = memApi
@@ -55,7 +56,7 @@ switch(config.apiDriver) {
   case 'db':
     log.normal('Using DatabaseApi')
     log.warn('DatabaseApi isn\'t implemented yet')
-    const dbApi = new DatabaseApi(config.apiSecret)
+    const dbApi = new DatabaseApi(config)
     api = dbApi
     break
 }
@@ -133,6 +134,22 @@ export class Request {
         reject(err)
       })
     })
+  }
+
+  async receiveImage(): Promise<string | undefined> {
+    const opts = formidable.defaultOptions // Alapból a tmpbe teszi a fájlokat.
+    opts.keepExtensions = true
+    const form = new formidable.IncomingForm()
+
+    return new Promise(
+      (resolve) => {
+        form.parse(this.req, (err: any, _fields: formidable.Fields<string>, files: formidable.Files<string>) => {
+          if(err) throw err
+          if(files.image === undefined) resolve(undefined)
+          resolve(files.image![0].filepath)
+        })
+      }
+    )
   }
 
   setCookie(name: string, value: string) {
