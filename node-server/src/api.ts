@@ -1,5 +1,8 @@
 import * as crypto from 'crypto'
 import { StatusCodes } from 'http-status-codes'
+import * as fs from 'fs/promises'
+import Mime from 'mime/lite'
+import * as path from 'path'
 
 import * as log from './log.js'
 import { Config } from './config.js'
@@ -15,7 +18,7 @@ class ApiCall {
   variables: string[]
   loggedInAs: User | null = null
 
-  contentTypeOverride: string | null = null
+  contentType: string | null = null
 
 
   constructor(request: Request, variables: string[]) {
@@ -40,6 +43,7 @@ type ApiMethod = (call: ApiCall) => Promise<Result>
 type Endpoint = {path: string[], method: ApiMethod}
 
 
+// TODO media garbic collector
 export abstract class Api {
 
   private readonly config: Config
@@ -51,7 +55,7 @@ export abstract class Api {
   mediaStagers = new Cache<number, MediaStager>()
 
   endpoints: Array<Endpoint> = Array()
-  reportErrors = true // TODO konfigurálható
+  reportErrors = true // TO-DO konfigurálható
 
   allowDebt = false
 
@@ -97,6 +101,7 @@ export abstract class Api {
     this.addEndpoint(['mediastager'], this.epMediaStager) // GET, POST, DELETE
     this.addEndpoint(['mediastager', '$'], this.epMediaStagerIndexed)
     this.addEndpoint(['mediastager', 'form'], this.epMediaStagerForm)
+    this.addEndpoint(['media', '$'], this.epMedia)
   }
 
 
@@ -163,9 +168,13 @@ export abstract class Api {
         const bound = matchedEndpoint.method.bind(this)
         const result = await bound(call)
         request.res.statusCode = result.code
-        request.res.setHeader('Content-Type', call.contentTypeOverride ?? 'application/json')
-        const body = (call.contentTypeOverride === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString())
-        if(result.body !== undefined) await request.writePatiently(body)
+
+        let body = result.body
+        if(body !== undefined) {
+          request.res.setHeader('Content-Type', call.contentType ?? 'application/json')
+          body = (call.contentType === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString())
+          await request.writePatiently(body)
+        }
       } catch(e: any) {
         let msg = `Unhandled exception during API call: ${e}`
         if(e instanceof Error) msg += `\n${e.stack}`;
@@ -173,7 +182,7 @@ export abstract class Api {
 
         request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
         if(this.reportErrors) {
-          request.res.setHeader('Content-Type', call.contentTypeOverride ?? 'application/json')
+          request.res.setHeader('Content-Type', call.contentType ?? 'application/json')
           await request.writePatiently(JSON.stringify(e))
         }
       }
@@ -217,7 +226,7 @@ export abstract class Api {
   }
 
   hashPassword(pass: string, salt: number): string {
-    return crypto.createHash('sha256' /* TODO konfigurálható */)
+    return crypto.createHash('sha256' /* TO-DO konfigurálható */)
     .update(this.config.apiSecret)
     .update(salt.toString())
     .update(pass)
@@ -259,6 +268,37 @@ export abstract class Api {
       }
     }
     return body
+  }
+
+  async saveMedia(srcPath: string): Promise<string> {
+    // TO-DO enforce valid media
+    const thinkOfPath = function(): string {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+      let path = ''
+      for(let i = 0; i < 32; i++) {
+        path += chars[Math.floor(Math.random() * chars.length)]
+      }
+      return path
+    }
+
+    while(true) {
+      let somePath = thinkOfPath()
+      somePath += path.extname(srcPath).toLowerCase()
+
+      try {
+        await fs.copyFile(srcPath, this.config.apiMediaRoot + somePath);
+        await fs.rm(srcPath, {recursive: false})
+        log.info(`${srcPath} saved as ${somePath}`)
+        return somePath // It worked
+      } catch (err) {
+        if(err instanceof Error && (err as NodeJS.ErrnoException).code === 'EEXIST') {
+          log.info(`Media URI collision: ${somePath}`)
+          continue
+        } else {
+          throw err
+        }
+      }
+    }
   }
 
 
@@ -347,7 +387,7 @@ export abstract class Api {
   async epAuthForm(call: ApiCall): Promise<Result> {
     if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
     // This is stupid
-    call.contentTypeOverride = 'text/html'
+    call.contentType = 'text/html'
     return new Result(StatusCodes.OK,
       "<html><body>\
       <form id=\"form\" method=\"post\" action=\"/api/auth\" accept-charset=\"utf-8\">\
@@ -356,6 +396,10 @@ export abstract class Api {
       <label for=\"pass\">pass</label>\
       <input name=\"pass\" id=\"pass\" type=\"password\">\
       <input type=\"submit\">\
+      </form>\
+      <form id=\"logout\" method=\"post\" action=\"/api/logout\" accept-charset=\"utf-8\">\
+      <label for=\"submit\">log out</label>\
+      <input name=\"submit\" type=\"submit\">\
       </form>\
       <script>\
         document.getElementById('form').addEventListener('submit', function(event) {\
@@ -427,6 +471,7 @@ export abstract class Api {
         else {
           this.mediaStagers.drop(user.id)
           this.dropUser(user.id)
+          this.offerCache.drop(user.id)
           call.request.setCookie(this.sessionCookieName, 'x')
           return new Result(StatusCodes.OK, 'Harakiri successful')
         }
@@ -465,7 +510,7 @@ export abstract class Api {
   }
 
   async epUserPicture(call: ApiCall): Promise<Result> {
-    if(call.request.method !== 'PUT') return Api.errorMethodNotAllowed()
+    if(!['POST', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
 
     const id = Number(call.variables[0])
     if(!Number.isSafeInteger(id)) {
@@ -480,8 +525,25 @@ export abstract class Api {
     if(call.loggedInAs === null) return Api.errorAuthRequired()
     if(call.loggedInAs.id !== user.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to yourself')
 
-    // TODO
-    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
+    switch(call.request.method) {
+      case 'POST': {
+        const imagePath: string | undefined = await call.request.receiveImage()
+
+        if(imagePath === undefined) return new Result(StatusCodes.BAD_REQUEST, 'Image upload failed. You need to send the image as multipart/form-data, in an input named "image"')
+        log.info(`Received ${imagePath} from user ${call.loggedInAs.id}`)
+
+        const uri = await this.saveMedia(imagePath)
+        user.profilePicUri = uri
+        this.userCache.insert(user.id, user)
+        return new Result(StatusCodes.OK, 'Profile picture updated')
+      }
+      case 'DELETE': {
+        user.profilePicUri = ''
+        this.userCache.insert(user.id, user)
+        return new Result(StatusCodes.OK, 'Profile picture removed')
+      }
+      default: throw new Error('Unreachable')
+    }
   }
 
   async epUserPassword(call: ApiCall): Promise<Result> {
@@ -529,49 +591,99 @@ export abstract class Api {
 
   // Offeres endpointok
   async epOfferList(call: ApiCall): Promise<Result> {
-    if(call.request.method != 'GET') return Api.errorMethodNotAllowed()
+    if(!['GET', 'POST'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
 
     const optionalNum = function(name: string): number | undefined {
       const val = call.request.query[name]
       return (typeof val === 'number') ? val : undefined
     }
 
-    const pagesToTurn: number = Number(call.request.query['page']) ?? 0
+    switch(call.request.method) {
+      case 'GET': {
+        const pagesToTurn: number = Number(call.request.query['page']) ?? 0
 
-    const includeSold: boolean = call.request.query['includeSold'] === 'true'
+        const includeSold: boolean = call.request.query['includeSold'] === 'true'
 
-    const titleFilter = call.request.query['filterTitle']
-    const titleRegex = (typeof titleFilter === 'string') ? RegExp(titleFilter, 'i') : undefined
-    const categoryId = optionalNum('filterCategory')
+        const titleFilter = call.request.query['filterTitle']
+        const titleRegex = (typeof titleFilter === 'string') ? RegExp(titleFilter, 'i') : undefined
+        const categoryId = optionalNum('filterCategory')
 
-    const minPrice = optionalNum('minPrice')
-    const maxPrice = optionalNum('maxPrice')
+        const minPrice = optionalNum('minPrice')
+        const maxPrice = optionalNum('maxPrice')
 
-    const gen = this.yieldOfferIds(
-      titleRegex,
-      categoryId,
-      minPrice,
-      maxPrice,
-      'id',
-      false
-    )
+        const gen = this.yieldOfferIds(
+          titleRegex,
+          categoryId,
+          minPrice,
+          maxPrice,
+          'id',
+          false
+        )
 
-    const thiis = this // Miért
-    this.skipPages<number>(
-      function*(): Iterator<number> {
-        for(const val of gen) {
-          if(includeSold || thiis.fetchOffer(val)?.buyer === null) {
-            yield val
+        const thiis = this // Miért
+        this.skipPages<number>(
+          function*(): Iterator<number> {
+            for(const val of gen) {
+              if(includeSold || thiis.fetchOffer(val)?.buyer === null) {
+                yield val
+              }
+            }
+          }(), // Genuis!
+          pagesToTurn
+        )
+
+        const arr = Array.from(gen)
+
+        return new Result(StatusCodes.OK, arr)
+      }
+      case 'POST': {
+        if(call.loggedInAs === null) return Api.errorAuthRequired()
+        /*{
+          "title": "Hagyományos mosópor kedvező Áron",
+          "price": 1000, // Nemnegatív egész szám
+          "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
+          "categoryId": 1, // Hanyadik kategória a /categories-ből
+        }*/
+        const body = await this.parseBody(call.request)
+        if(body instanceof Result) return body
+
+        if(typeof body.title !== 'string') return Api.errorMissingProp('title (string)')
+        if(typeof body.price !== 'number') return Api.errorMissingProp('price (number)')
+        if(typeof body.description !== 'string') return Api.errorMissingProp('description (string)')
+        if(typeof body.categoryId !== 'number') return Api.errorMissingProp('categoryId (number)')
+
+        const category = await this.categoryCache.tryGet(body.categoryId)
+        if(category === undefined) return new Result(StatusCodes.BAD_REQUEST, 'Category doesn\'t exist')
+
+        let id = 1
+        for(const existingId of this.yieldOfferIds(undefined, undefined, undefined, undefined, 'id', true)) {
+          if(id <= existingId) {
+            id = existingId + 1
+            break // Mert descending.
           }
         }
-      }(), // Genuis!
-      pagesToTurn
-    )
 
-    const arr = Array.from(gen)
+        const stager = await this.getStager(call.loggedInAs)
 
-    // TODO POST
-    return new Result(StatusCodes.OK, arr)
+        const offer = new Offer(
+          id,
+          {
+            createdTimestamp: Date.now(),
+            seller: call.loggedInAs,
+            title: body.title,
+            category: category,
+            description: body.description,
+            price: body.price,
+            pictureUris: stager.urls
+          }
+        )
+
+        stager.urls = []
+
+        await this.offerCache.insert(id, offer)
+      }
+      default: throw new Error('Unreachable')
+    }
   }
 
   async epRandomOffers(call: ApiCall): Promise<Result> {
@@ -608,27 +720,91 @@ export abstract class Api {
 
   async epOfferById(call: ApiCall): Promise<Result> {
     if(!['GET', 'DELETE'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
-    // TODO
-    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
+
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) return new Result(StatusCodes.BAD_REQUEST, 'Index must be an integer')
+
+    const offer = await this.offerCache.tryGet(id)
+    if(offer === undefined) return new Result(StatusCodes.NOT_FOUND, 'No offer with this ID exists')
+
+    switch(call.request.method) {
+      case 'GET': {
+        return new Result(StatusCodes.OK, offer.serializePublic())
+      }
+      case 'DELETE': {
+        if(call.loggedInAs === null) return Api.errorAuthRequired()
+
+        if(offer.seller.id !== call.loggedInAs.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to your own offers')
+        if(offer.buyer !== null) return new Result(StatusCodes.FORBIDDEN, 'This offer is already sold')
+
+        this.dropOffer(offer.id)
+        await this.offerCache.drop(offer.id)
+
+        return new Result(StatusCodes.OK, 'Offer deleted')
+      }
+      default: throw new Error('Unreachable')
+    }
   }
 
   async epOfferBuy(call: ApiCall): Promise<Result> {
     if(call.request.method !== 'POST') return Api.errorMethodNotAllowed()
-    // TODO
-    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
+
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) return new Result(StatusCodes.BAD_REQUEST, 'Index must be an integer')
+
+    const offer = await this.offerCache.tryGet(id)
+    if(offer === undefined) return new Result(StatusCodes.NOT_FOUND, 'No offer with this ID exists')
+
+    if(call.loggedInAs === null) return Api.errorAuthRequired()
+
+    if(offer.seller.id === call.loggedInAs.id) return new Result(StatusCodes.FORBIDDEN, 'You can\'t buy your own offer')
+    if(offer.buyer !== null) return new Result(StatusCodes.FORBIDDEN, 'This offer is already sold')
+
+    offer.buyer = call.loggedInAs
+    offer.entangle(offer.buyer)
+    offer.entangle(offer.seller)
+
+    return new Result(StatusCodes.OK, 'Purchased')
   }
 
   async epOfferRating(call: ApiCall): Promise<Result> {
     if(!['GET', 'POST'].includes(call.request.method ?? '')) return Api.errorMethodNotAllowed()
-    // TODO
-    return new Result(StatusCodes.NOT_IMPLEMENTED, 'Not implemented')
+
+    const id = Number(call.variables[0])
+    if(!Number.isSafeInteger(id)) return new Result(StatusCodes.BAD_REQUEST, 'Index must be an integer')
+
+    const offer = await this.offerCache.tryGet(id)
+    if(offer === undefined) return new Result(StatusCodes.NOT_FOUND, 'No offer with this ID exists')
+
+    switch(call.request.method) {
+      case 'GET': {
+        if(offer.buyerRating !== null) return new Result(StatusCodes.OK, { stars: offer.buyerRating })
+        else return new Result(StatusCodes.NOT_FOUND, 'Not rated yet')
+      }
+      case 'POST': {
+        if(call.loggedInAs === null) return Api.errorAuthRequired()
+
+        if(offer.buyer === null) return new Result(StatusCodes.FORBIDDEN, 'This offer is not sold yet')
+        if(offer.buyer.id !== call.loggedInAs.id) return new Result(StatusCodes.FORBIDDEN, 'You can only rate offers that you bought')
+        if(offer.buyerRating !== null) return new Result(StatusCodes.FORBIDDEN, 'This offer was already rated')
+
+        const body = await this.parseBody(call.request)
+        if(body instanceof Result) return body
+        if(typeof body.stars !== 'number') return Api.errorMissingProp('stars (number)')
+
+        offer.buyerRating = body.stars
+        offer.entangle(offer.buyer)
+        offer.entangle(offer.seller)
+      }
+      default: throw new Error('Unreachable')
+    }
   }
 
 
   // Media stager
   async epMediaStagerForm(call: ApiCall): Promise<Result> {
     if(call.request.method !== 'GET') return Api.errorMethodNotAllowed()
-    call.contentTypeOverride = 'text/html'
+    call.contentType = 'text/html'
     return new Result(StatusCodes.OK, '<html><body><form action="/api/mediastager" method="POST" enctype="multipart/form-data"><input type="file" id="image" name="image" accept="image/*" required><button type="submit">Submit</button></form></body></html>')
   }
 
@@ -644,7 +820,7 @@ export abstract class Api {
           StatusCodes.OK,
           {
             imagesLeft: stager.capacity - stager.urls.length,
-            uris: stager.urls // TODO ne a filesystem pathek legyenek
+            uris: stager.urls
           }
         )
       }
@@ -656,8 +832,9 @@ export abstract class Api {
         if(imagePath === undefined) return new Result(StatusCodes.BAD_REQUEST, 'Image upload failed. You need to send the image as multipart/form-data, in an input named "image"')
         log.info(`Received ${imagePath} from user ${call.loggedInAs.id}`)
 
-        // TODO elrakni a media rootba
-        stager.urls.push(imagePath)
+        const uri = await this.saveMedia(imagePath)
+
+        stager.urls.push(uri)
         return new Result(StatusCodes.OK, 'Upload succesful')
       }
 
@@ -691,6 +868,36 @@ export abstract class Api {
     stager.urls = newUrls
 
     return new Result(StatusCodes.OK, 'Deleted')
+  }
+
+
+  async epMedia(call: ApiCall): Promise<Result> {
+    if(call.request.method !== 'GET') return Api.errorMethodNotAllowed()
+
+    const uri = call.variables[0]
+    if(uri.includes('/')) return new Result(StatusCodes.BAD_REQUEST, 'Invalid uri')
+
+    const path = this.config.apiMediaRoot + uri
+
+    let file: fs.FileHandle | undefined = undefined
+    try {
+      const mimeType: string = Mime.getType(path) || 'application/octet-stream'
+      file = await fs.open(path, 'r')
+
+      await call.request.sendFile(file, mimeType)
+      return new Result(StatusCodes.OK, undefined)
+    } catch(error) {
+      if(error instanceof Error) {
+        switch((error as NodeJS.ErrnoException).code) {
+          case 'ENOENT':
+          case 'ERR_FS_EISDIR':
+            return new Result(StatusCodes.NOT_FOUND, 'Not found')
+        }
+      }
+      throw error
+    } finally {
+      if(file !== undefined) await file.close()
+    }
   }
 
 

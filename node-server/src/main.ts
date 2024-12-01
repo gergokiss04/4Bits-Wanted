@@ -152,6 +152,24 @@ export class Request {
     )
   }
 
+  async sendFile(file: fs.FileHandle, mime: string): Promise<void> {
+    const expectedLength = (await file.stat()).size
+    let totalBytes = 0
+
+    this.res.setHeader('Content-Length', expectedLength)
+    this.res.setHeader('Content-Type', mime)
+    const buffer: Buffer = Buffer.alloc(2**16)
+    while(true) {
+      const result: fs.FileReadResult<Buffer> = await file.read(buffer, 0, buffer.length)
+      totalBytes += result.bytesRead
+      if(result.bytesRead <= 0) break
+
+      await this.writePatiently(buffer.subarray(0, result.bytesRead))
+    }
+
+    if(totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading file`)
+  }
+
   setCookie(name: string, value: string) {
       this.res.setHeader('Set-Cookie', `${name}=${value};`)
   }
@@ -184,22 +202,8 @@ async function serveStatic(request: Request, url: string): Promise<void> {
     const mimeType: string = Mime.getType(filePath) || 'application/octet-stream'
 
     file = await fs.open(filePath, 'r')
-    const expectedLength = (await file.stat()).size
-    let totalBytes = 0
-
-    request.res.setHeader('Content-Length', expectedLength)
-    request.res.setHeader('Content-Type', mimeType)
-    const buffer: Buffer = Buffer.alloc(2**16)
-    while(true) {
-      const result: fs.FileReadResult<Buffer> = await file.read(buffer, 0, buffer.length)
-      totalBytes += result.bytesRead
-      if(result.bytesRead <= 0) break
-
-      await request.writePatiently(buffer.subarray(0, result.bytesRead))
-    }
+    await request.sendFile(file, mimeType)
     request.res.end()
-
-    if(totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading ${log.sanitize(url)}`)
   } catch(error) {
     if(error instanceof Error) {
       switch((error as NodeJS.ErrnoException).code) {
@@ -213,7 +217,7 @@ async function serveStatic(request: Request, url: string): Promise<void> {
     }
     throw error
   } finally {
-    if(file) await file.close()
+    if(file !== undefined) await file.close()
   }
 }
 

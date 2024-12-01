@@ -138,6 +138,8 @@ Query paraméterek:
 
 Ha be vagyunk jelentkezve, akkor visszaadja a saját felhasználónkat ugyan úgy, mint az id alapján lekérés. Ha nem vagyunk bejelentkezve, akkor `404 Not Found`.
 
+**Fontos!** Ezen nem működik a bio, picture, stb., azokhoz ID-vel kell elérni az usert.
+
 
 ## PUT /users/ID/bio
 
@@ -155,6 +157,10 @@ Frissíthetjük saját profilképünket. Ez azért nem PUT, mert nem idempotens.
 ```
 (a request body egy kép, lásd POST /mediastager)
 ```
+
+## DELETE /users/ID/picture
+
+Törölhetjük saját profilképünket.
 
 ## PUT /users/ID/password
 
