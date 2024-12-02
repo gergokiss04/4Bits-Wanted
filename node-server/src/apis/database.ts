@@ -80,8 +80,8 @@ export class DatabaseApi extends Api {
   }
 
   override fetchUser(id: number): User | undefined {
-    const query = 'SELECT * FROM users WHERE id = ?';
-    const rowsPromise = this.db.execute(query, [id]);
+    const query = 'SELECT * FROM users WHERE id = ' + id;
+    const rowsPromise = this.db.execute(query);
 
     const rows = deasync(rowsPromise);
 
@@ -112,7 +112,13 @@ export class DatabaseApi extends Api {
   override commitUser(val: User): void {
     const query = `
       INSERT INTO users (id, name, profile_pic, bio, email, password, average_rating)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (${val.id}, 
+              ${val.name}, 
+              ${val.profilePicUri}, 
+              ${val.bio}, 
+              ${val.password}, 
+              ${val.averageRating}
+      )
       ON DUPLICATE KEY UPDATE
         name = VALUES(name),
         profile_pic = VALUES(profile_pic),
@@ -122,22 +128,13 @@ export class DatabaseApi extends Api {
         average_rating = VALUES(average_rating)
     `;
 
-    const params = [
-      val.id,
-      val.name,
-      val.profilePicUri,
-      val.bio,
-      val.password,
-      val.averageRating
-    ];
-
-    const result = this.db.execute(query, params);
+    const result = this.db.execute(query);
   }
 
   override dropUser(id: number): void {
     const query = `DELETE 
                    FROM users
-                   WHERE id = ?`;
+                   WHERE id = ${id}`;
 
     const queryId = id;
     const result = this.db.execute(query, queryId);
@@ -154,26 +151,26 @@ export class DatabaseApi extends Api {
     descending: boolean
   ): Generator<number> {
     let query = 'SELECT id FROM offers WHERE 1=1';
-    const params: any[] = [];
+
 
     if (titleRegex) {
-      query += ' AND title REGEXP ?';
-      params.push(titleRegex.source);
+      query += ` AND title REGEXP ${titleRegex.source}`;
+      
     }
 
     if (categoryFilter !== undefined) {
-      query += ' AND category_id = ?';
-      params.push(categoryFilter);
+      query += ` AND category_id = ${categoryFilter}`;
+
     }
 
     if (minPrice !== undefined) {
-      query += ' AND price >= ?';
-      params.push(minPrice);
+      query += ` AND price >= ${minPrice}`;
+
     }
 
     if (maxPrice !== undefined) {
-      query += ' AND price <= ?';
-      params.push(maxPrice);
+      query += ` AND price <= ${maxPrice}`;
+
     }
 
     if (orderBy === "price") {
@@ -188,7 +185,7 @@ export class DatabaseApi extends Api {
       query += ' DESC';
     }
 
-    const rowsPromise = this.db.execute(query, params);
+    const rowsPromise = this.db.execute(query);
     const rows = deasync(rowsPromise);
 
     for (const offer of rows[0] as { id: number }[]) {
@@ -215,8 +212,8 @@ export class DatabaseApi extends Api {
   override fetchOffer(id: number): Offer | undefined {
     const query = `SELECT *
                    FROM offers
-                   WHERE id = ?`;
-    const rowsPromise = this.db.execute(query, id);
+                   WHERE id = ${id}`;
+    const rowsPromise = this.db.execute(query);
 
     const rows = deasync(rowsPromise);
 
@@ -278,8 +275,8 @@ export class DatabaseApi extends Api {
   }
 
   override dropOffer(id: number): void {
-    const query = 'DELETE FROM offers WHERE id = ?';
-    const resultPromise = this.db.execute(query, [id]);
+    const query = `DELETE FROM offers WHERE id = ${id}`;
+    const resultPromise = this.db.execute(query);
     deasync(resultPromise);
   }
 
@@ -300,7 +297,7 @@ export class DatabaseApi extends Api {
   }
 
   override fetchCategory(id: number): Category | undefined {
-    const query = 'SELECT * FROM categories WHERE id = ?';
+    const query = `SELECT * FROM categories WHERE id = ${id}`;
     const rowsPromise = this.db.execute(query, [id]);
 
     const rows = deasync(rowsPromise);
@@ -322,22 +319,20 @@ export class DatabaseApi extends Api {
   override commitCategory(val: Category): void {
     const query = `
       INSERT INTO categories (id, name)
-      VALUES (?, ?)
+      VALUES (${val.id}, 
+              ${val.name})
       ON DUPLICATE KEY UPDATE
         name = VALUES(name)
     `;
-    const params = [
-      val.id,
-      val.name
-    ];
 
-    const resultPromise = this.db.execute(query, params);
+
+    const resultPromise = this.db.execute(query);
     deasync(resultPromise);
   }
 
   override dropCategory(id: number): void {
-    const query = 'DELETE FROM categories WHERE id = ?';
-    const resultPromise = this.db.execute(query, [id]);
+    const query = 'DELETE FROM categories WHERE id = ' + id;
+    const resultPromise = this.db.execute(query);
     deasync(resultPromise);
   }
 
