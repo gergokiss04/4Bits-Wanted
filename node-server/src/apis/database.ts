@@ -246,7 +246,13 @@ export class DatabaseApi extends Api {
   override commitOffer(val: Offer): void {
     const query = `
       INSERT INTO offers (id, title, price, description, pics, category, buyer_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (${val.id}, 
+              ${val.title}, 
+              ${val.price}, 
+              ${val.description}, 
+              ${val.pictureUris}, 
+              ${val.category}, 
+              ${val.buyer})
       ON DUPLICATE KEY UPDATE
         id = VALUES(id),
         title = VALUES(title),
@@ -258,18 +264,7 @@ export class DatabaseApi extends Api {
     
     `;
 
-
-    const params = [
-      val.id,
-      val.title,
-      val.price,
-      val.description,
-      val.pictureUris.join(','),
-      val.category,
-      val.buyer
-    ];
-
-    const resultPromise = this.db.execute(query, params);
+    const resultPromise = this.db.execute(query);
     deasync(resultPromise);
 
   }
