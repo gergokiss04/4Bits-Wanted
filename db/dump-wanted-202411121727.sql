@@ -54,7 +54,6 @@ CREATE TABLE `offers` (
   `category_id` INT NOT NULL,
   `seller_id` int(11) NOT NULL,
   `buyer_id` int(11) DEFAULT NULL,
-  `buyer_rating` float DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_offers_buyer_id` (`buyer_id`),
   CONSTRAINT `FK_offers_buyer_id` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`id`),
@@ -85,7 +84,6 @@ CREATE TABLE `users` (
   `bio` varchar(1000) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
-  `average_rating` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
