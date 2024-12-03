@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -22,7 +24,9 @@ function Login() {
         credentials: 'include'
       })
 
-      if (!response.ok){
+      if (response.ok){
+        navigate('/');
+      } else{
         throw new Error("Nem sikerült bejelentkezni");
       }
     } catch (error){
