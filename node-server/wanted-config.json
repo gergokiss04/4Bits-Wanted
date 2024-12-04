@@ -1,9 +1,42 @@
 {
+  "log": {
+    "normal": {
+      "stdout": true,
+      "stderr": false,
+      "file": true
+    },
+    "info": {
+      "stdout": true,
+      "stderr": false,
+      "file": false
+    },
+    "warn": {
+      "stdout": true,
+      "stderr": false,
+      "file": true
+    },
+    "error": {
+      "stdout": false,
+      "stderr": true,
+      "file": true
+    }
+  },
   "listen": {
     "hostname": "127.0.0.1",
     "port": 8000
   },
   "static": {
-    "directory": "../wanted/build/"
+    "rootFile": "index.html",
+    "roots": ["../wanted/build/"]
+  },
+  "api": {
+    "prefix": "api",
+    "driver": "memory",
+    "secret": "password1234",
+    "allowDebt": true,
+    "media": {
+      "root": "./media/",
+      "capacity": 10
+    }
   }
 }
