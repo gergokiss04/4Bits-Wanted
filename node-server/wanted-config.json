@@ -34,6 +34,8 @@
     "driver": "memory",
     "secret": "password1234",
     "allowDebt": true,
+    "reportErrorsToClient": true,
+    "cacheLifetime": 3,
     "media": {
       "root": "./media/",
       "capacity": 10
