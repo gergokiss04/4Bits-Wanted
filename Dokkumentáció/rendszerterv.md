@@ -5,7 +5,7 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
 
 ### 2.1 Projektszerepkörök, felelőségek:
    * Scrum masters: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
-   * Product owner: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente****
+   * Product owner: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
    * Üzleti szereplő: Kiss Gergő Zsolt, Müller Krisztián, Fidrus Bence, Rácz Levente
      
 ### 2.2 Projektmunkások és felelőségek:
@@ -34,9 +34,20 @@ A rendszer célja egy online apróhirdetési platform létrehozása, ahol a felh
 ## 3. Üzleti folyamatok modellje
 
 ### 3.1 Üzleti szereplők
+  1. Látogató
+    * A weboldalt látogató felhasználó aki még nem regisztrált vagy nincs bejelentkezve. Csak a böngészési lehetőségekhez fér hozzá.
+  2. Vevő
+    * Regisztrált és bejelentkezett felhasználó aki vásárolhat és értékelhet eladókat.
+  3. Eladó
+    * Regisztrált és bejelentkezett felhasználó aki képes hirdetéseket létrehozni.
 
 ### 3.2 Üzleti folyamatok
-
+  1. Regisztráció: A felhasználó fiókot hoz létre felhasználónév, email cím és jelszó megadásával. A regisztráció után hozzáférést kap termékek eladásához és vételéhez.
+  2. Bejelentkezés: A regisztrált felhasználó megadja az email címét és jelszavát, hogy hozzáférjen további szolgáltatásokhoz.
+  3. Hirdetés létrehozása:  Az eladó új hirdetést hoz létre, ahol megadja a termék címét, árát, leírását, képeit és címkéit. A hirdetés bármikor módosítható vagy törölhető mindaddig, amíg nincs megvásárolva.
+  4. Hirdetések keresése: A látogatók és regisztrált felhasználók böngészhetik a hirdetéseket, illetve szűrhetnek cím, címke és ártartomány alapján.
+  5. Vásárlás: A vevő végrehajtja a vásárlást a kiválasztott terméken. A vásárlás után az eladó értesítést kap, hogy terméke eladásra került, a hirdetés pedig inaktívvá válik.
+  6. Eladó értékelése: A sikeres vásárlást követően a vevő lehetőséget kap az eladó értékelésére 1–5 csillagos skálán. Az értékelések átlaga megjelenik az eladó profilján.
 ## 4. Követelmények
 
 ### Funkcionális követelmények
@@ -117,30 +128,53 @@ hozzáférni, ez biztosítja, hogy illetéktelen felhasználók ne csinálhassan
 
 ## 9. Adatbázis terv
 Az adatbázis két táblával rendelkezik:
-   - User (felhasználó adatai)
-      - id (PK)
-         - NN
-         - Unique
+   - Users (felhasználó adatai)
+      - id 
+         - egész
+         - PK
+         - auto increment
       - name
+         - szöveg
          - NN
       - profile_pic
+         - szöveg
+         - NN
       - bio
+         - hosszú szöveg
       - email
+         - szöveg
          - NN
       - password
+         - szöveg
          - NN
-   - Ad (apróhirdetés adatai)
-      - id (PK)
-         - NN
+
+
+   - Offers (apróhirdetés adatai)
+      - id
+         - egész
+         - PK
+         - auto increment
       - title
+         - szöveg
          - NN
       - price
+         - valós
          - NN
       - description
+         - hosszú szöveg
+         - NN
       - pics []
-      - tags []
-      - buyer_id ?
-      - stars ?
+         - hosszú szöveg (?)
+         - NN
+      - category
+         - egész
+         - Idegen kulcs -> Category.id
+      - buyer_id
+         - egész
+         - NULL, ha még nem vették meg
+      - buyer_rating
+         - valós
+         - NULL, ha még nem vették meg
 
 ## 10. Implementációs terv
 
@@ -174,9 +208,6 @@ például. Teszt #01 | Regisztráció | A felhasználó az adatok megadásával 
 ... | ... | ... | ... | ...
 
 ## 12. Telepítési terv
-
-Fizikai telepítési terv: 
-
 Szoftver telepítési terv: 
 A szoftver webes felületen működik, ehhez csak egy ajánlott böngésző telepítése szükséges 
 (Google Chrome, Safari, Opera), külön szoftver nem kell hozzá.
