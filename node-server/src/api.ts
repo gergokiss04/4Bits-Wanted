@@ -313,6 +313,7 @@ export abstract class Api {
     if(body instanceof Result) return body
 
     if(typeof body.login !== 'string') return Api.errorMissingProp('login (string)')
+    if(typeof body.email !== 'string') return Api.errorMissingProp('email (string)')
     if(typeof body.pass !== 'string') return Api.errorMissingProp('pass (string)')
 
     if(!this.isPasswordGood(body.pass)) return new Result(StatusCodes.BAD_REQUEST, 'Your password doesn\'t meet some requirement')
@@ -335,6 +336,7 @@ export abstract class Api {
         id,
         {
           name: body.login,
+          email: body.email,
           password: this.hashPassword(body.pass, id),
           averageStars: 0,
           bio: "",
