@@ -128,30 +128,53 @@ hozzáférni, ez biztosítja, hogy illetéktelen felhasználók ne csinálhassan
 
 ## 9. Adatbázis terv
 Az adatbázis két táblával rendelkezik:
-   - User (felhasználó adatai)
-      - id (PK)
-         - NN
-         - Unique
+   - Users (felhasználó adatai)
+      - id 
+         - egész
+         - PK
+         - auto increment
       - name
+         - szöveg
          - NN
       - profile_pic
+         - szöveg
+         - NN
       - bio
+         - hosszú szöveg
       - email
+         - szöveg
          - NN
       - password
+         - szöveg
          - NN
-   - Ad (apróhirdetés adatai)
-      - id (PK)
-         - NN
+
+
+   - Offers (apróhirdetés adatai)
+      - id
+         - egész
+         - PK
+         - auto increment
       - title
+         - szöveg
          - NN
       - price
+         - valós
          - NN
       - description
+         - hosszú szöveg
+         - NN
       - pics []
-      - tags []
-      - buyer_id ?
-      - stars ?
+         - hosszú szöveg (?)
+         - NN
+      - category
+         - egész
+         - Idegen kulcs -> Category.id
+      - buyer_id
+         - egész
+         - NULL, ha még nem vették meg
+      - buyer_rating
+         - valós
+         - NULL, ha még nem vették meg
 
 ## 10. Implementációs terv
 
