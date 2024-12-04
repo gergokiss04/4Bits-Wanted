@@ -196,22 +196,6 @@ export class DatabaseApi extends Api {
     }
   }
 
-  private resolveUser(id: number): User {
-    const user = this.fetchUser(id);
-    if (!user) {
-      throw new Error(`User with id ${id} not found`);
-    }
-    return user;
-  }
-
-  private resolveCategory(id: number): Category {
-    const category = this.fetchCategory(id);
-    if (!category) {
-      throw new Error(`Category with id ${id} not found`);
-    }
-    return category;
-  }
-
   override fetchOffer(id: number): Offer | undefined {
     const query = `SELECT *
                    FROM offers
