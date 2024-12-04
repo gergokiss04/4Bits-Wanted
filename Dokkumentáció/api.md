@@ -50,7 +50,7 @@ Ha nem `200 OK`, akkor lehet, hogy van `text/plain` hibaüzenet a válaszban. Ez
 
 ## POST /register
 
-Új fiókot regisztrál. Csak kijelentkezve működik. Ha már van ilyen nevű felhasználó, akkor `400 Bad Request`, tehát előtte érdemes egy `GET /users/filter=Minta_123`-mal ellenőrizni, hogy létezik-e már.
+Új fiókot regisztrál. Csak kijelentkezve működik. Ha már van ilyen nevű felhasználó vagy épp be vagyunk jelentkezve, akkor `400 Bad Request`, tehát előtte érdemes egy `GET /users/filter=Minta_123`-mal ellenőrizni, hogy létezik-e már.
 
 Minta kérés:
 ```
@@ -97,8 +97,8 @@ Minta kérés:
 {}
 ```
 
-A szerver megszűnteti az ő oldalán a sessiont, és valami érvénytelen cookiet küld vissza:
-`Set-Cookie: session_token=deleted;`
+A szerver valami érvénytelen cookiet küld vissza:
+`Set-Cookie: session_token=x;`
 
 
 ## GET /users
@@ -130,9 +130,16 @@ Query paraméterek:
   "name": "Minta_123", // Alfanumerikus, kis- és nagybetű, kötőjel, alávonás
   "averageStars": 4.5333334, // Valós szám 0-tól 5-ig (inkluzív)
   "bio": "Profilleírás, hosszú szöveg,\nújsorokkal, <b>bármilyen szöveggel! Ez nem szabad, hogy félkövéren jelenjen meg!</b>", // Profilleírás, max. 4000 byte (UTF8-ként)
-  "pictureUri": "/content/zi35th3hgq93hg945tt45whfasdfasdf.jpg" // A profilkép URI-je. Ezzel már jobbak vagyunk, mint a kanban.
+  "pictureUri": "zi35th3hgq93hg945tt45whfasdfasdf.jpg" // A profilkép URI-je. Ezzel már jobbak vagyunk, mint a kanban. Lásd: GET /media
 }
 ```
+
+## GET /users/self
+
+Ha be vagyunk jelentkezve, akkor visszaadja a saját felhasználónkat ugyan úgy, mint az id alapján lekérés. Ha nem vagyunk bejelentkezve, akkor `404 Not Found`.
+
+**Fontos!** Ezen nem működik a bio, picture, stb., azokhoz ID-vel kell elérni az usert.
+
 
 ## PUT /users/ID/bio
 
@@ -148,8 +155,12 @@ Profilleírás, hosszú szöveg,
 Frissíthetjük saját profilképünket. Ez azért nem PUT, mert nem idempotens. (minden kérés után változik a `pictureUri`-nk, még akkor is, ha ugyan azt a képet töltjük fel)
 
 ```
-(a request body egy kép)
+(a request body egy kép, lásd POST /mediastager)
 ```
+
+## DELETE /users/ID/picture
+
+Törölhetjük saját profilképünket.
 
 ## PUT /users/ID/password
 
@@ -167,6 +178,8 @@ Magunkat törölhetjük ezzel, persze csak ha be vagyunk jelentkezve.
 
 
 ## GET /categories
+
+Itt is lehet filterezni amúgy.
 
 ```
 [
@@ -221,10 +234,10 @@ Nem biztos, hogy tényleg létezik annyi offer, amennyit kérsz!
   "price": 1000, // Nemnegatív egész szám
   "description": "Természetes okokból elhunyt anyósomtól örökölt, kiváló állapotú, alig használt mosópor.\n\nPlz vegye már meg vki",
   "categoryId": 1, // Hanyadik kategória a /categories-ből
-  "pictureUris": [ // 0 vagy több uri
-    "/media/q394ghq39ztq3t4q3t5.jpg",
-    "/media/77385fz8732z68732z634t8.png",
-    "/media/w3v896z3948v9zv9vt.webp"
+  "pictureUris": [ // 0 vagy több uri. Lásd GET /media
+    "q394ghq39ztq3t4q3t5.jpg",
+    "77385fz8732z68732z634t8.png",
+    "w3v896z3948v9zv9vt.webp"
   ]
 }
 ```
@@ -269,11 +282,11 @@ Megnézi, mik vannak az előkészítőben. Amikor új offert hozunk létre, akko
 
 ```
 {
-  "imagesLeft": 7 // Még hány képet lehet hozzáadni, mielőtt megtelik.
+  "imagesLeft": 7, // Még hány képet lehet hozzáadni, mielőtt megtelik.
   "uris": [
-    "/media/q394ghq39ztq3t4q3t5.jpg",
-    "/media/77385fz8732z68732z634t8.png",
-    "/media/w3v896z3948v9zv9vt.webp"
+    "q394ghq39ztq3t4q3t5.jpg",
+    "77385fz8732z68732z634t8.png",
+    "w3v896z3948v9zv9vt.webp"
   ]
 }
 ```
@@ -281,6 +294,16 @@ Megnézi, mik vannak az előkészítőben. Amikor új offert hozunk létre, akko
 ## POST /mediastager
 
 Beletesz egy képet a médiaelőkészítőbe. Ha már nincs hely (az imagesLeft 0), akkor `400 Bad Request`.
+
+form-dataként kell enkódolva lennie, és a kép nevének image-nek kell lennie.
+
+Íme egy form ami elküldi **multipart/form-data**ként, **image** névvel:
+```
+<form action="/api/mediastager" method="POST" enctype="multipart/form-data">
+  <input type="file" id="image" name="image" accept="image/*" required>
+  <button type="submit">Submit</button>
+</form>
+```
 
 ```
 (a request body egy kép, amit hozzá szeretnénk adni az előkészítőhöz)
@@ -293,3 +316,7 @@ Kidobja az `INDEX`-edik médiát az előkészítőből. Ha nem létezőt próbá
 ## DELETE /mediastager
 
 Kidob mindent az előkészítőből.
+
+## GET /media/URI
+
+Visszaadja a megadott URIjú médiát. Ilyen a profilkép, az offer képek, meg ami a mediastagerben van.

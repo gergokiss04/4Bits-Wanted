@@ -15,6 +15,7 @@ export class Cache<TKey, TValue> {
   dict: Map<TKey, {timestamp: bigint, value: TValue}> = new Map()
   semaphore = new Semaphore(Cache.BIG_LIMIT)
   onDroppedCallback?: (key: TKey, value: TValue) => void
+  populateCallback?: (key: TKey) => TValue | undefined
   logCallback?: (msg: string) => void
 
 
@@ -27,7 +28,7 @@ export class Cache<TKey, TValue> {
   }
 
   log(msg: string) {
-      if(this.logCallback) this.logCallback(msg)
+    if(this.logCallback) this.logCallback(msg)
   }
 
 
@@ -97,7 +98,19 @@ export class Cache<TKey, TValue> {
   public async tryGet(key: TKey) : Promise<TValue | undefined> {
     return await this.runExclusiveRead(
       () => {
-        return this.dict.get(key)?.value
+        const found = this.dict.get(key)?.value
+        if(found) return found
+        else if(this.populateCallback) {
+          const populateResult = this.populateCallback(key)
+          if(populateResult) {
+            this.insert(key, populateResult)
+            return populateResult
+          } else {
+            return undefined
+          }
+        } else {
+          return undefined
+        }
       }
     )
   }

@@ -6,18 +6,27 @@
 // - user/más létrehozása, hogy legyen idje
 
 import http from 'http'
+import url from 'url'
+import { ParsedUrlQuery } from 'querystring'
 import * as path from 'path'
 import * as fs from 'fs/promises'
 import * as fsSync from 'fs'
 import Mime from 'mime/lite'
+import * as cookie from 'cookie'
+import * as formidable from 'formidable'
 
 import * as log from './log.js'
 import { Config } from './config.js'
+import { Api } from './api.js'
 import { MemoryApi } from './apis/memory.js'
+import { DatabaseApi } from './apis/database.js'
 
+
+process.on('unhandledRejection', (reason, promise) => {
+  log.error(`Unhandled rejection in ${promise}, because: ${reason}`)
+})
 
 const configPath = process.env.WANTED_CONFIG || 'wanted-config.json'
-log.normal(`Reading config at '${configPath}'`)
 
 // Konfinguráció betöltése
 const config = new Config(
@@ -26,10 +35,149 @@ const config = new Config(
                  process.env.WANTED_CONFIG || 'wanted-config.json', 'utf-8')
 ))
 
-const api = new MemoryApi()
+log.LogOptions.info = config.logInfo
+log.LogOptions.normal = config.logNormal
+log.LogOptions.warn = config.logWarn
+log.LogOptions.error = config.logError
+
+log.normal(`Reading config at '${configPath}'`)
+
+// Kitaláljuk, melyik API implementációt akarjuk
+let api: Api
+switch(config.apiDriver) {
+  case 'memory':
+    log.normal('Using MemoryApi')
+    const memApi = new MemoryApi(config)
+    memApi.logCallback = (msg) => log.info(`[MemoryApi] ${msg}`)
+    memApi.loadTestData()
+    api = memApi
+    break
+
+  case 'db':
+    log.normal('Using DatabaseApi')
+    log.warn('DatabaseApi isn\'t implemented yet')
+    const dbApi = new DatabaseApi(config)
+    api = dbApi
+    break
+}
 
 
-async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: string): Promise<void> {
+
+export class Request {
+
+  static readonly BODY_SIZE_LIMIT: number = 1024*1024 // 1M
+
+  req: http.IncomingMessage
+  res: http.ServerResponse<http.IncomingMessage>
+  method: 'GET' | 'PUT' | 'POST' | 'DELETE' | undefined
+  cleanPath: string
+  pathParts: string[]
+  query: ParsedUrlQuery
+  cookies: Record<string, string | undefined>
+
+
+  constructor(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>, cleanPath: string, urlParts: string[], query: ParsedUrlQuery) {
+    this.req = req
+    this.res = res
+
+    const meth = (req.method ?? '').toUpperCase()
+    if(['GET', 'PUT', 'POST', 'DELETE'].includes(meth ?? '')) this.method = meth as 'GET' | 'PUT' | 'POST' | 'DELETE'
+    else this.method = undefined
+
+    this.cleanPath = cleanPath
+    this.pathParts = urlParts
+    this.query = query
+    this.cookies = cookie.parse(req.headers.cookie ?? '')
+  }
+
+  static constructFromReqRes(req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>): Request {
+    const parsed = url.parse(req.url ?? '/', true)
+
+    const pathParts: string[] = []
+    for(const part of path.normalize(parsed.pathname ?? '/').split('/')) {
+      if(part.length <= 0) continue
+      pathParts.push(decodeURIComponent(part))
+    }
+    let reqUrl = path.join(...pathParts)
+    const reqQuery: ParsedUrlQuery = parsed.query
+
+    return new Request(req, res, reqUrl, pathParts, reqQuery)
+  }
+
+
+  async writePatiently(chunk: any): Promise<void> {
+    // TODO ez jelzi a hibát ha nincs callbackje?
+    const wrote: boolean = this.res.write(chunk)
+    if(!wrote) await new Promise(resolve => this.res.once('drain', resolve)) // Ez nagyon fontos! A write visszatérési értékét nem szabad figyelmen kívül hagyni.
+  }
+
+  async readBody(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let body: string = ''
+      let oversized = false
+      this.req.on('data', chunk => {
+        if(oversized) return
+
+        if(body.length > Request.BODY_SIZE_LIMIT) {
+          log.warn(`Oversized request (>${Request.BODY_SIZE_LIMIT}) truncated`)
+          oversized = true
+          resolve(body)
+          return
+        }
+        const chunkString = chunk.toString()
+        body += chunkString
+      })
+      this.req.on('end', () => {
+        resolve(body)
+      })
+      this.req.on('error', err => {
+        reject(err)
+      })
+    })
+  }
+
+  async receiveImage(): Promise<string | undefined> {
+    const opts = formidable.defaultOptions // Alapból a tmpbe teszi a fájlokat.
+    opts.keepExtensions = true
+    const form = new formidable.IncomingForm()
+
+    return new Promise(
+      (resolve) => {
+        form.parse(this.req, (err: any, _fields: formidable.Fields<string>, files: formidable.Files<string>) => {
+          if(err) throw err
+          if(files.image === undefined) resolve(undefined)
+          resolve(files.image![0].filepath)
+        })
+      }
+    )
+  }
+
+  async sendFile(file: fs.FileHandle, mime: string): Promise<void> {
+    const expectedLength = (await file.stat()).size
+    let totalBytes = 0
+
+    this.res.setHeader('Content-Length', expectedLength)
+    this.res.setHeader('Content-Type', mime)
+    const buffer: Buffer = Buffer.alloc(2**16)
+    while(true) {
+      const result: fs.FileReadResult<Buffer> = await file.read(buffer, 0, buffer.length)
+      totalBytes += result.bytesRead
+      if(result.bytesRead <= 0) break
+
+      await this.writePatiently(buffer.subarray(0, result.bytesRead))
+    }
+
+    if(totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading file`)
+  }
+
+  setCookie(name: string, value: string) {
+      this.res.setHeader('Set-Cookie', `${name}=${value};`)
+  }
+
+}
+
+// FIXME MÉG MINDIG A GC ZÁRJA BE NÉHA
+async function serveStatic(request: Request, url: string): Promise<void> {
   // FONTOS!! Még joinolás előtt normalizáljuk, nehogy működjön ez: /%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
   url = path.normalize(url)
   let file: fs.FileHandle | undefined
@@ -44,8 +192,8 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
       }
     }
 
-    // Egyik root alatt sem létezik
     if(!filePath) {
+      // Egyik root alatt sem létezik
       let err = new Error() as NodeJS.ErrnoException
       err.code = 'ENOENT'
       throw err
@@ -54,37 +202,22 @@ async function serveStatic(res: http.ServerResponse<http.IncomingMessage>, url: 
     const mimeType: string = Mime.getType(filePath) || 'application/octet-stream'
 
     file = await fs.open(filePath, 'r')
-    const expectedLength = (await file.stat()).size
-    let totalBytes = 0
-
-    res.setHeader('Content-Length', expectedLength)
-    res.setHeader('Content-Type', mimeType)
-    const buffer: Buffer = Buffer.alloc(2**16)
-    while(true) {
-      const result: fs.FileReadResult<Buffer> = await file.read(buffer, 0, buffer.length)
-      totalBytes += result.bytesRead
-      if(result.bytesRead <= 0) break
-
-      const wrote: boolean = res.write(buffer.subarray(0, result.bytesRead))
-      if(!wrote) await new Promise(resolve => res.once('drain', resolve)) // Ez nagyon fontos! A write visszatérési értékét nem szabad figyelmen kívül hagyni.
-    }
-    res.end()
-
-    if(totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading ${log.sanitize(url)}`)
+    await request.sendFile(file, mimeType)
+    request.res.end()
   } catch(error) {
     if(error instanceof Error) {
       switch((error as NodeJS.ErrnoException).code) {
         case 'ENOENT':
         case 'ERR_FS_EISDIR':
           log.info(`Not found or is a directory: ${log.sanitize(url)}`)
-          res.statusCode = 404
-          res.end()
+          request.res.statusCode = 404
+          request.res.end()
           return
       }
     }
     throw error
   } finally {
-    file?.close()
+    if(file !== undefined) await file.close()
   }
 }
 
@@ -93,31 +226,20 @@ const server = http.createServer()
 
 server.on('request', async (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
   try {
-    const pathParts: string[] = []
-    for(const part of path.normalize(req.url ?? '/').split('/')) {
-      if(part.length <= 0) continue
-      pathParts.push(decodeURIComponent(part))
-    }
-    const url = path.join(...pathParts)
+    const request = Request.constructFromReqRes(req, res)
+    log.info(`Request from ${log.sanitize(request.req.socket.remoteAddress)} for ${log.sanitize(req.url)} ${JSON.stringify(request.pathParts)}`)
 
-    log.info(`Request from ${log.sanitize(req.socket.remoteAddress)} for ${log.sanitize(url)} ${JSON.stringify(pathParts)}`)
-
-    const maybeApiPath = config.maybeApiPath(pathParts)
+    const maybeApiPath: string[] | false = config.maybeApiPath(request.pathParts)
     if(maybeApiPath !== false) {
-      log.info(`API call: ${log.sanitize(maybeApiPath)}`)
-      api.handle(req, res, pathParts)
+      log.info(`API call: ${log.sanitize(maybeApiPath)}, query: ${log.sanitize(request.query)}`)
+      await api.handle(request, maybeApiPath)
     } else {
-      if(url == '.' && config.rootFile) serveStatic(res, config.rootFile)
-      else serveStatic(res, url)
+      if(request.cleanPath == '.' && config.rootFile) await serveStatic(request, config.rootFile)
+      else await serveStatic(request, request.cleanPath)
     }
   } catch(e) {
-    if(e instanceof Error) {
-      log.exception(e)
-    } else {
-      log.error('Unknown exception occurred (not instanceof Error)')
-    }
+    log.exception(e)
   }
-
 })
 
 server.listen(config.listenPort, config.listenHostname, function () {

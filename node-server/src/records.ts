@@ -1,8 +1,9 @@
 import * as dictutil from './dictutil.js'
+import { Cache } from './cache.js'
 
 
 
-type RecordResolver<TId, TRecord extends Record<TId>> = (id: TId) => TRecord
+//type RecordResolver<TId, TRecord extends Record<TId>> = (id: TId) => TRecord
 
 export abstract class Record<TId> {
 
@@ -23,13 +24,21 @@ export abstract class Record<TId> {
     other.entangled.add(this)
   }
 
+  public dropEntangled<T extends Record<TId>>(cache: Cache<TId, T>) {
+    if(!cache.dropUnsynchronized(this.id)) return // Kataklizma megakadályozása
+
+    for(const other of this.entangled) {
+      other.dropEntangled(cache)
+    }
+  }
+
 }
 
 
 export class User extends Record<number> {
 
-  id: number
   name: string
+  email: string
   password: string
   averageRating: number
   bio: string
@@ -39,8 +48,8 @@ export class User extends Record<number> {
   constructor(id: number, dict: {}) {
     super(id)
 
-    this.id = dictutil.require(dict, ['id'])
     this.name = dictutil.require(dict, ['name'])
+    this.email = dictutil.require(dict, ['email'])
     this.password = dictutil.require(dict, ['password'])
     this.averageRating = dictutil.require(dict, ['averageStars'])
     this.bio = dictutil.require(dict, ['bio'])
@@ -76,18 +85,17 @@ export class Offer extends Record<number> {
   buyerRating: number | null
 
 
-  constructor(id: number, dict: {}, userResolver: RecordResolver<number, User>, categoryResolver: RecordResolver<number, Category>) {
+  constructor(id: number, dict: {}/*, userResolver: RecordResolver<number, User>, categoryResolver: RecordResolver<number, Category>*/) {
     super(id)
 
     this.createdTimestamp = dictutil.require<number>(dict, ['created'])
-    this.seller = userResolver(dictutil.require<number>(dict, ['sellerId']))
+    this.seller = dictutil.require<User>(dict, ['sellerId'])
     this.title = dictutil.require(dict, ['title'])
-    this.category = categoryResolver(dictutil.require<number>(dict, ['categoryId']))
+    this.category = dictutil.require<User>(dict, ['categoryId'])
     this.description = dictutil.require(dict, ['description'])
     this.price = dictutil.require(dict, ['price'])
     this.pictureUris = dictutil.require(dict, ['pictureUris'])
-    const buyerId: number = dictutil.require(dict, ['buyerId'])
-    this.buyer = buyerId ? userResolver(buyerId) : null
+    this.buyer = dictutil.optional(dict, ['buyer'])
     this.soldTimestamp = dictutil.require<number>(dict, ['sold'])
     this.buyerRating = dictutil.optional(dict, ['buyerRating'])
   }
