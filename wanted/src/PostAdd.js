@@ -7,7 +7,7 @@ function PostAdd() {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [mediaStagerInfo, setMediaStagerInfo] = useState({
-    imagesLeft: 5,
+    imagesLeft: 1,
     uris: []
   });
   const [categories, setCategories] = useState([]);
