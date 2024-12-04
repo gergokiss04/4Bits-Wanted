@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { SERVER_PORT } from './Constants.js';
 
 function PostAdd() {
   const [title, setTitle] = useState('');
@@ -16,8 +17,8 @@ function PostAdd() {
     const fetchInitData = async () => {
       try {
         const [categoriesResponse, mediastagerResponse] = await Promise.all([
-          fetch('http://127.0.0.1/api/categories'),
-          fetch('http://127.0.0.1/api/mediastager')
+          fetch(`http://127.0.0.1:${SERVER_PORT}/api/categories`),
+          fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`)
         ]);
 
         if (!categoriesResponse.ok || !mediastagerResponse.ok) {
@@ -52,7 +53,7 @@ function PostAdd() {
       formData.append('image', file);
 
       try {
-        const response = await fetch('http://127.0.0.1/api/mediastager', {
+        const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`, {
           method: 'POST',
           body: formData
         });
@@ -65,7 +66,7 @@ function PostAdd() {
         }
 
         // Mediastager update
-        const updatedMediastager = await fetch('http://127.0.0.1/api/mediastager');
+        const updatedMediastager = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`);
         const mediastagerData = await updatedMediastager.json();
         setMediaStagerInfo(mediastagerData);
 
@@ -98,7 +99,7 @@ function PostAdd() {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1/api/offers', {
+      const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(offerData)
@@ -115,7 +116,7 @@ function PostAdd() {
       setDescription('');
       setCategoryId('');
       
-      const updatedMediastager = await fetch('http://127.0.0.1/api/mediastager');
+      const updatedMediastager = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`);
       const mediastagerData = await updatedMediastager.json();
       setMediaStagerInfo(mediastagerData);
 

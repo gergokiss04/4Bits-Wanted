@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { SERVER_PORT } from './Constants.js';
 
 function Login() {
 
@@ -12,7 +13,7 @@ function Login() {
     event.preventDefault();
 
     try {
-      const response = await fetch('http://127.0.0.1/api/auth', {
+      const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

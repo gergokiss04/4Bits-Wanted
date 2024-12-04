@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { SERVER_PORT } from './Constants.js';
 
 function Registry() {
   const [username, setUsername] = useState('');
@@ -9,7 +10,7 @@ function Registry() {
   async function Register() {
     let item = { email: email, login: username, pass: password };
     try {
-      let response = await fetch("http://127.0.0.1/api/register", {
+      let response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/register`, {
         method: 'POST',
         body: JSON.stringify(item),
         headers: {
