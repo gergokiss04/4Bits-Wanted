@@ -2,6 +2,7 @@ import { Api } from '../api.js';
 import { User, Offer, Category } from '../records.js';
 import mysql from 'mysql2/promise.js';
 import deasync from 'deasync';
+import { Config } from '../config.js';
 
 
 /**
@@ -48,8 +49,8 @@ CREATE TABLE `users` (
 export class DatabaseApi extends Api {
   private db!: mysql.Connection;
 
-  constructor() {
-    super();
+  constructor(config: Config) {
+    super(config);
     this.connectToDb();
   }
 
@@ -58,7 +59,8 @@ export class DatabaseApi extends Api {
       host: 'localhost',
       user: 'root',
       password: 'password',
-      database: 'Wanted'
+      database: 'wanted',
+      port: 3305
     });
   }
 
@@ -241,7 +243,7 @@ export class DatabaseApi extends Api {
       category: offer.category,
       sellerId: offer.seller_id,
       buyerId: offer.buyer_id
-    }, this.resolveUser.bind(this), this.resolveCategory.bind(this));
+    });
   }
 
   override commitOffer(val: Offer): void {
