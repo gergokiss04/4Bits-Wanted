@@ -13,7 +13,6 @@ import deasync from 'deasync';
   PRIMARY KEY (`id`)
 )
 
-
  * 
 CREATE TABLE `offers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -21,7 +20,7 @@ CREATE TABLE `offers` (
   `price` float NOT NULL,
   `description` varchar(1000) NOT NULL,
   `pictures` varchar(1000) NOT NULL,
-  `category` varchar(100) NOT NULL,
+  `category_id` int(11) NOT NULL,
   `seller_id` int(11) NOT NULL,
   `buyer_id` int(11) DEFAULT NULL,
   `buyer_rating` float DEFAULT NULL,
@@ -60,7 +59,7 @@ export class DatabaseApi extends Api {
       user: 'root',
       password: 'password',
       database: 'Wanted'
-    })
+    });
   }
 
   override *yieldUserIds(
@@ -103,6 +102,7 @@ export class DatabaseApi extends Api {
       id: user.id,
       name: user.name,
       password: user.password,
+      email: user.email,
       averageStars: user.average_rating,
       bio: user.bio,
       pictureUri: user.profile_pic
@@ -115,7 +115,8 @@ export class DatabaseApi extends Api {
       VALUES (${val.id}, 
               ${val.name}, 
               ${val.profilePicUri}, 
-              ${val.bio}, 
+              ${val.bio},
+              ${val.email}, 
               ${val.password}, 
               ${val.averageRating}
       )
@@ -245,7 +246,7 @@ export class DatabaseApi extends Api {
 
   override commitOffer(val: Offer): void {
     const query = `
-      INSERT INTO offers (id, title, price, description, pics, category, buyer_id)
+      INSERT INTO offers (id, title, price, description, pics, category_id, buyer_id)
       VALUES (${val.id}, 
               ${val.title}, 
               ${val.price}, 
