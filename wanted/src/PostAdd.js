@@ -134,6 +134,7 @@ function PostAdd() {
         >
     <div className="container mt-5">
       <h1 className="text-center mb-4">Hirdetés feladása</h1>
+      <hr />
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6">
