@@ -36,6 +36,9 @@ A végleges tesztelés során az összes fent felsorolt vizsgálati elem újra e
 | Vizsgálat | Tesztelés időpontja | Elvárás | Eredmény | Hibák |
 | :---: | --- | --- | --- | --- |
 | Weboldal reszponzív | 2024.12.03. | Weboldal igényesen, felhasználóbarát elrendezést követ telefonon,tableten és asztali számítógépen| Működik | Nem tapasztaltam hibát |
+| Kosár felület  | 2024.12.03. | Felhasználó kosárba rakott termékeinek megjelenítésére szolgáló oldal| Működik | Nem tapasztaltam hibát |
+| Rendelés véglegesítés felület  | 2024.12.03. | Felhasználó megrendelés adatainak megadása és kiválasztására megjelenítésére szolgáló oldal| Működik | Nem tapasztaltam hibát |
+| Képek megjelenése  | 2024.12.03. | Weboldalon a képek a felhasználói eszköz alapján igényesen jelennek meg| Működik | Nem tapasztaltam hibát |
 
 
 A Végleges teszt lezajlott és minden funkció rendesen működik, esztétikailag is megfelelő a program.
