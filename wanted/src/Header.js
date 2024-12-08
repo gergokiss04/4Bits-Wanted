@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { SERVER_PORT } from './Constants.js';
 
 function Header() {
 
@@ -11,7 +12,7 @@ function Header() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await fetch('http://127.0.0.1/api/auth', {
+        const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/auth`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -29,7 +30,7 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://127.0.0.1/api/logout', {
+      const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
