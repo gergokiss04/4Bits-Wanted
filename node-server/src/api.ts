@@ -907,19 +907,19 @@ export abstract class Api {
   **/
   abstract yieldUserIds(
     nameRegex: RegExp | undefined
-  ): Generator<number>
+  ): Promise<number[]>
   /**
     Visszaadja a megadott id-jű Usert, vagy undefinedet, ha nem létezik.
   **/
-  abstract fetchUser(id: number): User | undefined
+  abstract fetchUser(id: number): Promise<User | undefined>
   /**
     Eltárol egy Usert.
   **/
-  abstract commitUser(val: User): void
+  abstract commitUser(val: User): Promise<void>
   /**
     Töröl egy Usert.
   **/
-  abstract dropUser(id: number): void
+  abstract dropUser(id: number): Promise<void>
 
   /**
     Visszaadja az összes Offer id-jét.
@@ -937,19 +937,19 @@ export abstract class Api {
     maxPrice: number | undefined,
     orderBy: "id" | "price" | "random",
     descending: boolean
-  ): Generator<number>
+  ): Promise<number[]>
   /**
     Visszaadja a megadott id-jű Offert, vagy undefinedet, ha nem létezik.
   **/
-  abstract fetchOffer(id: number): Offer | undefined
+  abstract fetchOffer(id: number): Promise<Offer | undefined>
   /**
     Eltárol egy Offert.
   **/
-  abstract commitOffer(val: Offer): void
+  abstract commitOffer(val: Offer): Promise<void>
   /**
     Töröl egy Offert.
   **/
-  abstract dropOffer(id: number): void
+  abstract dropOffer(id: number): Promise<void>
 
   /**
     Visszaadja az összes Category id-jét.
@@ -957,23 +957,23 @@ export abstract class Api {
   **/
   abstract yieldCategoryIds(
     nameRegex: RegExp | undefined
-  ): Generator<number>
+  ): Promise<number[]>
   /**
     Visszaadja a megadott id-jű Categoryt, vagy undefinedet, ha nem létezik.
   **/
-  abstract fetchCategory(id: number): Category | undefined
+  abstract fetchCategory(id: number): Promise<Category | undefined>
   /**
     Eltárol egy Categoryt.
   **/
-  abstract commitCategory(val: Category): void
+  abstract commitCategory(val: Category): Promise<void>
   /**
     Töröl egy Categoryt.
   **/
-  abstract dropCategory(id: number): void
+  abstract dropCategory(id: number): Promise<void>
 
   /**
     Visszaad minden olyan URL-t, mely nem szerepel User profilképeként, vagy Offer képei közt.
   **/
-  abstract yieldUnusedMediaUrls(): Generator<string>
+  abstract yieldUnusedMediaUrls(): Promise<string[]>
 
 }
