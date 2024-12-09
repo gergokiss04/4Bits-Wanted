@@ -1,28 +1,147 @@
-import { Api } from '../api.js'
+import { Api } from '../api.js';
 import { User, Offer, Category } from '../records.js';
+import mysql from 'mysql2/promise.js';
+import deasync from 'deasync';
+import { Config } from '../config.js';
 
+
+/**
+ * Könnyítés képpen...
+ * 
+ * CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)
+
+ * 
+CREATE TABLE `offers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `price` float NOT NULL,
+  `description` varchar(1000) NOT NULL,
+  `pictures` varchar(1000) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `seller_id` int(11) NOT NULL,
+  `buyer_id` int(11) DEFAULT NULL,
+  `buyer_rating` float DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_offers_buyer_id` (`buyer_id`),
+  CONSTRAINT `FK_offers_buyer_id` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `FK_offers_category_id` FOREIGN KEY (`id`) REFERENCES `categories` (`id`)
+)
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `profile_pic` varchar(1000) NOT NULL,
+  `bio` varchar(1000) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `average_rating` float NOT NULL,
+  PRIMARY KEY (`id`)
+)
+ */
 
 /**
   Az adatbázisban tárolja az adatokat.
 **/
 export class DatabaseApi extends Api {
+  private db!: mysql.Connection;
+
+  constructor(config: Config) {
+    super(config);
+    this.connectToDb();
+  }
+
+  private async connectToDb() {
+    this.db = await mysql.createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: 'password',
+      database: 'wanted',
+      port: 3305
+    });
+  }
 
   override *yieldUserIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
-    throw new Error('Not implemented.') // TODO
+    const query = `SELECT id
+                   FROM users`;
+    const rowsPromise = this.db.execute(query);
+
+    const rows = deasync(rowsPromise)
+
+    for (const user of rows[0] as { id: number, name: string }[]) {
+      if (!nameRegex || nameRegex.test(user.name)) {
+        yield user.id;
+      }
+    }
   }
 
   override fetchUser(id: number): User | undefined {
-    throw new Error('Not implemented.') // TODO
+    const query = 'SELECT * FROM users WHERE id = ' + id;
+    const rowsPromise = this.db.execute(query);
+
+    const rows = deasync(rowsPromise);
+
+    if ((rows[0] as any[]).length === 0) {
+      return undefined;
+    }
+
+    const user = (rows[0] as any[])[0] as {
+      id: number;
+      name: string;
+      profile_pic: string;
+      bio: string;
+      email: string;
+      password: string;
+      average_rating: number;
+    };
+
+    return new User(user.id, {
+      id: user.id,
+      name: user.name,
+      password: user.password,
+      email: user.email,
+      averageStars: user.average_rating,
+      bio: user.bio,
+      pictureUri: user.profile_pic
+    });
   }
 
   override commitUser(val: User): void {
-    throw new Error('Not implemented.') // TODO
+    const query = `
+      INSERT INTO users (id, name, profile_pic, bio, email, password, average_rating)
+      VALUES (${val.id}, 
+              ${val.name}, 
+              ${val.profilePicUri}, 
+              ${val.bio},
+              ${val.email}, 
+              ${val.password}, 
+              ${val.averageRating}
+      )
+      ON DUPLICATE KEY UPDATE
+        name = VALUES(name),
+        profile_pic = VALUES(profile_pic),
+        bio = VALUES(bio),
+        email = VALUES(email),
+        password = VALUES(password),
+        average_rating = VALUES(average_rating)
+    `;
+
+    const result = this.db.execute(query);
   }
 
   override dropUser(id: number): void {
-    throw new Error('Not implemented.') // TODO
+    const query = `DELETE 
+                   FROM users
+                   WHERE id = ${id}`;
+
+    const queryId = id;
+    const result = this.db.execute(query, queryId);
+
   }
 
 
@@ -34,38 +153,169 @@ export class DatabaseApi extends Api {
     orderBy: "id" | "price" | "random",
     descending: boolean
   ): Generator<number> {
-    throw new Error('Not implemented.') // TODO
+    let query = 'SELECT id FROM offers WHERE 1=1';
+
+
+    if (titleRegex) {
+      query += ` AND title REGEXP ${titleRegex.source}`;
+      
+    }
+
+    if (categoryFilter !== undefined) {
+      query += ` AND category_id = ${categoryFilter}`;
+
+    }
+
+    if (minPrice !== undefined) {
+      query += ` AND price >= ${minPrice}`;
+
+    }
+
+    if (maxPrice !== undefined) {
+      query += ` AND price <= ${maxPrice}`;
+
+    }
+
+    if (orderBy === "price") {
+      query += ' ORDER BY price';
+    } else if (orderBy === "random") {
+      query += ' ORDER BY RAND()';
+    } else {
+      query += ' ORDER BY id';
+    }
+
+    if (descending) {
+      query += ' DESC';
+    }
+
+    const rowsPromise = this.db.execute(query);
+    const rows = deasync(rowsPromise);
+
+    for (const offer of rows[0] as { id: number }[]) {
+      yield offer.id;
+    }
   }
 
   override fetchOffer(id: number): Offer | undefined {
-    throw new Error('Not implemented.') // TODO
+    const query = `SELECT *
+                   FROM offers
+                   WHERE id = ${id}`;
+    const rowsPromise = this.db.execute(query);
+
+    const rows = deasync(rowsPromise);
+
+    if ((rows[0] as any[]).length === 0) {
+      return undefined;
+    }
+
+    const offer = (rows[0] as any[])[0] as {
+      id: number;
+      title: string;
+      price: number;
+      description: string;
+      pictures: string;
+      category: string;
+      seller_id: number;
+      buyer_id: number | null;
+    };
+
+    return new Offer(offer.id, {
+      title: offer.title,
+      price: offer.price,
+      description: offer.description,
+      pictures: offer.pictures,
+      category: offer.category,
+      sellerId: offer.seller_id,
+      buyerId: offer.buyer_id
+    });
   }
 
   override commitOffer(val: Offer): void {
-    throw new Error('Not implemented.') // TODO
+    const query = `
+      INSERT INTO offers (id, title, price, description, pics, category_id, buyer_id)
+      VALUES (${val.id}, 
+              ${val.title}, 
+              ${val.price}, 
+              ${val.description}, 
+              ${val.pictureUris}, 
+              ${val.category}, 
+              ${val.buyer})
+      ON DUPLICATE KEY UPDATE
+        id = VALUES(id),
+        title = VALUES(title),
+        price = VALUES(price),
+        description = VALUES(description),
+        pics = VALUES(pics),
+        category = VALUES(category),
+        buyer_id = VALUES(buyer_id)
+    
+    `;
+
+    const resultPromise = this.db.execute(query);
+    deasync(resultPromise);
+
   }
 
   override dropOffer(id: number): void {
-    throw new Error('Not implemented.') // TODO
+    const query = `DELETE FROM offers WHERE id = ${id}`;
+    const resultPromise = this.db.execute(query);
+    deasync(resultPromise);
   }
 
 
   override *yieldCategoryIds(
     nameRegex: RegExp | undefined = undefined
   ): Generator<number> {
-    throw new Error('Not implemented.') // TODO
+    const query = 'SELECT id FROM categories';
+    
+    const resultPromise = this.db.execute(query);
+    const rows = deasync(resultPromise);
+
+    for (const cat of rows[0] as { id: number, name: string }[]) {
+      if (!nameRegex || nameRegex.test(cat.name)) {
+        yield cat.id;
+      }
+    }
   }
 
   override fetchCategory(id: number): Category | undefined {
-    throw new Error('Not implemented.') // TODO
+    const query = `SELECT * FROM categories WHERE id = ${id}`;
+    const rowsPromise = this.db.execute(query, [id]);
+
+    const rows = deasync(rowsPromise);
+
+    if ((rows[0] as any[]).length === 0) {
+      return undefined;
+    }
+
+    const category = (rows[0] as any[])[0] as {
+      id: number;
+      name: string;
+    };
+
+    return new Category(category.id, {
+      name: category.name
+    });
   }
 
   override commitCategory(val: Category): void {
-    throw new Error('Not implemented.') // TODO
+    const query = `
+      INSERT INTO categories (id, name)
+      VALUES (${val.id}, 
+              ${val.name})
+      ON DUPLICATE KEY UPDATE
+        name = VALUES(name)
+    `;
+
+
+    const resultPromise = this.db.execute(query);
+    deasync(resultPromise);
   }
 
   override dropCategory(id: number): void {
-    throw new Error('Not implemented.') // TODO
+    const query = 'DELETE FROM categories WHERE id = ' + id;
+    const resultPromise = this.db.execute(query);
+    deasync(resultPromise);
   }
 
 
