@@ -60,40 +60,47 @@ export class MemoryApi extends Api {
     this.categories.set(3, new Category(3, {name: 'Amaz'}))
   }
 
-  override *yieldUserIds(
+  override yieldUserIds(
     nameRegex: RegExp | undefined = undefined
-  ): Generator<number> {
+  ): Promise<number[]> {
     this.log('Yield user IDs')
+
+    const result: number[] = []
+
     for(const kvp of this.users) {
       if(nameRegex && !nameRegex.test(kvp[1].name)) continue
-      yield kvp[0]
+      result.push(kvp[0])
     }
+
+    return new Promise(() => result)
   }
 
-  override fetchUser(id: number): User | undefined {
+  override fetchUser(id: number): Promise<User | undefined> {
     this.log(`Fetch user ${id}`)
-    return this.users.get(id)
+    return new Promise(() => this.users.get(id))
   }
 
-  override commitUser(val: User): void {
+  override commitUser(val: User): Promise<void> {
     this.log(`Commit user ${val.id}`)
     this.users.set(val.id, val)
+    return new Promise(() => undefined)
   }
 
-  override dropUser(id: number): void {
+  override dropUser(id: number): Promise<void> {
     this.log(`Drop user ${id}`)
     this.users.delete(id)
+    return new Promise(() => undefined)
   }
 
 
-  override *yieldOfferIds(
+  override yieldOfferIds(
     titleRegex: RegExp | undefined = undefined,
     categoryFilter: number | undefined,
     minPrice: number | undefined,
     maxPrice: number | undefined,
     orderBy: "id" | "price" | "random",
     descending: boolean
-  ): Generator<number> {
+  ): Promise<number[]> {
     this.log('Yield offer IDs')
 
     let copy: Offer[] = []
@@ -116,6 +123,7 @@ export class MemoryApi extends Api {
 
     if(descending) copy.reverse()
 
+    const ids: number[] = []
     for(let i = 0; i < copy.length; i++) {
       const kvp: [number, Offer] = [i, copy[i]]
 
@@ -123,56 +131,65 @@ export class MemoryApi extends Api {
       if(categoryFilter && kvp[1].category.id !== categoryFilter) continue
       if(minPrice && kvp[1].price < minPrice) continue
       if(maxPrice && kvp[1].price > maxPrice) continue
-      yield kvp[0]
+      ids.push(kvp[0])
     }
+
+    return new Promise(() => ids)
   }
 
-  override fetchOffer(id: number): Offer | undefined {
+  override fetchOffer(id: number): Promise<Offer | undefined> {
     this.log(`Fetch offer ${id}`)
-    return this.offers.get(id)
+    return new Promise(() => this.offers.get(id))
   }
 
-  override commitOffer(val: Offer): void {
+  override commitOffer(val: Offer): Promise<void> {
     this.log(`Commit offer ${val.id}`)
     this.offers.set(val.id, val)
+    return new Promise(() => undefined)
   }
 
-  override dropOffer(id: number): void {
+  override dropOffer(id: number): Promise<void> {
     this.log(`Drop offer ${id}`)
     this.offers.delete(id)
+    return new Promise(() => undefined)
   }
 
 
-  override *yieldCategoryIds(
+  override yieldCategoryIds(
     nameRegex: RegExp | undefined = undefined
-  ): Generator<number> {
+  ): Promise<number[]> {
     this.log('Yield category IDs')
+    const filtered: number[] = []
     for(const kvp of this.categories) {
       if(nameRegex && !nameRegex.test(kvp[1].name)) continue
-      yield kvp[0]
+      filtered.push(kvp[0])
     }
+    return new Promise(() => filtered)
   }
 
-  override fetchCategory(id: number): Category | undefined {
+  override fetchCategory(id: number): Promise<Category | undefined> {
     this.log(`Fetch category ${id}`)
-    return this.categories.get(id)
+    return new Promise(() => this.categories.get(id))
   }
 
-  override commitCategory(val: Category): void {
+  override commitCategory(val: Category): Promise<void> {
     this.log(`Commit category ${val.id}`)
     this.categories.set(val.id, val)
+    return new Promise(() => undefined)
   }
 
-  override dropCategory(id: number): void {
+  override dropCategory(id: number): Promise<void> {
     this.log(`Drop category ${id}`)
     this.categories.delete(id)
+    return new Promise(() => undefined)
   }
 
 
-  override *yieldUnusedMediaUrls(): Generator<string> {
-    this.log(`Yield unused media URLs`)
+  override isMediaUriUsed(): Promise<boolean> {
+    this.log(`Is media URI used (not implemented!)`)
+
     // TODO
-    throw new Error('Not implemented')
+    return new Promise(() => true)
   }
 
 }
