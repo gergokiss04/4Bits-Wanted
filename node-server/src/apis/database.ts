@@ -3,7 +3,8 @@ import { User, Offer, Category } from '../records.js';
 import mysql from 'mysql2/promise.js';
 import deasync from 'deasync';
 import { Config } from '../config.js';
-
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Könnyítés képpen...
@@ -43,10 +44,20 @@ CREATE TABLE `users` (
 )
  */
 
+
+interface DBConfig {
+  host: string;
+  user: string;
+  password: string;
+  database: string;
+  port: number;
+}
+
 /**
   Az adatbázisban tárolja az adatokat.
 **/
 export class DatabaseApi extends Api {
+  
   private db!: mysql.Connection;
 
   constructor(config: Config) {
@@ -55,12 +66,16 @@ export class DatabaseApi extends Api {
   }
 
   private async connectToDb() {
+    const configPath = path.resolve('./src/apis/', 'db-config.json');
+    const config = fs.readFileSync(configPath, 'utf-8');
+    const dbConfig: DBConfig = JSON.parse(config);
+
     this.db = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'password',
-      database: 'wanted',
-      port: 3305
+      host: dbConfig.host,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      database: dbConfig.database,
+      port: dbConfig.port
     });
   }
 
