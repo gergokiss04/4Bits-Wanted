@@ -1,13 +1,59 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import { SERVER_PORT } from './Constants.js';
 
 function Header() {
+
+  const [isLoggedIn, SetIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({}),
+        });
+
+        SetIsLoggedIn(response.ok);
+      } catch {
+        SetIsLoggedIn(false);
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({}),
+      });
+
+      if (response.ok) {
+        SetIsLoggedIn(false);
+        navigate('/');
+      } else {
+        console.error('Logout hiba');
+      }
+
+    } catch (error) {
+      console.error('logout hiba:', error);
+    }
+  }
+
   return (
     <header>
       <nav className="navbar navbar-expand-lg headerfootercolor">
         <div className="container-fluid">
-          {/* Bal oldalon a Termékek és Hirdetés feladása */}
+          {/* Navbar toggler (mobile view) */}
           <button
             className="navbar-toggler"
             type="button"
@@ -21,6 +67,7 @@ function Header() {
           </button>
           
           <div className="collapse navbar-collapse" id="navbarNav">
+            {/* Bal oldali linkek */}
             <ul className="navbar-nav me-auto">
               {/* Termékek lenyíló menü */}
               <li className="nav-item dropdown">
@@ -39,10 +86,9 @@ function Header() {
                   <li><NavLink className="dropdown-item" to="/products/books">Könyvek</NavLink></li>
                   <li><NavLink className="dropdown-item" to="/products/games">Társasjátékok</NavLink></li>
                   <li><NavLink className="dropdown-item" to="/products/clothing">Ruhák</NavLink></li>
-                  
                 </ul>
               </li>
-              
+
               {/* Hirdetés feladása */}
               <li className="nav-item">
                 <NavLink className="nav-link" to="/post-ad">Hirdetés feladása</NavLink>
@@ -52,7 +98,7 @@ function Header() {
             {/* Középen a logó */}
             <NavLink className="navbar-brand mx-auto" to="/">
               <img
-                src="img/logo.jpg"
+                src="../img/logo.jpg"
                 alt="Logó"
                 width="120"
                 height="40"
@@ -60,10 +106,38 @@ function Header() {
               />
             </NavLink>
 
-            {/* Jobb oldalon a Bejelentkezés/Regisztráció */}
+            {/* Jobb oldali linkek (Bejelentkezés, Regisztráció vagy bejelentkezve Profil, Kijelentkezés) */}
             <ul className="navbar-nav ms-auto">
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/login">Bejelentkezés/Regisztráció</NavLink>
+              {!isLoggedIn ? (
+                <>
+                  <li className="nav-item">
+                    <NavLink className="nav-link" to="/login">Bejelentkezés</NavLink>
+                  </li>
+                  <li className="nav-item">
+                    <NavLink className="nav-link" to="/registry">Regisztráció</NavLink>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="nav-item">
+                    <NavLink className="nav-link" to="/profile">
+                      <i className="bi bi-person-circle me-1"></i>Profil
+                    </NavLink>
+                  </li>
+                  <li className="nav-item">
+                    <button 
+                      className="nav-link btn btn-link" 
+                      onClick={handleLogout}
+                    >
+                      Kijelentkezés
+                    </button>
+                  </li>
+                </>
+              )}
+              <li className="nav-item">   
+                <NavLink className="nav-link" to="/basket">
+                  <i className="bi bi-basket"></i>
+                </NavLink>
               </li>
             </ul>
           </div>

@@ -3,16 +3,15 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import Home from './Home';
+import Login from './Login';
+import Registry from './Registry';
+import PostAdd from './PostAdd';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Product from './Product';
+import Profile from './Profile';
+import Basket from './Basket';
+import Order from './Order';
 
-
-//function Home() { return <h2>Főoldal</h2>; }
-function Electronics() { return <h2>Műszaki cikkek</h2>; }
-function Books() { return <h2>Könyvek</h2>; }
-function Games() { return <h2>Társasjátékok</h2>; }
-function Clothing() { return <h2>Ruhák</h2>; }
-function PostAd() { return <h2>Hirdetés feladása</h2>; }
-function Login() { return <h2>Bejelentkezés/Regisztráció</h2>; }
 
 function App() {
   return (
@@ -20,12 +19,16 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/products/electronics" element={<Electronics />} />
-        <Route path="/products/books" element={<Books />} />
-        <Route path="/products/games" element={<Games />} />
-        <Route path="/products/clothing" element={<Clothing />} />
-        <Route path="/post-ad" element={<PostAd />} />
+        <Route path="/products/electronics" element={<Product selectedCategory="Műszaki cikkek" />} />
+        <Route path="/products/books" element={<Product selectedCategory="Könyvek" />} />
+        <Route path="/products/games" element={<Product selectedCategory="Társasjáték" />} />
+        <Route path="/products/clothing" element={<Product selectedCategory="Ruhák" />} />
+        <Route path="/post-ad" element={<PostAdd />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/registry" element={<Registry />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/basket" element={<Basket />} />
+        <Route path="/order" element={<Order />} />
       </Routes>
       <Footer />
     </Router>
