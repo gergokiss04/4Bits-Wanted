@@ -15,6 +15,8 @@ Minden parancs ennek a fájlnak a mappájában futtatandó, kivéve, ha kifejeze
 2. `node build/main.js` - A Node elkezdi futtatni az átfordított kódot
 (protip: `npx tsc && node build/main.js`)
 
+Ha nem a 80-as porton fut a szerver, akkor a frontend nem fogja megtalálni. Ez kiküszöbölhető a `portforward.sh` segítségével például.
+
 ## Config fájl
 A `WANTED_CONFIG` környezeti változóval megadható, hogy máshol keresse. (légyszi ne committold ha magadnak átírsz valamit helyileg)
 
