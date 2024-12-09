@@ -5,8 +5,6 @@ import { RowDataPacket } from 'mysql2/promise.js';
 import { Config } from '../config.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PassThrough } from 'stream';
-import { off } from 'process';
 
 /**
  * Könnyítés képpen...
