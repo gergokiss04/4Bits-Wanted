@@ -59,6 +59,9 @@ interface DBConfig {
   Az adatbázisban tárolja az adatokat.
 **/
 export class DatabaseApi extends Api {
+  isMediaUriUsed(): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
   
   private db!: mysql.Connection;
 
@@ -219,20 +222,26 @@ export class DatabaseApi extends Api {
       title: string;
       price: number;
       description: string;
-      pictures: string;
-      category: string;
+      pictures: string[];
+      category: number;
       seller_id: number;
       buyer_id: number | null;
+      created: number;
+      sold: number;
+      rating: number;
     }
 
     return new Offer(id, {
-      title: offer.title,
-      price: offer.price,
-      description: offer.description,
-      pictures: offer.pictures,
-      category: offer.category,
+      created: offer.created,
       sellerId: offer.seller_id,
-      buyerId: offer.buyer_id
+      title: offer.title,
+      categoryId: offer.category,
+      description: offer.description,
+      price: offer.price,
+      pictureUris: offer.pictures,
+      buyer: offer.buyer_id,
+      sold: offer.sold,
+      buyerRating: offer.rating
     });
   }
   override async commitOffer(val: Offer): Promise<void> {
