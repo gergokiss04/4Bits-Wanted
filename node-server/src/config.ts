@@ -19,6 +19,8 @@ export class Config {
   apiDriver: 'memory' | 'db'
   apiSecret: string
   apiAllowDebt: boolean
+  apiReportErrorsToClient: boolean
+  apiCacheLifetime: number
 
   apiMediaRoot: string
   apiMediaCapacity: number
@@ -39,6 +41,9 @@ export class Config {
     }
     this.apiSecret = dictutil.require<string>(dict, ['api', 'secret'])
     this.apiAllowDebt = dictutil.optional<boolean>(dict, ['api', 'allowDebt']) ?? false
+    this.apiReportErrorsToClient = dictutil.optional<boolean>(dict, ['api', 'reportErrorsToClient']) ?? false
+    this.apiCacheLifetime = dictutil.require<number>(dict, ['api', 'cacheLifetime'])
+
     this.apiMediaRoot = dictutil.require<string>(dict, ['api', 'media', 'root'])
     this.apiMediaCapacity = dictutil.optional<number>(dict, ['api', 'media', 'capacity']) ?? 10
 

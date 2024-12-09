@@ -55,32 +55,32 @@ export abstract class Api {
   mediaStagers = new Cache<number, MediaStager>()
 
   endpoints: Array<Endpoint> = Array()
-  reportErrors = true // TO-DO konfigurálható
+  reportErrors: boolean
 
   allowDebt = false
 
 
   constructor(config: Config) {
     this.config = config
+    this.reportErrors = config.apiReportErrorsToClient
 
-    // HACK expires fast
     this.userCache.populateCallback = this.fetchUser.bind(this)
     this.userCache.onDroppedCallback = (_, value: User) => { this.commitUser(value); value.dropEntangled(this.userCache) }
-    this.userCache.expireSeconds = 1
+    this.userCache.expireSeconds = this.config.apiCacheLifetime
     this.userCache.setGcInterval()
 
     this.offerCache.populateCallback = this.fetchOffer.bind(this)
     this.offerCache.onDroppedCallback = (_, value: Offer) => value.dropEntangled(this.offerCache)
-    this.offerCache.expireSeconds = 1
+    this.offerCache.expireSeconds = this.config.apiCacheLifetime
     this.offerCache.setGcInterval()
 
     this.categoryCache.populateCallback = this.fetchCategory.bind(this)
     this.categoryCache.onDroppedCallback = (_, value: Category) => value.dropEntangled(this.categoryCache)
-    this.categoryCache.expireSeconds = 1
+    this.categoryCache.expireSeconds = this.config.apiCacheLifetime
     this.categoryCache.setGcInterval()
 
     this.mediaStagers.populateCallback = () => new MediaStager(this.config.apiMediaCapacity)
-    this.mediaStagers.expireSeconds = 100000
+    this.mediaStagers.expireSeconds = 100000 // FIX-ME this is stupid
 
     this.addEndpoint(['register'], this.epRegister)
     this.addEndpoint(['auth'], this.epAuth)
@@ -93,12 +93,12 @@ export abstract class Api {
     this.addEndpoint(['users', '$', 'picture'], this.epUserPicture)
     this.addEndpoint(['users', '$', 'password'], this.epUserPassword)
     this.addEndpoint(['categories'], this.epCategoryList)
-    this.addEndpoint(['offers'], this.epOfferList) // GET és POST is
+    this.addEndpoint(['offers'], this.epOfferList)
     this.addEndpoint(['offers', 'random'], this.epRandomOffers)
-    this.addEndpoint(['offers', '$'], this.epOfferById) // GET és DELETE is
+    this.addEndpoint(['offers', '$'], this.epOfferById)
     this.addEndpoint(['offers', '$', 'buy'], this.epOfferBuy)
-    this.addEndpoint(['offers', '$', 'rating'], this.epOfferRating) // GET és POST is
-    this.addEndpoint(['mediastager'], this.epMediaStager) // GET, POST, DELETE
+    this.addEndpoint(['offers', '$', 'rating'], this.epOfferRating)
+    this.addEndpoint(['mediastager'], this.epMediaStager)
     this.addEndpoint(['mediastager', '$'], this.epMediaStagerIndexed)
     this.addEndpoint(['mediastager', 'form'], this.epMediaStagerForm)
     this.addEndpoint(['media', '$'], this.epMedia)
