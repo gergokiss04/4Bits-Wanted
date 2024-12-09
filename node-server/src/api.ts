@@ -197,16 +197,14 @@ export abstract class Api {
   }
 
 
-  skipPages<T>(iter: Iterator<T>, count: number): Iterator<T> {
+  skipPages<T>(arr: T[], count: number): T[] {
+    if(count <= 0) count = 0
+
     const PAGE_SIZE = 100
 
-    while(count-- > 0) {
-      for(let i = 0; i < PAGE_SIZE; i++) {
-        if(!iter.next()) break
-      }
-    }
+    arr = arr.slice(count * PAGE_SIZE)
 
-    return iter
+    return arr
   }
 
   static errorMissingProp(name: string): Result {
@@ -318,7 +316,7 @@ export abstract class Api {
     if(!this.isPasswordGood(body.pass)) return new Result(StatusCodes.BAD_REQUEST, 'Your password doesn\'t meet some requirement')
 
     let foundUser: User | undefined
-    for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
+    for(const id of await this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
       if(foundUser !== undefined) break
       foundUser = await this.userCache.tryGet(id)
     }
@@ -327,7 +325,7 @@ export abstract class Api {
       return new Result(StatusCodes.BAD_REQUEST, 'A user with this name already exists')
     } else {
       let id = 1
-      for(const existingId of this.yieldUserIds(undefined)) {
+      for(const existingId of await this.yieldUserIds(undefined)) {
         if(id <= existingId) id = existingId + 1
       }
 
@@ -370,7 +368,7 @@ export abstract class Api {
     if(typeof body.pass !== 'string') return Api.errorMissingProp('pass (string)')
 
     let foundUser: User | undefined
-    for(const id of this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
+    for(const id of await this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
       if(foundUser !== undefined) break
       foundUser = await this.userCache.tryGet(id)
     }
@@ -442,12 +440,10 @@ export abstract class Api {
     const filter = call.request.query['filter']
     const regex = (typeof filter === 'string') ? RegExp(filter, 'i') : undefined
 
-    const gen = this.yieldUserIds(regex)
-    this.skipPages(gen, pagesToTurn)
+    const users = await this.yieldUserIds(regex)
+    this.skipPages(users, pagesToTurn)
 
-    const arr = Array.from(gen)
-
-    return new Result(StatusCodes.OK, arr)
+    return new Result(StatusCodes.OK, users)
   }
 
   async epUserById(call: ApiCall): Promise<Result> {
@@ -581,9 +577,9 @@ export abstract class Api {
     const filter = call.request.query['filter']
     const regex = (typeof filter === 'string') ? RegExp(filter, 'i') : undefined
 
-    const gen = this.yieldCategoryIds(regex)
+    const cats = await this.yieldCategoryIds(regex)
 
-    const arr = Array.from(gen).map((id) => this.fetchCategory(id)?.serializePublic(), this)
+    const arr = cats.map(async (id) => (await this.fetchCategory(id))?.serializePublic(), this)
 
     return new Result(StatusCodes.OK, arr)
   }
@@ -611,28 +607,19 @@ export abstract class Api {
         const minPrice = optionalNum('minPrice')
         const maxPrice = optionalNum('maxPrice')
 
-        const gen = this.yieldOfferIds(
-          titleRegex,
-          categoryId,
-          minPrice,
-          maxPrice,
-          'id',
-          false
-        )
-
-        const thiis = this // Miért
-        this.skipPages<number>(
-          function*(): Iterator<number> {
-            for(const val of gen) {
-              if(includeSold || thiis.fetchOffer(val)?.buyer === null) {
-                yield val
-              }
-            }
-          }(), // Genuis!
+        const arr = this.skipPages( // 3.
+          (await this.yieldOfferIds( // 1.
+            titleRegex,
+            categoryId,
+            minPrice,
+            maxPrice,
+            'id',
+            false
+          )).filter( // 2.
+            async (id) => includeSold || (await this.fetchOffer(id))?.buyer === null
+          ),
           pagesToTurn
         )
-
-        const arr = Array.from(gen)
 
         return new Result(StatusCodes.OK, arr)
       }
@@ -656,7 +643,7 @@ export abstract class Api {
         if(category === undefined) return new Result(StatusCodes.BAD_REQUEST, 'Category doesn\'t exist')
 
         let id = 1
-        for(const existingId of this.yieldOfferIds(undefined, undefined, undefined, undefined, 'id', true)) {
+        for(const existingId of await this.yieldOfferIds(undefined, undefined, undefined, undefined, 'id', true)) {
           if(id <= existingId) {
             id = existingId + 1
             break // Mert descending.
@@ -696,7 +683,7 @@ export abstract class Api {
 
     let count = optionalNum('count') ?? 10
 
-    let gen = this.yieldOfferIds(
+    let offers = await this.yieldOfferIds(
       undefined,
       undefined,
       undefined,
@@ -705,17 +692,17 @@ export abstract class Api {
       false
     )
 
-    const arr: number[] = []
-    for(const val of gen) {
-      if(this.fetchOffer(val)?.buyer === null) {
-        arr.push(val)
+    const randoms: number[] = []
+    for(const val of offers) {
+      if((await this.fetchOffer(val))?.buyer === null) {
+        randoms.push(val)
       }
 
       count--
       if(count <= 0) break
     }
 
-    return new Result(StatusCodes.OK, arr)
+    return new Result(StatusCodes.OK, randoms)
   }
 
   async epOfferById(call: ApiCall): Promise<Result> {
@@ -972,8 +959,8 @@ export abstract class Api {
   abstract dropCategory(id: number): Promise<void>
 
   /**
-    Visszaad minden olyan URL-t, mely nem szerepel User profilképeként, vagy Offer képei közt.
+    Visszaadja, hogy egy URI szerepel-e User profilképeként vagy Offer képei közt.
   **/
-  abstract yieldUnusedMediaUrls(): Promise<string[]>
+  abstract isMediaUriUsed(): Promise<boolean>
 
 }
