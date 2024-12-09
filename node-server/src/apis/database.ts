@@ -69,16 +69,12 @@ export class DatabaseApi extends Api {
   }
 
   private async connectToDb() {
-    const configPath = path.resolve('./src/apis/', 'db-config.json');
-    const config = fs.readFileSync(configPath, 'utf-8');
-    const dbConfig: DBConfig = JSON.parse(config);
-
     this.db = await mysql.createConnection({
-      host: dbConfig.host,
-      user: dbConfig.user,
-      password: dbConfig.password,
-      database: dbConfig.database,
-      port: dbConfig.port
+      host: 'localhost',
+      user: 'root',
+      password: 'password',
+      database: 'wanted',
+      port: 3305
     });
   }
 
