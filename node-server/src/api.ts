@@ -333,6 +333,7 @@ export abstract class Api {
         id,
         {
           name: body.login,
+          email: body.email,
           password: this.hashPassword(body.pass, id),
           averageStars: 0,
           bio: "",

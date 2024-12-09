@@ -127,27 +127,29 @@ export class DatabaseApi extends Api {
   }
   override async commitUser(val: User): Promise<void> {
     const query = `
-      INSERT INTO users (id, name, profile_pic, bio, email, password, average_rating)
-      VALUES (${val.id}, 
-              ${val.name}, 
-              ${val.profilePicUri}, 
-              ${val.bio},
-              ${val.email}, 
-              ${val.password}, 
-              ${val.averageRating}
-      )
-      ON DUPLICATE KEY UPDATE
-        name = VALUES(name),
-        profile_pic = VALUES(profile_pic),
-        bio = VALUES(bio),
-        email = VALUES(email),
-        password = VALUES(password),
-        average_rating = VALUES(average_rating)
-    `;
+    INSERT INTO users (id, name, profile_pic, bio, email, password, average_rating)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      name = VALUES(name),
+      profile_pic = VALUES(profile_pic),
+      bio = VALUES(bio),
+      email = VALUES(email),
+      password = VALUES(password),
+      average_rating = VALUES(average_rating)
+  `;
 
-    const result = await this.db.execute(query);
+  const params = [
+    val.id,
+    val.name,
+    val.profilePicUri,
+    val.bio,
+    val.email,
+    val.password,
+    val.averageRating
+  ];
 
-  }
+  await this.db.execute(query, params);
+}
   override async dropUser(id: number): Promise<void> {
     const query = `DELETE 
                    FROM users
@@ -213,30 +215,38 @@ export class DatabaseApi extends Api {
       return undefined;
     }
 
-    const offer = (rows[0] as any[])[0] as {
+    console.log("ROWS:" + rows)
+    console.log("ROWS00: " + rows[0][0])
+    const offer = rows[0][0] as {
       id: number;
       title: string;
       price: number;
       description: string;
-      pictures: string[];
-      category: number;
+      pictures: string;
+      category_id: number;
       seller_id: number;
       buyer_id: number | null;
       created: number;
-      sold: number;
-      rating: number;
-    }
+      sold_at: number | null;
+      rating: number | null;
+    };
+
+    console.log("OFFER: " + offer.seller_id);
+  
+    const sellerId = offer.seller_id;
+    const buyerId = offer.buyer_id;
+    const categoryId = offer.category_id;
 
     return new Offer(id, {
       created: offer.created,
-      sellerId: offer.seller_id,
+      seller: await this.fetchUser(sellerId),
       title: offer.title,
-      categoryId: offer.category,
+      category: await this.fetchCategory(categoryId),
       description: offer.description,
       price: offer.price,
       pictureUris: offer.pictures,
-      buyer: offer.buyer_id,
-      sold: offer.sold,
+      buyer: offer.buyer_id ? await this.fetchUser(buyerId!) : null,
+      sold: offer.sold_at,
       buyerRating: offer.rating
     });
   }
@@ -303,11 +313,11 @@ export class DatabaseApi extends Api {
 
     const cat = rows[0] as {
       id: number;
-      name: string;
+      category_name: string;
     }
 
     return new Category(cat.id, {
-      name: cat.name
+      name: cat.category_name
     })
   }
   override async commitCategory(val: Category): Promise<void> {
