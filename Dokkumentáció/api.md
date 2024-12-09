@@ -19,24 +19,24 @@ User:
 - name -> szöveg
 - password (titkos) -> szöveg
 - pénz -> valós
-- average_rating (számított mező) -> valós
+- average\_rating (számított mező) -> valós
 - bio -> hosszú szöveg
-- profile_pic -> uri
+- profile\_pic -> uri
 
 Offer:
 - id -> egész
-- seller_id -> &User
+- seller\_id -> &User
 - title -> szöveg
 - category -> &Kategória
 - description -> hosszú szöveg
 - price -> valós
 - pictures -> uri[]
-- buyer_id (null, ha még nem kelt el) -> &User?
-- buyer_rating (null, ha a vásárló még nem értékelte) -> valós?
+- buyer\_id (null, ha még nem kelt el) -> &User?
+- buyer\_rating (null, ha a vásárló még nem értékelte) -> valós?
 
 Kategória:
 - id -> egész
-- category_name -> szöveg
+- category\_name -> szöveg
 
 
 # Gyakori hibák
@@ -45,7 +45,7 @@ Kategória:
 - `401 Unauthorized`: Ha bejelentkezés szükséges, és a nem vagy bejelentkezve.
 - `403 Forbidden`: Ha másnak a dolgát akarjuk piszkálni.
 
-Ha nem `200 OK`, akkor lehet, hogy van `text/plain` hibaüzenet a válaszban. Ez fejleszési célú, ne írjuk ki közvetlenül a felhasználónak!
+Ha nem `200 OK`, akkor lehet, hogy van hibaüzenet a válaszban. Ez fejleszési célú, ne írjuk ki közvetlenül a felhasználónak!
 
 
 ## POST /register
@@ -261,6 +261,12 @@ Nem biztos, hogy tényleg létezik annyi offer, amennyit kérsz!
 
 Csak akkor használható, ha mi hoztuk létre az offert, és még nem kelt el.
 
+## POST /offers/ID/buy
+
+Megvehetünk egy offert, ha be vagyunk jelentkezve, és még nem kelt el. Illetve a szerver beállításától függően lehet, hogy szükséges elegendő pénzzel rendelkeznünk. A request bodyt az endpoint figyelmen kívül hangya.
+
+A művelet `200 OK` eredménnyel jön vissza, ha sikerült, különben hibakóddal.
+
 ## GET /offers/ID/rating
 
 Csak akkor hozzáférhető, ha az offert megvásárolt felhaszálóként vagyunk bejelentkezve, és már értékeltük ezt az offert. Ha még nem értékeltük, akkor `404 Not Found`.
@@ -282,11 +288,11 @@ Megnézi, mik vannak az előkészítőben. Amikor új offert hozunk létre, akko
 
 ```
 {
-  "imagesLeft": 7, // Még hány képet lehet hozzáadni, mielőtt megtelik.
+  "imagesLeft": 7 // Még hány képet lehet hozzáadni, mielőtt megtelik.
   "uris": [
-    "q394ghq39ztq3t4q3t5.jpg",
-    "77385fz8732z68732z634t8.png",
-    "w3v896z3948v9zv9vt.webp"
+    "/media/q394ghq39ztq3t4q3t5.jpg",
+    "/media/77385fz8732z68732z634t8.png",
+    "/media/w3v896z3948v9zv9vt.webp"
   ]
 }
 ```
