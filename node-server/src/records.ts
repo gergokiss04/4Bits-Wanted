@@ -88,15 +88,15 @@ export class Offer extends Record<number> {
   constructor(id: number, dict: {}/*, userResolver: RecordResolver<number, User>, categoryResolver: RecordResolver<number, Category>*/) {
     super(id)
 
-    this.createdTimestamp = dictutil.require<number>(dict, ['created'])
-    this.seller = dictutil.require<User>(dict, ['sellerId'])
+    this.createdTimestamp = dictutil.require(dict, ['created'])
+    this.seller = dictutil.require(dict, ['seller'])
     this.title = dictutil.require(dict, ['title'])
-    this.category = dictutil.require<User>(dict, ['categoryId'])
+    this.category = dictutil.require(dict, ['category'])
     this.description = dictutil.require(dict, ['description'])
     this.price = dictutil.require(dict, ['price'])
     this.pictureUris = dictutil.require(dict, ['pictureUris'])
     this.buyer = dictutil.optional(dict, ['buyer'])
-    this.soldTimestamp = dictutil.require<number>(dict, ['sold'])
+    this.soldTimestamp = dictutil.require(dict, ['sold'])
     this.buyerRating = dictutil.optional(dict, ['buyerRating'])
   }
 
