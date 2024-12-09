@@ -1,10 +1,12 @@
 import { Api } from '../api.js';
 import { User, Offer, Category } from '../records.js';
 import mysql from 'mysql2/promise.js';
-import deasync from 'deasync';
+import { RowDataPacket } from 'mysql2/promise.js';
 import { Config } from '../config.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { PassThrough } from 'stream';
+import { off } from 'process';
 
 /**
  * Könnyítés képpen...
@@ -79,33 +81,32 @@ export class DatabaseApi extends Api {
     });
   }
 
-  override *yieldUserIds(
-    nameRegex: RegExp | undefined = undefined
-  ): Generator<number> {
-    const query = `SELECT id
-                   FROM users`;
-    const rowsPromise = this.db.execute(query);
+  override async yieldUserIds(nameRegex: RegExp | undefined): Promise<number[]> {
+    const query = `SELECT id FROM users;`;
 
-    const rows = deasync(rowsPromise)
+    const [rows] = await this.db.execute(query);
 
-    for (const user of rows[0] as { id: number, name: string }[]) {
-      if (!nameRegex || nameRegex.test(user.name)) {
-        yield user.id;
+    console.log(rows);
+    let userIds: number[] = [];
+    for(const user of rows as {id: number, name:string}[]) {
+      if(!nameRegex || nameRegex.test(user.name)) {
+        userIds.push(user.id);
       }
     }
+
+    return userIds;
+
   }
+  override async fetchUser(id: number): Promise<User | undefined> {
+    const query = `SELECT * FROM users WHERE id = ?;`;
 
-  override fetchUser(id: number): User | undefined {
-    const query = 'SELECT * FROM users WHERE id = ' + id;
-    const rowsPromise = this.db.execute(query);
+    const [rows] = await this.db.execute<RowDataPacket[]>(query, [id]);
 
-    const rows = deasync(rowsPromise);
-
-    if ((rows[0] as any[]).length === 0) {
+    if(rows.length === 0) {
       return undefined;
     }
 
-    const user = (rows[0] as any[])[0] as {
+    const user = rows[0] as {
       id: number;
       name: string;
       profile_pic: string;
@@ -113,7 +114,7 @@ export class DatabaseApi extends Api {
       email: string;
       password: string;
       average_rating: number;
-    };
+    }
 
     return new User(user.id, {
       id: user.id,
@@ -125,8 +126,7 @@ export class DatabaseApi extends Api {
       pictureUri: user.profile_pic
     });
   }
-
-  override commitUser(val: User): void {
+  override async commitUser(val: User): Promise<void> {
     const query = `
       INSERT INTO users (id, name, profile_pic, bio, email, password, average_rating)
       VALUES (${val.id}, 
@@ -146,28 +146,18 @@ export class DatabaseApi extends Api {
         average_rating = VALUES(average_rating)
     `;
 
-    const result = this.db.execute(query);
-  }
+    const result = await this.db.execute(query);
 
-  override dropUser(id: number): void {
+  }
+  override async dropUser(id: number): Promise<void> {
     const query = `DELETE 
                    FROM users
                    WHERE id = ${id}`;
 
-    const queryId = id;
-    const result = this.db.execute(query, queryId);
+    const result = await this.db.execute(query);
 
   }
-
-
-  override *yieldOfferIds(
-    titleRegex: RegExp | undefined = undefined,
-    categoryFilter: number | undefined,
-    minPrice: number | undefined,
-    maxPrice: number | undefined,
-    orderBy: "id" | "price" | "random",
-    descending: boolean
-  ): Generator<number> {
+  override async yieldOfferIds(titleRegex: RegExp | undefined, categoryFilter: number | undefined, minPrice: number | undefined, maxPrice: number | undefined, orderBy: 'id' | 'price' | 'random', descending: boolean): Promise<number[]> {
     let query = 'SELECT id FROM offers WHERE 1=1';
 
 
@@ -203,23 +193,24 @@ export class DatabaseApi extends Api {
       query += ' DESC';
     }
 
-    const rowsPromise = this.db.execute(query);
-    const rows = deasync(rowsPromise);
+    const rows = await this.db.execute(query);
 
-    for (const offer of rows[0] as { id: number }[]) {
-      yield offer.id;
+    let offers: number[] = []
+
+    for(const offer of rows[0] as {id: number}[]) {
+      offers.push(offer.id);
     }
+
+    return offers;
+    
   }
-
-  override fetchOffer(id: number): Offer | undefined {
-    const query = `SELECT *
-                   FROM offers
+  override async fetchOffer(id: number): Promise<Offer | undefined> {
+    const query = `SELECT * FROM offers
                    WHERE id = ${id}`;
-    const rowsPromise = this.db.execute(query);
 
-    const rows = deasync(rowsPromise);
+    const rows = await this.db.execute<RowDataPacket[]>(query);
 
-    if ((rows[0] as any[]).length === 0) {
+    if(rows[0].length === 0) {
       return undefined;
     }
 
@@ -232,9 +223,9 @@ export class DatabaseApi extends Api {
       category: string;
       seller_id: number;
       buyer_id: number | null;
-    };
+    }
 
-    return new Offer(offer.id, {
+    return new Offer(id, {
       title: offer.title,
       price: offer.price,
       description: offer.description,
@@ -244,76 +235,77 @@ export class DatabaseApi extends Api {
       buyerId: offer.buyer_id
     });
   }
-
-  override commitOffer(val: Offer): void {
+  override async commitOffer(val: Offer): Promise<void> {
     const query = `
-      INSERT INTO offers (id, title, price, description, pics, category_id, buyer_id)
-      VALUES (${val.id}, 
-              ${val.title}, 
-              ${val.price}, 
-              ${val.description}, 
-              ${val.pictureUris}, 
-              ${val.category}, 
-              ${val.buyer})
-      ON DUPLICATE KEY UPDATE
-        id = VALUES(id),
-        title = VALUES(title),
-        price = VALUES(price),
-        description = VALUES(description),
-        pics = VALUES(pics),
-        category = VALUES(category),
-        buyer_id = VALUES(buyer_id)
-    
-    `;
+    INSERT INTO offers (id, title, price, description, pictures, category_id, seller_id, buyer_id, buyer_rating)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      title = VALUES(title),
+      price = VALUES(price),
+      description = VALUES(description),
+      pictures = VALUES(pictures),
+      category_id = VALUES(category_id),
+      seller_id = VALUES(seller_id),
+      buyer_id = VALUES(buyer_id),
+      buyer_rating = VALUES(buyer_rating)
+  `;
 
-    const resultPromise = this.db.execute(query);
-    deasync(resultPromise);
+  const params = [
+    val.id,
+    val.title,
+    val.price,
+    val.description,
+    JSON.stringify(val.pictureUris),
+    val.category.id,
+    val.buyer ? val.buyer.id : null,
+    val.seller.id,
+    val.soldTimestamp,
+    val.buyerRating
+  ];
 
+  await this.db.execute(query, params);
   }
-
-  override dropOffer(id: number): void {
+  override async dropOffer(id: number): Promise<void> {
     const query = `DELETE FROM offers WHERE id = ${id}`;
-    const resultPromise = this.db.execute(query);
-    deasync(resultPromise);
+    const result = await this.db.execute(query);
   }
+  override async yieldCategoryIds(nameRegex: RegExp | undefined): Promise<number[]> {
+    const query = `SELECT id FROM categories;`;
 
+    const rows = await this.db.execute<RowDataPacket[]>(query);
 
-  override *yieldCategoryIds(
-    nameRegex: RegExp | undefined = undefined
-  ): Generator<number> {
-    const query = 'SELECT id FROM categories';
-    
-    const resultPromise = this.db.execute(query);
-    const rows = deasync(resultPromise);
+          //meow
+    const cats: number[] = []
 
-    for (const cat of rows[0] as { id: number, name: string }[]) {
-      if (!nameRegex || nameRegex.test(cat.name)) {
-        yield cat.id;
+              //meow
+    for(const cat of rows[0] as {id: number, category_name: string}[]) {
+      if(!nameRegex || nameRegex.test(cat.category_name)) {
+        //meowmeow
+        cats.push(cat.id);
       }
     }
+
+    return cats;
   }
+  override async fetchCategory(id: number): Promise<Category | undefined> {
+    const query = `SELECT * FROM categories WHERE id = ${id};`;
 
-  override fetchCategory(id: number): Category | undefined {
-    const query = `SELECT * FROM categories WHERE id = ${id}`;
-    const rowsPromise = this.db.execute(query, [id]);
+    const [rows] = await this.db.execute<RowDataPacket[]>(query);
 
-    const rows = deasync(rowsPromise);
-
-    if ((rows[0] as any[]).length === 0) {
+    if(rows[0].length === 0) {
       return undefined;
     }
 
-    const category = (rows[0] as any[])[0] as {
+    const cat = rows[0] as {
       id: number;
       name: string;
-    };
+    }
 
-    return new Category(category.id, {
-      name: category.name
-    });
+    return new Category(cat.id, {
+      name: cat.name
+    })
   }
-
-  override commitCategory(val: Category): void {
+  override async commitCategory(val: Category): Promise<void> {
     const query = `
       INSERT INTO categories (id, name)
       VALUES (${val.id}, 
@@ -323,19 +315,15 @@ export class DatabaseApi extends Api {
     `;
 
 
-    const resultPromise = this.db.execute(query);
-    deasync(resultPromise);
+    const resultPromise = await this.db.execute(query);
   }
-
-  override dropCategory(id: number): void {
+  override async dropCategory(id: number): Promise<void> {
     const query = 'DELETE FROM categories WHERE id = ' + id;
-    const resultPromise = this.db.execute(query);
-    deasync(resultPromise);
+    const resultPromise = await this.db.execute(query);
+  }
+  yieldUnusedMediaUrls(): Promise<string[]> {
+    throw new Error('Too fancy...');
   }
 
-
-  override *yieldUnusedMediaUrls(): Generator<string> {
-    throw new Error('Not implemented.') // TODO
-  }
 
 }
