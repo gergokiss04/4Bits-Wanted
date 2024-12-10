@@ -176,7 +176,7 @@ function PostAdd() {
               >
                 <option value="">Válasszon kategóriát</option>
                 {categories.map((category, index) => (
-                  <option key={index} value={index}>{category.name}</option>
+                  <option key={index} value={category.id}>{category.name}</option>
                 ))}
               </select>
             </div>
