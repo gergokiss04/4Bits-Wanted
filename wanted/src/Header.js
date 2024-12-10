@@ -6,7 +6,7 @@ import { SERVER_PORT } from './Constants.js';
 
 function Header() {
 
-  const [isLoggedIn, SetIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,7 +19,12 @@ function Header() {
           body: JSON.stringify({}),
         });
 
-        SetIsLoggedIn(response.ok);
+        if (response.ok){
+          setIsLoggedIn(true);
+        }
+        else {
+          setIsLoggedIn(false);
+        }
       } catch (error) {
         console.error('Hiba');
       }
@@ -38,7 +43,7 @@ function Header() {
       });
 
       if (response.ok) {
-        SetIsLoggedIn(false);
+        setIsLoggedIn(false);
         navigate('/');
       } else {
         console.error('Logout hiba');
