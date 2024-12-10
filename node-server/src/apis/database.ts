@@ -81,14 +81,19 @@ export class DatabaseApi extends Api {
   }
 
   override async yieldUserIds(nameRegex: RegExp | undefined): Promise<number[]> {
-    const query = `SELECT id FROM users;`;
+    const query = `SELECT id, name FROM users;`;
 
     const [rows] = await this.db.execute(query);
 
-    console.log(rows);
     let userIds: number[] = [];
-    for(const user of rows as {id: number, name:string}[]) {
+    //console.log("Kapott regex: " + nameRegex);
+
+    for(const user of rows as {id: number, name: string}[]) {
+      /*console.log("user: " + user);
+      console.log("userid: " + user.id);
+      console.log("username: " + user.name)*/
       if(!nameRegex || nameRegex.test(user.name)) {
+        //console.log("USERID: " + user.id)
         userIds.push(user.id);
       }
     }
@@ -97,11 +102,13 @@ export class DatabaseApi extends Api {
 
   }
   override async fetchUser(id: number): Promise<User | undefined> {
+    console.log("HALO");
     const query = `SELECT * FROM users WHERE id = ?;`;
 
     const [rows] = await this.db.execute<RowDataPacket[]>(query, [id]);
 
     if(rows.length === 0) {
+      console.log("eh?");
       return undefined;
     }
 
@@ -115,7 +122,8 @@ export class DatabaseApi extends Api {
       average_rating: number;
     }
 
-    return new User(user.id, {
+    console.log("Első: " + user);
+    const finalUser: User = new User(user.id, {
       id: user.id,
       name: user.name,
       password: user.password,
@@ -124,6 +132,20 @@ export class DatabaseApi extends Api {
       bio: user.bio,
       pictureUri: user.profile_pic
     });
+
+    console.log("Final: " + finalUser);
+
+    return finalUser;
+
+    /*return new User(user.id, {
+      id: user.id,
+      name: user.name,
+      password: user.password,
+      email: user.email,
+      averageStars: user.average_rating,
+      bio: user.bio,
+      pictureUri: user.profile_pic
+    });*/
   }
   override async commitUser(val: User): Promise<void> {
     const query = `
@@ -215,8 +237,6 @@ export class DatabaseApi extends Api {
       return undefined;
     }
 
-    console.log("ROWS:" + rows)
-    console.log("ROWS00: " + rows[0][0])
     const offer = rows[0][0] as {
       id: number;
       title: string;
@@ -230,8 +250,6 @@ export class DatabaseApi extends Api {
       sold_at: number | null;
       rating: number | null;
     };
-
-    console.log("OFFER: " + offer.seller_id);
   
     const sellerId = offer.seller_id;
     const buyerId = offer.buyer_id;

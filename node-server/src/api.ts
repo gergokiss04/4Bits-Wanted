@@ -364,19 +364,28 @@ if (this.reportErrors) {
     }
 
     const body = await this.parseBody(call.request)
+    console.log(body);
     if(body instanceof Result) return body
 
     if(typeof body.login !== 'string') return Api.errorMissingProp('login (string)')
     if(typeof body.pass !== 'string') return Api.errorMissingProp('pass (string)')
 
     let foundUser: User | undefined
+
+    //console.log(await this.yieldUserIds(new RegExp('^' + body.login + '$')));
+
     for(const id of await this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
       if(foundUser !== undefined) break
       foundUser = await this.userCache.tryGet(id)
+      
+      //console.log("FOUND USER-asd: " + foundUser);
     }
+
+    //console.log("FOUND USER:" + foundUser);
 
     if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
       //log.warn(this.hashPassword(body.pass, foundUser!.id))
+      //console.log("FOUNDUSER2: " + foundUser)
       return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
     } else {
       giveToken(foundUser)
