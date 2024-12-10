@@ -20,8 +20,8 @@ function Header() {
         });
 
         SetIsLoggedIn(response.ok);
-      } catch {
-        SetIsLoggedIn(false);
+      } catch (error) {
+        console.error('Hiba');
       }
     };
 
