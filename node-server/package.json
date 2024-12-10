@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/formidable": "^3.4.5",
     "@types/node": "^22.7.9",
     "typescript": "^5.6.3"
@@ -17,11 +18,12 @@
   "dependencies": {
     "async-mutex": "^0.5.0",
     "colors": "^1.4.0",
-    "deasync": "^0.1.30",
-    "mysql2": "^3.11.4",
     "cookie": "^1.0.2",
+    "cors": "^2.8.5",
+    "deasync": "^0.1.30",
     "formidable": "^3.5.2",
     "http-status-codes": "^2.3.0",
-    "mime": "^4.0.4"
+    "mime": "^4.0.4",
+    "mysql2": "^3.11.4"
   }
 }

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SERVER_PORT } from './Constants.js';
-
 function Registry() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SERVER_PORT } from './Constants';
-import { useCart } from './CartContext';
+
 
 function Product({ selectedCategory }) {
   const [products, setProducts] = useState([]);
-  const { addToCart } = useCart();
   const [categories, setCategories] = useState([]);
   
   // kategóriák lekérése
@@ -56,9 +55,7 @@ function Product({ selectedCategory }) {
     fetchProducts();
   }, []);
 
-  const handleAddToBasket = (product) => {
-    addToCart(product);
-  };
+  
 
   // Kategória index
   const selectedCategoryIndex = categories.findIndex(category => category === selectedCategory);
@@ -81,7 +78,7 @@ function Product({ selectedCategory }) {
                 <p className="card-text">Ár: {product.price} Ft</p>
                 <p className="card-text">Típus: {product.category}</p>
                 <p className="card-text">{product.description}</p>
-                <button className="btn btn-primary" onClick={() => handleAddToBasket(product)}>Megvásárol</button>
+                <button className="btn btn-primary">Megvásárol</button>
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ import { Request } from './main.js'
 import { Cache } from './cache.js'
 import { User, Offer, Category, Record } from './records.js'
 import { MediaStager } from './mediastager.js'
-
+import * as cors from 'cors';
 
 class ApiCall {
 
@@ -167,24 +167,34 @@ export abstract class Api {
       try {
         const bound = matchedEndpoint.method.bind(this)
         const result = await bound(call)
-        request.res.statusCode = result.code
+        request.res.statusCode = result.code;
 
-        let body = result.body
-        if(body !== undefined) {
-          request.res.setHeader('Content-Type', call.contentType ?? 'application/json')
-          body = (call.contentType === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString())
-          await request.writePatiently(body)
-        }
+let body = result.body;
+if (body !== undefined) {
+  request.res.setHeader('Content-Type', call.contentType ?? 'application/json');
+  request.res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  request.res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  request.res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  request.res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  body = (call.contentType === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString());
+  await request.writePatiently(body);
+}
       } catch(e: any) {
         let msg = `Unhandled exception during API call: ${e}`
         if(e instanceof Error) msg += `\n${e.stack}`;
         log.error(msg)
 
-        request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-        if(this.reportErrors) {
-          request.res.setHeader('Content-Type', call.contentType ?? 'application/json')
-          await request.writePatiently(JSON.stringify(e))
-        }
+        request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+if (this.reportErrors) {
+  request.res.setHeader('Content-Type', call.contentType ?? 'application/json');
+  request.res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  request.res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  request.res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  request.res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  await request.writePatiently(JSON.stringify(e));
+}
       }
 
     } else {
