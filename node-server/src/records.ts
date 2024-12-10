@@ -38,6 +38,7 @@ export abstract class Record<TId> {
 export class User extends Record<number> {
 
   name: string
+  email: string
   password: string
   averageRating: number
   bio: string
@@ -48,6 +49,7 @@ export class User extends Record<number> {
     super(id)
 
     this.name = dictutil.require(dict, ['name'])
+    this.email = dictutil.require(dict, ['email'])
     this.password = dictutil.require(dict, ['password'])
     this.averageRating = dictutil.require(dict, ['averageStars'])
     this.bio = dictutil.require(dict, ['bio'])

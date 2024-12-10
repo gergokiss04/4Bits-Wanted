@@ -94,8 +94,12 @@ export class Request {
     const parsed = url.parse(req.url ?? '/', true)
 
     const pathParts: string[] = []
-    for(const part of path.normalize(parsed.pathname ?? '/').split('/')) {
-      if(part.length <= 0) continue
+    for(const part of (parsed.pathname ?? '/').split('/')) {
+      if(part.length <= 0 || part === '.') continue
+      if(part === '..') {
+        if(pathParts.length > 0) pathParts.pop()
+        continue
+      }
       pathParts.push(decodeURIComponent(part))
     }
     let reqUrl = path.join(...pathParts)
