@@ -72,24 +72,24 @@ export class MemoryApi extends Api {
       result.push(kvp[0])
     }
 
-    return new Promise(() => result)
+    return new Promise((resolve, _) => resolve(result))
   }
 
   override fetchUser(id: number): Promise<User | undefined> {
     this.log(`Fetch user ${id}`)
-    return new Promise(() => this.users.get(id))
+    return new Promise((resolve, _) => resolve(this.users.get(id)))
   }
 
   override commitUser(val: User): Promise<void> {
     this.log(`Commit user ${val.id}`)
     this.users.set(val.id, val)
-    return new Promise(() => undefined)
+    return new Promise((resolve, _) => resolve(undefined))
   }
 
   override dropUser(id: number): Promise<void> {
     this.log(`Drop user ${id}`)
     this.users.delete(id)
-    return new Promise(() => undefined)
+    return new Promise((resolve, _) => resolve(undefined))
   }
 
 
@@ -134,24 +134,24 @@ export class MemoryApi extends Api {
       ids.push(kvp[0])
     }
 
-    return new Promise(() => ids)
+    return new Promise((resolve, _) => resolve(ids))
   }
 
   override fetchOffer(id: number): Promise<Offer | undefined> {
     this.log(`Fetch offer ${id}`)
-    return new Promise(() => this.offers.get(id))
+    return new Promise((resolve, _) => resolve(this.offers.get(id)))
   }
 
   override commitOffer(val: Offer): Promise<void> {
     this.log(`Commit offer ${val.id}`)
     this.offers.set(val.id, val)
-    return new Promise(() => undefined)
+    return new Promise((resolve, _) => resolve(undefined))
   }
 
   override dropOffer(id: number): Promise<void> {
     this.log(`Drop offer ${id}`)
     this.offers.delete(id)
-    return new Promise(() => undefined)
+    return new Promise((resolve, _) => resolve(undefined))
   }
 
 
@@ -164,24 +164,24 @@ export class MemoryApi extends Api {
       if(nameRegex && !nameRegex.test(kvp[1].name)) continue
       filtered.push(kvp[0])
     }
-    return new Promise(() => filtered)
+    return new Promise((resolve, _) => resolve(filtered))
   }
 
   override fetchCategory(id: number): Promise<Category | undefined> {
     this.log(`Fetch category ${id}`)
-    return new Promise(() => this.categories.get(id))
+    return new Promise((resolve, _) => resolve(this.categories.get(id)))
   }
 
   override commitCategory(val: Category): Promise<void> {
     this.log(`Commit category ${val.id}`)
     this.categories.set(val.id, val)
-    return new Promise(() => undefined)
+    return new Promise((resolve, _) => resolve(undefined))
   }
 
   override dropCategory(id: number): Promise<void> {
     this.log(`Drop category ${id}`)
     this.categories.delete(id)
-    return new Promise(() => undefined)
+    return new Promise((resolve, _) => resolve(undefined))
   }
 
 
@@ -189,7 +189,7 @@ export class MemoryApi extends Api {
     this.log(`Is media URI used (not implemented!)`)
 
     // TODO
-    return new Promise(() => true)
+    return new Promise((resolve, _) => resolve(true))
   }
 
 }

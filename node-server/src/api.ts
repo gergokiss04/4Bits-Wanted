@@ -376,7 +376,7 @@ if (this.reportErrors) {
     }
 
     if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
-      log.warn(this.hashPassword(body.pass, foundUser!.id))
+      //log.warn(this.hashPassword(body.pass, foundUser!.id))
       return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
     } else {
       giveToken(foundUser)
