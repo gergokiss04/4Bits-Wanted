@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SERVER_PORT } from './Constants.js';
+import { useNavigate } from 'react-router-dom';
 function Registry() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   async function Register() {
     let item = { email: email, login: username, pass: password };
@@ -29,6 +31,8 @@ function Registry() {
   const handleSubmit = (e) => {
     e.preventDefault();
     Register();
+    window.alert('YIPPEEE');
+    navigate('/');
   };
 
   return (
