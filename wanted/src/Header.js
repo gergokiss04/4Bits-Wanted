@@ -120,9 +120,7 @@ function Header() {
               ) : (
                 <>
                   <li className="nav-item">
-                    <NavLink className="nav-link" to="/profile">
-                      <i className="bi bi-person-circle me-1"></i>Profil
-                    </NavLink>
+                    <NavLink className="nav-link" to="/profile">Profil</NavLink>
                   </li>
                   <li className="nav-item">
                     <button 
