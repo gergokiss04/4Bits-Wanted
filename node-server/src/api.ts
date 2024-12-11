@@ -589,10 +589,14 @@ if (this.reportErrors) {
     const regex = (typeof filter === 'string') ? RegExp(filter, 'i') : undefined
 
     const cats = await this.yieldCategoryIds(regex)
-
+    console.log("API CATS: " + cats);
     const arr = cats.map(async (id) => (await this.fetchCategory(id))?.serializePublic(), this)
+    console.log("API ARR: " + arr[0].toString());
 
-    return new Result(StatusCodes.OK, arr)
+    const resolvedArr = await Promise.all(arr);
+
+    console.log(resolvedArr);
+    return new Result(StatusCodes.OK, resolvedArr)
   }
 
 

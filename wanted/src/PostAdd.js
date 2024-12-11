@@ -20,10 +20,12 @@ function PostAdd() {
           fetch(`http://127.0.0.1:${SERVER_PORT}/api/categories`),
           fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`)
         ]);
-
+        window.alert("RISZPONZ: " + await categoriesResponse.text())
+        await Promise.all(categoriesResponse);
         if (!categoriesResponse.ok || !mediastagerResponse.ok) {
           throw new Error('Nem sikerült betölteni az adatokat');
         }
+        
 
         const categoriesData = await categoriesResponse.json();
         const mediastagerData = await mediastagerResponse.json();

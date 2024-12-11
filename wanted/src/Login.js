@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SERVER_PORT } from './Constants.js';
+import { useAuth } from './AuthContext.js';
 
 function Login() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const {setIsLoggedIn} = useAuth();
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -26,6 +28,7 @@ function Login() {
       })
 
       if (response.ok){
+        setIsLoggedIn(true);
         navigate('/');
       } else{
         throw new Error("Nem sikerült bejelentkezni");

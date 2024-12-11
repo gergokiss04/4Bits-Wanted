@@ -270,40 +270,45 @@ export class DatabaseApi extends Api {
   }
   override async commitOffer(val: Offer): Promise<void> {
     const query = `
-    INSERT INTO offers (id, title, price, description, pictures, category_id, seller_id, buyer_id, buyer_rating)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO offers (id, created, seller_id, title, category_id, description, price, pictures, buyer_id, sold, buyer_rating)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
-      title = VALUES(title),
-      price = VALUES(price),
-      description = VALUES(description),
-      pictures = VALUES(pictures),
-      category_id = VALUES(category_id),
+      created = VALUES(created),
       seller_id = VALUES(seller_id),
+      title = VALUES(title),
+      category_id = VALUES(category_id),
+      description = VALUES(description),
+      price = VALUES(price),
+      pictures = VALUES(pictures),
       buyer_id = VALUES(buyer_id),
+      sold = VALUES(sold),
       buyer_rating = VALUES(buyer_rating)
   `;
 
   const params = [
     val.id,
-    val.title,
-    val.price,
-    val.description,
-    JSON.stringify(val.pictureUris),
-    val.category.id,
-    val.buyer ? val.buyer.id : null,
+    val.createdTimestamp,
     val.seller.id,
+    val.title,
+    val.category.id,
+    val.description,
+    val.price,
+    JSON.stringify(val.pictureUris), // Assuming pictureUris is an array of strings
+    val.buyer ? val.buyer.id : null,
     val.soldTimestamp,
     val.buyerRating
   ];
 
   await this.db.execute(query, params);
+
+  
   }
   override async dropOffer(id: number): Promise<void> {
     const query = `DELETE FROM offers WHERE id = ${id}`;
     const result = await this.db.execute(query);
   }
   override async yieldCategoryIds(nameRegex: RegExp | undefined): Promise<number[]> {
-    const query = `SELECT id FROM categories;`;
+    const query = `SELECT id, category_name FROM categories;`;
 
     const rows = await this.db.execute<RowDataPacket[]>(query);
 
@@ -314,9 +319,12 @@ export class DatabaseApi extends Api {
     for(const cat of rows[0] as {id: number, category_name: string}[]) {
       if(!nameRegex || nameRegex.test(cat.category_name)) {
         //meowmeow
+        console.log("KAT1: " + cat.category_name);
         cats.push(cat.id);
       }
     }
+
+    console.log("VÉGLEGES CAT: " + cats);
 
     return cats;
   }
@@ -326,6 +334,7 @@ export class DatabaseApi extends Api {
     const [rows] = await this.db.execute<RowDataPacket[]>(query);
 
     if(rows[0].length === 0) {
+      console.log("hülye vagy: " + rows[0])
       return undefined;
     }
 
@@ -333,10 +342,15 @@ export class DatabaseApi extends Api {
       id: number;
       category_name: string;
     }
-
-    return new Category(cat.id, {
+    console.log("talált cat: " + cat.category_name)
+    const newCat: Category = new Category(cat.id, {
       name: cat.category_name
     })
+
+    console.log("új macska: " + newCat.id + " " + newCat.name)
+
+    return newCat;
+    
   }
   override async commitCategory(val: Category): Promise<void> {
     const query = `

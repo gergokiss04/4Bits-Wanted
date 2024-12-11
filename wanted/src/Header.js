@@ -3,11 +3,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { SERVER_PORT } from './Constants.js';
+import { useAuth } from './AuthContext.js';
 
 function Header() {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  //const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const {isLoggedIn, setIsLoggedIn} = useAuth();
 
   useEffect(() => {
     const checkSession = async () => {

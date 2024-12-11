@@ -11,10 +11,12 @@ import Product from './Product';
 import Profile from './Profile';
 import Basket from './Basket';
 import Order from './Order';
+import { AuthProvider } from './AuthContext';
 
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Header />
       <Routes>
@@ -32,6 +34,7 @@ function App() {
       </Routes>
       <Footer />
     </Router>
+    </AuthProvider>
   );
 }
 
