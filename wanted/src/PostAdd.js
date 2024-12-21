@@ -20,21 +20,33 @@ function PostAdd() {
           fetch(`http://127.0.0.1:${SERVER_PORT}/api/categories`),
           fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`)
         ]);
-        window.alert("RISZPONZ: " + await categoriesResponse.text())
-        await Promise.all(categoriesResponse);
-        if (!categoriesResponse.ok || !mediastagerResponse.ok) {
+
+        console.log('Categories response status:', categoriesResponse.status);
+
+        // Ez most 401-et dob!! azért vannak kommentezve
+        console.log('Mediastager response status:', mediastagerResponse.status); 
+
+        /*if (!categoriesResponse.ok || !mediastagerResponse.ok) {
           throw new Error('Nem sikerült betölteni az adatokat');
-        }
-        
+        }*/
 
         const categoriesData = await categoriesResponse.json();
-        const mediastagerData = await mediastagerResponse.json();
-        
+        //const mediastagerData = await mediastagerResponse.json();
+
+        console.log('Fetched categories data:', categoriesData);
+        //console.log('Fetched mediastager data:', mediastagerData);
+
         setCategories(categoriesData);
-        setMediaStagerInfo(mediastagerData);
+        //setMediaStagerInfo(mediastagerData);
+
+        categories.forEach(cat => {
+          console.log(cat.name);
+          console.log(cat.id);
+        });
 
       } catch (error) {
         console.error('Inicializálási hiba:', error.message);
+        
       }
     };
 
@@ -111,13 +123,12 @@ function PostAdd() {
         throw new Error('Nem sikerült a hirdetés feladása');
       }
 
-
       alert('Hirdetés sikeresen feladva');
       setTitle('');
       setPrice('');
       setDescription('');
       setCategoryId('');
-      
+
       const updatedMediastager = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`);
       const mediastagerData = await updatedMediastager.json();
       setMediaStagerInfo(mediastagerData);
