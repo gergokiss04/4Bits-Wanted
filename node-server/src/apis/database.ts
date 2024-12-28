@@ -224,6 +224,8 @@ export class DatabaseApi extends Api {
       offers.push(offer.id);
     }
 
+    console.log(offers);
+
     return offers;
     
   }
@@ -293,7 +295,7 @@ export class DatabaseApi extends Api {
     val.category.id,
     val.description,
     val.price,
-    JSON.stringify(val.pictureUris), // Assuming pictureUris is an array of strings
+    JSON.stringify(val.pictureUris),
     val.buyer ? val.buyer.id : null,
     val.soldTimestamp,
     val.buyerRating

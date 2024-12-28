@@ -23,7 +23,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products/electronics" element={<Product selectedCategory="Műszaki cikkek" />} />
         <Route path="/products/books" element={<Product selectedCategory="Könyvek" />} />
-        <Route path="/products/games" element={<Product selectedCategory="Társasjáték" />} />
+        <Route path="/products/games" element={<Product selectedCategory="Társasjátékok" />} />
         <Route path="/products/clothing" element={<Product selectedCategory="Ruhák" />} />
         <Route path="/post-ad" element={<PostAdd />} />
         <Route path="/login" element={<Login />} />
