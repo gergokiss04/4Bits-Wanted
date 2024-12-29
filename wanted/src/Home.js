@@ -6,15 +6,15 @@ export function Home() {
     <div>
       {/* Carousel */}
       <div id="carouselExampleAutoplaying" className="carousel slide" data-bs-ride="carousel">
-        <div className="carousel-inner" style={{ height: '50vh' }}>
+        <div className="carousel-inner">
           <div className="carousel-item active">
-            <img src="img/carousel1.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Slide 1" />
+            <img src="img/carousel1.jpg" className="d-block  object-fit-cover" alt="Slide 1" />
           </div>
           <div className="carousel-item">
-            <img src="img/carousel2.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Slide 2" />
+            <img src="img/carousel2.jpg" className="d-block  object-fit-cover" alt="Slide 2" />
           </div>
           <div className="carousel-item">
-            <img src="img/carousel3.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Slide 3" />
+            <img src="img/carousel3.jpg" className="d-block  object-fit-cover" alt="Slide 3" />
           </div>
         </div>
 

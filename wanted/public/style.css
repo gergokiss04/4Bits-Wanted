@@ -49,9 +49,27 @@
       border-style: outset;
     }
   
-  
-    /*CAROUSEL MAGASSÁGÁNAK BEÁLLÍTÁSA*/
     .carousel-inner {
-      max-height: 700px;
+      height: auto; 
+      max-height: 700px; 
+      overflow: hidden;
+    }
+    
+    .carousel-item img {
+      width: 100%; 
+      height: auto;
+      object-fit: cover;
+    }
+    
+
+    @media (max-width: 576px) {
+      .carousel-inner {
+        height: auto;
+        max-height: 40vh; 
+      }
+    
+      .carousel-item img {
+        object-fit: contain; 
+      }
     }
     
