@@ -14,13 +14,13 @@ Operációs rendszer: Windows 11
 | Hirdetés feladása | 2024.11.19. | Hirdetés feladása megfelelően jelenik meg | Működik | - |
 | Regisztráció | 2024.11.19. | Regisztráció megfelelően jelenik meg | Működik | - |
 | Bejelentkezés | 2024.11.19. | Bejelentkezés megfelelően jelenik meg | Működik | - |
-| Betűtípusok: | 2024.11.19. | Betűméret jól olvasható | Működik | - |
-| Gombok tesztje: | 2024.11.19. | Gombok érzékenyek és stílusosak | Működik | - |
-| Mobil nézet: | 2024.11.19. | Oldal mobilbarát elrendezésben | Működik | - |
-| Képek minősége: | 2024.11.19. | Képek nagyfelbontásúak | Működik | - |
-| Formok: | 2024.11.19. | Minden form funkció megfelelően működik | Működik | - |
-| Használhatóság: | 2024.11.19. | Felhasználói folyamatok zökkenőmentesek | Működik | - |
-| Gyors navigáció: |  2024.11.19. | Oldalak közötti váltás gyors | Működik | - |
+| Betűtípusok | 2024.11.19. | Betűméret jól olvasható | Működik | - |
+| Gombok tesztje | 2024.11.19. | Gombok érzékenyek és stílusosak | Működik | - |
+| Mobil nézet | 2024.11.19. | Oldal mobilbarát elrendezésben | Működik | - |
+| Képek minősége | 2024.11.19. | Képek nagyfelbontásúak | Működik | - |
+| Formok | 2024.11.19. | Minden form funkció megfelelően működik | Működik | - |
+| Használhatóság | 2024.11.19. | Felhasználói folyamatok zökkenőmentesek | Működik | - |
+| Gyors navigáció |  2024.11.19. | Oldalak közötti váltás gyors | Működik | - |
 
 Az Alfa tesztelés során a vizsgált elemek mind hibátlanul működtek mindenféle fennakadások nélkül.
 
@@ -33,6 +33,13 @@ Következő tesztelésnél a többi funkció kerül vizsgálatra illetve elemzé
 | Carousel | 2024.11.26. | 3 db fénykép lapozható,szép megjelenést mutat | Működik | - |
 | Termékek kilistázása téma szerint | 2024.11.26. | Az oldalon témánként megjelennek a termékek| Működik | - |
 | Header és Footer megjelenik | 2024.11.26. | A header és footer igényesen megjelenik,reszponzív| Működik | - |
+| Gombok tesztje | 2024.11.26. | Gombok aktív állapotban is jól láthatók | Működik | - |
+| Formázás | 2024.11.26. | Tartalmak jól formázottak | Működik | - |
+| Reszponzivitás | 2024.11.26. | Asztali és táblagépes nézet különbségei jól kezeltek | Működik | - |
+| Használhatóság | 2024.11.26. | Elsődleges feladatok egyszerűen elvégezhetők | Működik | - |
+| Oldalbetöltési idő | 2024.11.26. | Elfogadható sebesség, még lassabb eszközökön is | Működik | - |
+| Visszalépési funkció | 2024.11.26. | Felhasználók könnyen visszaléphetnek | Működik | - |
+| Hibaüzenetek | 2024.11.26. | Hibaüzenetek informatívak | Működik | - |
 
 A Béta teszt sikeresen zajlott.
 A Béta teszt során akadtan hibák, mely(ek) javításra szorulnak.
@@ -46,6 +53,12 @@ A végleges tesztelés során az összes fent felsorolt vizsgálati elem újra e
 | Kosár felület  | 2024.12.03. | Felhasználó kosárba rakott termékeinek megjelenítésére szolgáló oldal| Működik | Nem tapasztaltam hibát |
 | Rendelés véglegesítés felület  | 2024.12.03. | Felhasználó megrendelés adatainak megadása és kiválasztására megjelenítésére szolgáló oldal| Működik | Nem tapasztaltam hibát |
 | Képek megjelenése  | 2024.12.03. | Weboldalon a képek a felhasználói eszköz alapján igényesen jelennek meg| Működik | Nem tapasztaltam hibát |
+| Betöltési idő | 2024.12.03. | Minden oldal gyorsan tölt be | Működik | - |
+| Hirdetés funkció | 2024.12.03. | Feladott hirdetések könnyen kezelhetők | Működik | - |
+| Footer tartalma | 2024.12.03. | Kapcsolódó linkek és információk helyesek | Működik | - |
+| Header tartalma | 2024.12.03. | Kapcsolódó linkek és információk helyesek | Működik | - |
+| Szűrők | 2024.12.03. | Termékszűrők helyesen működnek | Működik | - |
+| Betűtípusok | 2024.12.03. | Olvashatóság különböző eszközökön | Működik | - |
 
 
 A Végleges teszt lezajlott és minden funkció rendesen működik, esztétikailag is megfelelő a program.
