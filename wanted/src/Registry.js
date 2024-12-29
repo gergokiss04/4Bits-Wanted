@@ -36,7 +36,7 @@ function Registry() {
   };
 
   return (
-    <div className="p-5 m-auto text-center content bg-lavender img-down">
+    <div className="p-5 text-center content bg-lavender img-down">
       <div id="register" className="container-fluid text-white scrollspy dark-brown-background-color">
         <h1>Regisztráció</h1>
         <p>Csatlakozz, és adj el használt termékeidet díjmentesen</p>

@@ -140,7 +140,7 @@ function PostAdd() {
   };
 
   return (
-    <div className="p-5 m-auto text-center content bg-lavender img-down">
+    <div className="p-5 text-center content bg-lavender img-down">
         <div
           id="postadd"
           className="container-fluid text-white scrollspy dark-brown-background-color"

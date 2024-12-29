@@ -68,7 +68,7 @@ function Product({ selectedCategory }) {
   console.log("PRODUCTS[0]: " + products[0]);
   console.log("FILTERED: " + filteredProducts);
   return (
-        <div className="p-5 m-auto text-center content bg-lavender img-down">
+        <div className="p-5 text-center content bg-lavender img-down">
         <div
           id="login"
           className="container-fluid text-white scrollspy dark-brown-background-color"
