@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { SERVER_PORT } from './Constants.js';
 import { useAuth } from './AuthContext.js';
+import { useCart } from 'react-use-cart';
 
 function Login() {
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const {setIsLoggedIn} = useAuth();
+  const { setIsLoggedIn } = useAuth(); // Destructure setUser from useAuth
+  const { emptyCart } = useCart(); // Destructure emptyCart from useCart
 
   const handleLogin = async (event) => {
+    emptyCart();
     event.preventDefault();
 
     try {
@@ -25,18 +27,24 @@ function Login() {
           pass: password,
         }),
         credentials: 'include'
-      })
+      });
 
-      if (response.ok){
+      if (response.ok) {
         setIsLoggedIn(true);
+
+        // Clear the cart items using useCart
+        console.log('Clearing cart...');
+        emptyCart();
+        console.log('Cart cleared.');
+
         navigate('/');
-      } else{
+      } else {
         throw new Error("Nem sikerült bejelentkezni");
       }
-    } catch (error){
+    } catch (error) {
       alert(error.message);
     }
-  }
+  };
 
   return (
     <div className="p-5 text-center content bg-lavender img-down">

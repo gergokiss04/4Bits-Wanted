@@ -182,41 +182,41 @@ export class DatabaseApi extends Api {
   }
   override async yieldOfferIds(titleRegex: RegExp | undefined, categoryFilter: number | undefined, minPrice: number | undefined, maxPrice: number | undefined, orderBy: 'id' | 'price' | 'random', descending: boolean): Promise<number[]> {
     let query = 'SELECT id FROM offers WHERE 1=1';
-
-
+    const params: (string | number)[] = [];
+  
     if (titleRegex) {
-      query += ` AND title REGEXP ${titleRegex.source}`;
-      
+      query += ` AND title REGEXP ?`;
+      params.push(titleRegex.source);
     }
-
+  
     if (categoryFilter !== undefined) {
-      query += ` AND category_id = ${categoryFilter}`;
-
+      query += ` AND category_id = ?`;
+      params.push(categoryFilter);
     }
-
+  
     if (minPrice !== undefined) {
-      query += ` AND price >= ${minPrice}`;
-
+      query += ` AND price >= ?`;
+      params.push(minPrice);
     }
-
+  
     if (maxPrice !== undefined) {
-      query += ` AND price <= ${maxPrice}`;
-
+      query += ` AND price <= ?`;
+      params.push(maxPrice);
+    }
+  
+    switch (orderBy) {
+      case 'id':
+        query += ` ORDER BY id`;
+        break;
+      case 'price':
+        query += ` ORDER BY price`;
+        break;
+      case 'random':
+        query += ` ORDER BY RAND()`;
+        break;
     }
 
-    if (orderBy === "price") {
-      query += ' ORDER BY price';
-    } else if (orderBy === "random") {
-      query += ' ORDER BY RAND()';
-    } else {
-      query += ' ORDER BY id';
-    }
-
-    if (descending) {
-      query += ' DESC';
-    }
-
-    const rows = await this.db.execute(query);
+    const rows = await this.db.execute(query, params);
 
     let offers: number[] = []
 

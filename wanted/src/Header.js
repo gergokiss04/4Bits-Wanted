@@ -4,12 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { SERVER_PORT } from './Constants.js';
 import { useAuth } from './AuthContext.js';
+import { useCart } from 'react-use-cart';
 
 function Header() {
 
   //const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const {isLoggedIn, setIsLoggedIn} = useAuth();
+  const {emptyCart} = useCart();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -46,6 +48,7 @@ function Header() {
 
       if (response.ok) {
         setIsLoggedIn(false);
+        emptyCart();
         navigate('/');
       } else {
         console.error('Logout hiba');

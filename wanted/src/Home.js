@@ -3,14 +3,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect } from 'react';
 import { SERVER_PORT } from './Constants';
 import { useState } from 'react';
+import { CartProvider, useCart } from "react-use-cart";
 
 export function Home() {
     useEffect(() => { 
     
       fetchOffers();
+
     }, [])
 
     const [offers, setOffer] = useState([]);
+    const [searchTitle, setSearchTitle] = useState([]);
+    const [result, setResult] = useState([]);
+
     const fetchOffers = async () => {
     try {
       let apiURL = `http://127.0.0.1:${SERVER_PORT}/api/offers/random?count=3`;
@@ -30,6 +35,16 @@ export function Home() {
       console.log(e.message);
     }
   }
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers?filterTitle=${searchTitle}`);
+
+    const foundOffers = await response.json();
+    const offerData = await Promise.all(foundOffers.map(id => fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${id}`).then(x => x.json())))
+    setResult(offerData);
+    console.log(foundOffers);
+  }
+
   return (
     <div>
       {/* Carousel */}
@@ -63,11 +78,13 @@ export function Home() {
           <h1>Milyen terméket keres?</h1>
           <hr />
           <div className="d-flex justify-content-center mt-4">
-            <form className="d-flex" role="search">
+            <form className="d-flex" role="search" onSubmit={handleSearch}>
               <input
                 className="form-control me-4"
                 type="search"
                 placeholder="Keresés..."
+                value={searchTitle}
+                onChange={(e) => setSearchTitle(e.target.value)}
                 aria-label="Search"
                 style={{ maxWidth: '1000px' }}
               />
@@ -78,7 +95,37 @@ export function Home() {
           </div>
         </div>
       </div>
-
+            {/* Keresési eredmények */}
+            {result.length > 0 && (
+        <div className="p-5 m-auto text-center content bg-lavender img-down">
+          <div id="search-results" className="container-fluid text-white scrollspy dark-brown-background-color">
+            <h1>Keresési eredmények</h1>
+            <hr />
+            <div className="row">
+              {result.map((offer) => (
+                <div className="col-md-4 mb-4" key={offer.id}>
+                  <div className="card h-100 shadow-sm">
+                    <img
+                      src={offer.image}
+                      className="card-img-top"
+                      alt={offer.name}
+                      style={{ height: '200px', objectFit: 'cover' }}
+                    />
+                    <div className="card-body">
+                      <h5 className="card-title">{offer.title}</h5>
+                      <p className="card-text"><strong>Ár:</strong> {Math.round(offer.price)} Ft</p>
+                      <p className="card-text">{offer.description}</p>
+                    </div>
+                    <div className="card-footer text-center">
+                      <button className="btn btn-primary">Megvásárol</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="p-5 m-auto text-center content bg-lavender img-down">
         <div id="login" className="container-fluid text-white scrollspy dark-brown-background-color">
           <h1>Kiemelt termékeink</h1>
@@ -107,6 +154,8 @@ export function Home() {
           </div>
         </div>
       </div>
+
+      
     </div>
   );
 }

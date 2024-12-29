@@ -12,11 +12,13 @@ import Profile from './Profile';
 import Basket from './Basket';
 import Order from './Order';
 import { AuthProvider } from './AuthContext';
+import { CartProvider } from 'react-use-cart';
 
 
 function App() {
   return (
     <AuthProvider>
+      <CartProvider>
     <Router>
       <Header />
       <Routes>
@@ -34,6 +36,7 @@ function App() {
       </Routes>
       <Footer />
     </Router>
+    </CartProvider>
     </AuthProvider>
   );
 }
