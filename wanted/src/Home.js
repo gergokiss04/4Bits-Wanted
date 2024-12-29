@@ -1,7 +1,35 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useEffect } from 'react';
+import { SERVER_PORT } from './Constants';
+import { useState } from 'react';
 
 export function Home() {
+    useEffect(() => { 
+    
+      fetchOffers();
+    }, [])
+
+    const [offers, setOffer] = useState([]);
+    const fetchOffers = async () => {
+    try {
+      let apiURL = `http://127.0.0.1:${SERVER_PORT}/api/offers/random?count=3`;
+      
+      const response = await fetch(apiURL);
+      console.log("RESPONSE:" + response);
+      console.log("APIURL: " + apiURL);
+      const ids = await response.json();
+      console.log("IDS: " + ids);
+      const offerDetailed = await Promise.all(ids.map(id => fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${id}`).then(x => x.json())));
+
+      setOffer(offerDetailed);
+
+      console.log("OFFERDATAILED: " + offerDetailed);
+    }
+    catch(e) {
+      console.log(e.message);
+    }
+  }
   return (
     <div>
       {/* Carousel */}
@@ -56,51 +84,26 @@ export function Home() {
           <h1>Kiemelt termékeink</h1>
           <hr />
           <div className="row">
-            <div className="col-md-4 mb-4">
-              <div className="card h-100 shadow-sm">
-                {/* Image helye */}
-                <div className="card-body">
-                  <h5 className="card-title">Card Title 1</h5>
-                  <p className="card-text"><strong>Ár:</strong> Value</p>
-                  <p className="card-text"><strong>Típus:</strong> Category</p>
-                  <p className="card-text">Description</p>
-                </div>
-                <div className="card-footer text-center">
-                  <button className="btn btn-primary">Megvásárol</button>
-                </div>
+          {offers.map((offer) => (
+          <div className="col-md-4 mb-4" key={offer.id}>
+            <div className="card h-100 shadow-sm">
+              <img
+                src={offer.image}
+                className="card-img-top"
+                alt={offer.name}
+                style={{ height: '200px', objectFit: 'cover' }}
+              />
+              <div className="card-body">
+                <h5 className="card-title">{offer.title}</h5>
+                <p className="card-text"><strong>Ár:</strong> {Math.round(offer.price)} Ft</p>
+                <p className="card-text">{offer.description}</p>
+              </div>
+              <div className="card-footer text-center">
+                <button className="btn btn-primary">Megvásárol</button>
               </div>
             </div>
-
-
-            <div className="col-md-4 mb-4">
-              <div className="card h-100 shadow-sm">
-                {/* Image helye */}
-                <div className="card-body">
-                  <h5 className="card-title">Card Title 2</h5>
-                  <p className="card-text"><strong>Ár:</strong> Value</p>
-                  <p className="card-text"><strong>Típus:</strong> Category</p>
-                  <p className="card-text">Description</p>
-                </div>
-                <div className="card-footer text-center">
-                  <button className="btn btn-primary">Megvásárol</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-4 mb-4">
-              <div className="card h-100 shadow-sm">
-                {/* Image helye */}
-                <div className="card-body">
-                  <h5 className="card-title">Card Title 3</h5>
-                  <p className="card-text"><strong>Ár:</strong> Value</p>
-                  <p className="card-text"><strong>Típus:</strong> Category</p>
-                  <p className="card-text">Description</p>
-                </div>
-                <div className="card-footer text-center">
-                  <button className="btn btn-primary">Megvásárol</button>
-                </div>
-              </div>
-            </div>
+          </div>
+        ))}
           </div>
         </div>
       </div>

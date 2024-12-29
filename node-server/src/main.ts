@@ -164,7 +164,7 @@ export class Request {
   }
 
   setCookie(name: string, value: string) {
-    this.res.setHeader('Set-Cookie', `${name}=${value};`);
+    this.res.setHeader('Set-Cookie', `${name}=${value};  SameSite=None; Secure;`);
   }
 }
 

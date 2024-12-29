@@ -148,6 +148,10 @@ function PostAdd() {
     <div className="container mt-5">
       <h1 className="text-center mb-4">Hirdetés feladása</h1>
       <hr />
+      <form action="/api/mediastager" method="POST" enctype="multipart/form-data">
+        <input type="file" id="image" name="image" accept="image/*" required/>
+        <button type="submit">Submit</button>
+      </form>
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6">

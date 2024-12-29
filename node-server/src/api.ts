@@ -693,11 +693,14 @@ if (this.reportErrors) {
 
     const optionalNum = function(name: string): number | undefined {
       const val = call.request.query[name]
-      return (typeof val === 'number') ? val : undefined
+      console.log(typeof(val));
+      console.log(val);
+      
+      return (typeof val === 'string') ? parseInt(val, 10) : undefined
     }
 
     let count = optionalNum('count') ?? 10
-
+    console.log(count);
     let offers = await this.yieldOfferIds(
       undefined,
       undefined,
