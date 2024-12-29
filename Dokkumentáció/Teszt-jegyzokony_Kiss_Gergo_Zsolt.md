@@ -15,12 +15,12 @@ Operációs rendszer: Windows 11
 | Regisztráció | 2024.11.19. | Regisztráció megfelelően jelenik meg | Működik | - |
 | Bejelentkezés | 2024.11.19. | Bejelentkezés megfelelően jelenik meg | Működik | - |
 | Betűtípusok: | 2024.11.19. | Betűméret jól olvasható | Működik | - |
-| Gombok tesztje: 2024.11.19. | Gombok érzékenyek és stílusosak | Működik | - |
-| Mobil nézet: 2024.11.19. | Oldal mobilbarát elrendezésben | Működik | - |
-| Képek minősége: 2024.11.19. | Képek nagyfelbontásúak | Működik | - |
-| Formok: 2024.11.19. | Minden form funkció megfelelően működik | Működik | - |
-| Használhatóság: 2024.11.19. | Felhasználói folyamatok zökkenőmentesek | Működik | - |
-| Gyors navigáció: 2024.11.19. | Oldalak közötti váltás gyors | Működik | - |
+| Gombok tesztje: | 2024.11.19. | Gombok érzékenyek és stílusosak | Működik | - |
+| Mobil nézet: | 2024.11.19. | Oldal mobilbarát elrendezésben | Működik | - |
+| Képek minősége: | 2024.11.19. | Képek nagyfelbontásúak | Működik | - |
+| Formok: | 2024.11.19. | Minden form funkció megfelelően működik | Működik | - |
+| Használhatóság: | 2024.11.19. | Felhasználói folyamatok zökkenőmentesek | Működik | - |
+| Gyors navigáció: |  2024.11.19. | Oldalak közötti váltás gyors | Működik | - |
 
 Az Alfa tesztelés során a vizsgált elemek mind hibátlanul működtek mindenféle fennakadások nélkül.
 
