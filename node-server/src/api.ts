@@ -663,23 +663,28 @@ if (this.reportErrors) {
         }
 
         const stager = await this.getStager(call.loggedInAs)
-
+        console.log(body);
         const offer = new Offer(
           id,
           {
-            createdTimestamp: Date.now(),
+            created: Date.now(),
             seller: call.loggedInAs,
             title: body.title,
             category: category,
             description: body.description,
             price: body.price,
-            pictureUris: stager.urls
+            pictureUris: stager.urls,
+            sold: null
           }
         )
 
         stager.urls = []
 
+
         await this.offerCache.insert(id, offer)
+        await this.commitOffer(offer);
+
+        return new Result(StatusCodes.OK, offer)
       }
       default: throw new Error('Unreachable')
     }
