@@ -85,6 +85,7 @@ function PostAdd() {
 
         // Mediastager update
         const updatedMediastager = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`);
+        console.log(updatedMediastager);
         const mediastagerData = await updatedMediastager.json();
         setMediaStagerInfo(mediastagerData);
 
@@ -245,7 +246,7 @@ function PostAdd() {
                   {mediaStagerInfo.uris.map((uri, index) => (
                     <img 
                       key={index} 
-                      src={uri} 
+                      src={`/api/media/${uri}`} 
                       alt={`Feltöltött kép ${index + 1}`} 
                       className="img-thumbnail m-1" 
                       style={{width: '100px', height: '100px', objectFit: 'cover'}} 
