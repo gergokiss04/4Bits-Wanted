@@ -49,7 +49,10 @@ function Product({ selectedCategory, userId }) {
   };
 
   const filteredProducts = catId === null ? products : products.filter(product => product.categoryId == catId);
-
+  const modifiedProducts = filteredProducts.map(product => ({
+    ...product,
+    pictureUris: product.pictureUris.substring(2, product.pictureUris.length - 2)
+  }));
   return (
     <div className="p-5 text-center content bg-lavender img-down">
       <div
@@ -59,11 +62,11 @@ function Product({ selectedCategory, userId }) {
         <h2 className="text-center mb-4">{selectedCategory}</h2>
         <hr />
         <div className="row">
-          {filteredProducts.map((product) => (
+          {modifiedProducts.map((product) => (
             <div className="col-md-4 mb-4" key={product.id}>
               <div className="card h-100 shadow-sm">
                 <img
-                  src={product.image}
+                  src={`/api/media/${product.pictureUris}`}
                   className="card-img-top"
                   alt={product.name}
                   style={{ height: '200px', objectFit: 'cover' }}
