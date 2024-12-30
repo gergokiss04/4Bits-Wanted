@@ -213,6 +213,8 @@ async function serveStatic(request: Request, url: string): Promise<void> {
 const server = http.createServer();
 
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => {
+  res.setHeader('Access-Control-Allow-Origin', `http://${config.listenHostname}:${config.listenPort}`)
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
