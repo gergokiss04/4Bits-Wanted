@@ -30,11 +30,15 @@ function PostAdd() {
           throw new Error('Nem sikerült betölteni az adatokat');
         }*/
 
-        const categoriesData = await categoriesResponse.json();
+        let categoriesData = await categoriesResponse.json();
         //const mediastagerData = await mediastagerResponse.json();
 
         console.log('Fetched categories data:', categoriesData);
         //console.log('Fetched mediastager data:', mediastagerData);
+        console.log(categoriesData[0]);
+        console.log(typeof(categoriesData[0]));
+
+        categoriesData = categoriesData.map(cat => JSON.parse(cat));
 
         setCategories(categoriesData);
         //setMediaStagerInfo(mediastagerData);
