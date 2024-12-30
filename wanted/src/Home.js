@@ -21,15 +21,10 @@ export function Home() {
       let apiURL = `http://127.0.0.1:${SERVER_PORT}/api/offers/random?count=3`;
       
       const response = await fetch(apiURL);
-      console.log("RESPONSE:" + response);
-      console.log("APIURL: " + apiURL);
       const ids = await response.json();
-      console.log("IDS: " + ids);
       const offerDetailed = await Promise.all(ids.map(id => fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${id}`).then(x => x.json())));
 
       setOffer(offerDetailed);
-
-      console.log("OFFERDATAILED: " + offerDetailed);
     }
     catch(e) {
       console.log(e.message);
@@ -42,7 +37,6 @@ export function Home() {
     const foundOffers = await response.json();
     const offerData = await Promise.all(foundOffers.map(id => fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${id}`).then(x => x.json())))
     setResult(offerData);
-    console.log(foundOffers);
   }
 
   return (

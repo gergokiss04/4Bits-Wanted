@@ -589,13 +589,10 @@ if (this.reportErrors) {
     const regex = (typeof filter === 'string') ? RegExp(filter, 'i') : undefined
 
     const cats = await this.yieldCategoryIds(regex)
-    console.log("API CATS: " + cats);
     const arr = cats.map(async (id) => (await this.fetchCategory(id))?.serializePublic(), this)
-    console.log("API ARR: " + arr[0].toString());
 
     const resolvedArr = await Promise.all(arr);
 
-    console.log(resolvedArr);
     return new Result(StatusCodes.OK, resolvedArr)
   }
 
@@ -693,14 +690,11 @@ if (this.reportErrors) {
 
     const optionalNum = function(name: string): number | undefined {
       const val = call.request.query[name]
-      console.log(typeof(val));
-      console.log(val);
       
       return (typeof val === 'string') ? parseInt(val, 10) : undefined
     }
 
     let count = optionalNum('count') ?? 10
-    console.log(count);
     let offers = await this.yieldOfferIds(
       undefined,
       undefined,

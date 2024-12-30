@@ -31,7 +31,6 @@ function Registry() {
   const handleSubmit = (e) => {
     e.preventDefault();
     Register();
-    window.alert('YIPPEEE');
     navigate('/');
   };
 

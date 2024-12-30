@@ -86,14 +86,9 @@ export class DatabaseApi extends Api {
     const [rows] = await this.db.execute(query);
 
     let userIds: number[] = [];
-    //console.log("Kapott regex: " + nameRegex);
 
     for(const user of rows as {id: number, name: string}[]) {
-      /*console.log("user: " + user);
-      console.log("userid: " + user.id);
-      console.log("username: " + user.name)*/
       if(!nameRegex || nameRegex.test(user.name)) {
-        //console.log("USERID: " + user.id)
         userIds.push(user.id);
       }
     }
@@ -102,13 +97,11 @@ export class DatabaseApi extends Api {
 
   }
   override async fetchUser(id: number): Promise<User | undefined> {
-    console.log("HALO");
     const query = `SELECT * FROM users WHERE id = ?;`;
 
     const [rows] = await this.db.execute<RowDataPacket[]>(query, [id]);
 
     if(rows.length === 0) {
-      console.log("eh?");
       return undefined;
     }
 
@@ -121,8 +114,6 @@ export class DatabaseApi extends Api {
       password: string;
       average_rating: number;
     }
-
-    console.log("Első: " + user);
     const finalUser: User = new User(user.id, {
       id: user.id,
       name: user.name,
@@ -133,19 +124,7 @@ export class DatabaseApi extends Api {
       pictureUri: user.profile_pic
     });
 
-    console.log("Final: " + finalUser);
-
     return finalUser;
-
-    /*return new User(user.id, {
-      id: user.id,
-      name: user.name,
-      password: user.password,
-      email: user.email,
-      averageStars: user.average_rating,
-      bio: user.bio,
-      pictureUri: user.profile_pic
-    });*/
   }
   override async commitUser(val: User): Promise<void> {
     const query = `
@@ -223,8 +202,6 @@ export class DatabaseApi extends Api {
     for(const offer of rows[0] as {id: number}[]) {
       offers.push(offer.id);
     }
-
-    console.log(offers);
 
     return offers;
     
@@ -320,13 +297,9 @@ export class DatabaseApi extends Api {
               //meow
     for(const cat of rows[0] as {id: number, category_name: string}[]) {
       if(!nameRegex || nameRegex.test(cat.category_name)) {
-        //meowmeow
-        console.log("KAT1: " + cat.category_name);
         cats.push(cat.id);
       }
     }
-
-    console.log("VÉGLEGES CAT: " + cats);
 
     return cats;
   }
@@ -336,7 +309,6 @@ export class DatabaseApi extends Api {
     const [rows] = await this.db.execute<RowDataPacket[]>(query);
 
     if(rows[0].length === 0) {
-      console.log("hülye vagy: " + rows[0])
       return undefined;
     }
 
@@ -344,12 +316,9 @@ export class DatabaseApi extends Api {
       id: number;
       category_name: string;
     }
-    console.log("talált cat: " + cat.category_name)
     const newCat: Category = new Category(cat.id, {
       name: cat.category_name
     })
-
-    console.log("új macska: " + newCat.id + " " + newCat.name)
 
     return newCat;
     

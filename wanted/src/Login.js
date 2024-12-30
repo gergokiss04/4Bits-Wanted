@@ -31,11 +31,7 @@ function Login() {
 
       if (response.ok) {
         setIsLoggedIn(true);
-
-        // Clear the cart items using useCart
-        console.log('Clearing cart...');
         emptyCart();
-        console.log('Cart cleared.');
 
         navigate('/');
       } else {
