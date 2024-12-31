@@ -4,7 +4,8 @@ import { useCart } from 'react-use-cart';
 import { SERVER_PORT } from './Constants';
 
 function Order() {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
+  const [shippingPrice, setShippingPrice] = useState(0);
 
   const {items} = useCart();
 
@@ -52,6 +53,29 @@ function Order() {
     }
   };
   
+  const handleShippingPrice = async (e) => {
+    console.log(e);
+    switch(e) {
+      case "wolfpost":
+        setShippingPrice(1490);
+        break;
+      case "nextday":
+        setShippingPrice(1290);
+        break;
+      case "npm":
+        setShippingPrice(1190);
+        break;
+      case "posta":
+        setShippingPrice(900);
+        break;
+      default:
+        setShippingPrice(0);
+        break;
+    }
+
+    console.log(shippingPrice);
+  };
+
   const totalPrice = items.reduce((total, item) => total + item.price, 0);
 
   return (
@@ -98,7 +122,7 @@ function Order() {
 
                 <div className="mb-3">
                   <label htmlFor="orderType" className="form-label">Szállítás típusa:</label>
-                  <select className="form-select" id="orderType" required>
+                  <select className="form-select" id="orderType" required onChange={(e) => handleShippingPrice(e.target.value)}>
                     <option value="">Válaszd ki a szállítás típusát:</option>
                     <option value="wolfpost">Wolfpost csomagautomata 1490FT</option>
                     <option value="nextday">Nextday csomagautomata 1290FT</option>
@@ -106,7 +130,7 @@ function Order() {
                     <option value="posta">Postán maradó csomag 990FT</option>
                   </select>
                 </div>
-                <h2>Végösszeg: {Math.round(totalPrice)} Ft</h2>
+                <h2>Végösszeg: {Math.round(totalPrice) + shippingPrice} Ft</h2>
                 
                 <div className="text-center mt-4">
                   <button type="submit" className="btn btn-primary">Megrendelem</button>
