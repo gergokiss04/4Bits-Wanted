@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { useCart } from "react-use-cart";
 
 function Basket() {
-  const { items, isEmpty, totalItems, setItems } = useCart();
+  const { items, isEmpty, totalItems, removeItem } = useCart();
 
   return (
     <div className="p-5 text-center content bg-lavender img-down">
@@ -29,7 +29,9 @@ function Basket() {
                     <p>{item.description}</p>
                     <p>{Math.round(item.price)}</p>
                   </div>
-                  <span className="badge bg-primary rounded-pill">{item.quantity}</span>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => removeItem(item.id)}>Eltávolítás</button>
                 </li>
               ))}
             </ul>

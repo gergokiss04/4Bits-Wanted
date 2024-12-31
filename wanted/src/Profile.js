@@ -117,11 +117,6 @@ function Profile() {
                 </div>
               )}
             </div>
-
-            <form action="/api/mediastager" method="POST" enctype="multipart/form-data">
-  <input type="file" id="image" name="image" accept="image/*" required onChange={handleImageUpload}/>
-  <button type="submit">Submit</button>
-</form>
           </div>
         </div>
       </div>
