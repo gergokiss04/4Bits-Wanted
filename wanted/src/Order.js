@@ -19,11 +19,7 @@ function Order() {
         credentials: 'include'
       });
       const user = await response.json();
-    
-    console.log(user);
     setUser(user);
-
-    console.log(items);
     } catch (error) {
       console.error(error);
     }
@@ -34,7 +30,6 @@ function Order() {
     e.preventDefault();
 
     try {
-      console.log(items);
       for (const item of items) {
         const buyOfferResponse = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${item.id}/buy`, {
           method: 'POST',
@@ -54,7 +49,6 @@ function Order() {
   };
   
   const handleShippingPrice = async (e) => {
-    console.log(e);
     switch(e) {
       case "wolfpost":
         setShippingPrice(1490);
@@ -72,8 +66,6 @@ function Order() {
         setShippingPrice(0);
         break;
     }
-
-    console.log(shippingPrice);
   };
 
   const totalPrice = items.reduce((total, item) => total + item.price, 0);

@@ -38,7 +38,6 @@ function Product({ selectedCategory, userId }) {
       for(const offer of offerDetailed) {
        const offerResponse = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${offer.id}`);
        const offers = await offerResponse.json();
-       console.log(offers);
         
        if(offer.buyerId == null || offer.buyerId == undefined) {
         finalOffers.push(offer);

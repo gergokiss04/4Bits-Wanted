@@ -372,20 +372,13 @@ if (this.reportErrors) {
 
     let foundUser: User | undefined
 
-    //console.log(await this.yieldUserIds(new RegExp('^' + body.login + '$')));
-
     for(const id of await this.yieldUserIds(new RegExp('^' + body.login + '$'))) {
       if(foundUser !== undefined) break
       foundUser = await this.userCache.tryGet(id)
-      
-      //console.log("FOUND USER-asd: " + foundUser);
     }
 
-    //console.log("FOUND USER:" + foundUser);
-
     if(foundUser === undefined || foundUser.name != body.login || foundUser.password != this.hashPassword(body.pass, foundUser.id)) {
-      //log.warn(this.hashPassword(body.pass, foundUser!.id))
-      //console.log("FOUNDUSER2: " + foundUser)
+      
       return new Result(StatusCodes.FORBIDDEN, 'Incorrect username or password')
     } else {
       giveToken(foundUser)
@@ -767,9 +760,6 @@ if (this.reportErrors) {
     offer.buyer = call.loggedInAs
     offer.entangle(offer.buyer)
     offer.entangle(offer.seller)
-
-    console.log(offer);
-
     await this.commitOffer(offer);
 
     return new Result(StatusCodes.OK, 'Purchased')

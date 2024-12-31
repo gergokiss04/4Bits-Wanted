@@ -248,7 +248,6 @@ export class DatabaseApi extends Api {
     });
   }
   override async commitOffer(val: Offer): Promise<void> {
-    console.log("HELOOO");
     let query = ``;
     let params: any[] = [];
 
@@ -297,10 +296,6 @@ export class DatabaseApi extends Api {
           val.id
         ];
     }
-
-    console.log("TESTING");
-    console.log(params);
-  
     await this.db.execute(query, params);
   }
   override async dropOffer(id: number): Promise<void> {

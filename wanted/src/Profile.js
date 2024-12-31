@@ -52,15 +52,12 @@ function Profile() {
           const user = await userResponse.json();
 
           const profilePicUri = []
-          console.log(mediaStagerInfo);
           if(mediaStagerInfo.uris.length != 0) {
-            console.log("itt vagyok")
             profilePicUri = mediaStagerInfo.uris[0];
           }
           else {
             alert("Üres a mediastager");
           }
-          console.log(profilePicUri);
 
           const uploadProfilePic = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/users/${user.id}/picture`, {
             method: 'POST',
@@ -73,7 +70,6 @@ function Profile() {
           }
   
           const uploadData = await uploadProfilePic.json();
-          console.log("DATA: " + uploadData);
           setProfilePicUri(uploadData.pictureUri);
 
         } catch (error) {
@@ -87,7 +83,6 @@ function Profile() {
       const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/users/self`);
       const currentUser = await response.json();
 
-      console.log(currentUser.name);
       setUserName(currentUser.name);
     };
 
