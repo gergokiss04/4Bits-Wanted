@@ -51,8 +51,9 @@ function Product({ selectedCategory, userId }) {
   const filteredProducts = catId === null ? products : products.filter(product => product.categoryId == catId);
   const modifiedProducts = filteredProducts.map(product => ({
     ...product,
-    pictureUris: product.pictureUris.substring(2, product.pictureUris.length - 2)
+    pictureUris: product.pictureUris.split(',')[0].substring(2, product.pictureUris.length - 2)
   }));
+
   return (
     <div className="p-5 text-center content bg-lavender img-down">
       <div
@@ -66,10 +67,10 @@ function Product({ selectedCategory, userId }) {
             <div className="col-md-4 mb-4" key={product.id}>
               <div className="card h-100 shadow-sm">
                 <img
-                  src={`/api/media/${product.pictureUris}`}
+                  src={`/api/media/${product.pictureUris.replace('\"', '')}`} // a kép nevének elején vagy végén ne maradjon " jel véletlenül
                   className="card-img-top"
                   alt={product.name}
-                  style={{ height: '200px', objectFit: 'cover' }}
+                  style={{ height: '200px', objectFit: 'contain' }}
                 />
                 <div className="card-body">
                   <h5 className="card-title">{product.title}</h5>

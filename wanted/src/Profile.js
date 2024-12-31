@@ -1,6 +1,83 @@
+import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { SERVER_PORT } from './Constants.js';
+
+
+
+
 
 function Profile() {
+  const [profilePicUri, setProfilePicUri] = useState('');
+  const [mediaStagerInfo, setMediaStagerInfo] = useState({
+    imagesLeft: 1,
+    uris: []
+  });
+
+    const handleImageUpload = async (e) => {
+      const files = Array.from(e.target.files);
+  
+      if (mediaStagerInfo.imagesLeft < files.length) {
+        alert(`Maximum ${mediaStagerInfo.imagesLeft} képet tölthet fel.`);
+        return;
+      }
+  
+      for (let file of files) {
+        const formData = new FormData();
+        formData.append('image', file);
+  
+        try {
+          const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`, {
+            method: 'POST',
+            body: formData
+          });
+  
+          if (!response.ok) {
+            if (response.status === 400) {
+              throw new Error('Megtelt a mediastager.');
+            }
+            throw new Error('Hiba a képfeltöltéskor');
+          }
+  
+          // Mediastager update
+          const updatedMediastager = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`);
+          const mediastagerData = await updatedMediastager.json();
+          setMediaStagerInfo(mediastagerData);
+
+          const userResponse = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/users/self`);
+          const user = await userResponse.json();
+
+          const profilePicUri = []
+          console.log(mediaStagerInfo);
+          if(mediaStagerInfo.uris.length != 0) {
+            console.log("itt vagyok")
+            profilePicUri = mediaStagerInfo.uris[0];
+          }
+          else {
+            alert("Üres a mediastager");
+          }
+          console.log(profilePicUri);
+
+          const uploadProfilePic = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/users/${user.id}/picture`, {
+            method: 'POST',
+            body: profilePicUri,
+            credentials: 'include'
+          });
+
+          if(!uploadProfilePic.ok) {
+            throw new Error("Hiba a profilkép feltöltésekor!");
+          }
+  
+          const uploadData = await uploadProfilePic.json();
+          console.log("DATA: " + uploadData);
+          setProfilePicUri(uploadData.pictureUri);
+
+        } catch (error) {
+          console.error('Képfeltöltési hiba:', error.message);
+          alert(error.message);
+        }
+      }
+    };
+
   return (
     <div className="p-5 m-auto text-center content bg-lavender img-down">
       <div id="profile" className="container-fluid text-white scrollspy dark-brown-background-color">
@@ -23,14 +100,28 @@ function Profile() {
 
             {/* Profilkép feltöltése */}
             <div className="mb-5">
-              <label htmlFor="profileImageUpload" className="form-label">Profilkép feltöltése</label>
-              <input
-                type="file"
-                className="form-control"
-                id="profileImageUpload"
+              <label htmlFor="images" className="form-label">
+                Képek feltöltése (max {mediaStagerInfo.imagesLeft} kép)
+              </label>
+              <input 
+                type="file" 
+                className="form-control" 
+                id="images"
                 accept="image/*"
+                onChange={handleImageUpload}
+                disabled={mediaStagerInfo.imagesLeft === 0}
               />
+              {mediaStagerInfo.imagesLeft === 0 && (
+                <div className="text-danger mt-2">
+                  A médiaelőkészítő megtelt. Nem tölthet fel több képet.
+                </div>
+              )}
             </div>
+
+            <form action="/api/mediastager" method="POST" enctype="multipart/form-data">
+  <input type="file" id="image" name="image" accept="image/*" required onChange={handleImageUpload}/>
+  <button type="submit">Submit</button>
+</form>
           </div>
         </div>
       </div>

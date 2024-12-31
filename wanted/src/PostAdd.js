@@ -21,33 +21,11 @@ function PostAdd() {
           fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`)
         ]);
 
-        console.log('Categories response status:', categoriesResponse.status);
-
-        // Ez most 401-et dob!! azért vannak kommentezve
-        console.log('Mediastager response status:', mediastagerResponse.status); 
-
-        /*if (!categoriesResponse.ok || !mediastagerResponse.ok) {
-          throw new Error('Nem sikerült betölteni az adatokat');
-        }*/
-
         let categoriesData = await categoriesResponse.json();
-        //const mediastagerData = await mediastagerResponse.json();
-
-        console.log('Fetched categories data:', categoriesData);
-        //console.log('Fetched mediastager data:', mediastagerData);
-        console.log(categoriesData[0]);
-        console.log(typeof(categoriesData[0]));
 
         categoriesData = categoriesData.map(cat => JSON.parse(cat));
 
         setCategories(categoriesData);
-        //setMediaStagerInfo(mediastagerData);
-
-        categories.forEach(cat => {
-          console.log(cat.name);
-          console.log(cat.id);
-        });
-
       } catch (error) {
         console.error('Inicializálási hiba:', error.message);
         
@@ -85,7 +63,6 @@ function PostAdd() {
 
         // Mediastager update
         const updatedMediastager = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/mediastager`);
-        console.log(updatedMediastager);
         const mediastagerData = await updatedMediastager.json();
         setMediaStagerInfo(mediastagerData);
 
@@ -153,10 +130,6 @@ function PostAdd() {
     <div className="container mt-5">
       <h1 className="text-center mb-4">Hirdetés feladása</h1>
       <hr />
-      <form action="/api/mediastager" method="POST" enctype="multipart/form-data">
-        <input type="file" id="image" name="image" accept="image/*" required/>
-        <button type="submit">Submit</button>
-      </form>
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6">
