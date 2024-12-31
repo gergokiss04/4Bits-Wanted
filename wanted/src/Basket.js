@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { NavLink } from 'react-router-dom';
 import { useCart } from "react-use-cart";
 
 function Basket() {
   const { items, isEmpty, totalItems, removeItem } = useCart();
+
+  // Calculate the total price
+  const totalPrice = items.reduce((total, item) => total + item.price, 0);
 
   return (
     <div className="p-5 text-center content bg-lavender img-down">
@@ -27,7 +30,7 @@ function Basket() {
                   <div>
                     <h5>{item.title}</h5>
                     <p>{item.description}</p>
-                    <p>{Math.round(item.price)}</p>
+                    <p><strong>Ár: {Math.round(item.price)} Ft</strong></p>
                   </div>
                   <button
                     className="btn btn-danger btn-sm"
@@ -35,11 +38,21 @@ function Basket() {
                 </li>
               ))}
             </ul>
+
+            <div className="mt-4">
+              <h3>Összesen fizetendő: {Math.round(totalPrice)} Ft</h3>
+            </div>
           </div>
         )}
 
         <br />
-        <NavLink className="nav-link" to="/order">
+        <NavLink
+          className="nav-link"
+          to={{
+            pathname: "/order",
+            state: { items, totalPrice }
+          }}
+        >
           <button type="submit" className="btn btn-primary w-100" style={{ maxWidth: '300px' }}>
             Tovább az adatok megadására
           </button>

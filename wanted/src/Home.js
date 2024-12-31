@@ -39,6 +39,11 @@ export function Home() {
     setResult(offerData);
   }
 
+  const modifiedProducts = offers.map(product => ({
+    ...product,
+    pictureUris: product.pictureUris.split(',')[0].substring(2, product.pictureUris.length - 2)
+  }));
+
   return (
     <div>
       {/* Carousel */}
@@ -125,11 +130,11 @@ export function Home() {
           <h1>Kiemelt termékeink</h1>
           <hr />
           <div className="row">
-          {offers.map((offer) => (
+          {modifiedProducts.map((offer) => (
           <div className="col-md-4 mb-4" key={offer.id}>
             <div className="card h-100 shadow-sm">
               <img
-                src={offer.image}
+                src={`/api/media/${offer.pictureUris.replace('\"', '')}`}
                 className="card-img-top"
                 alt={offer.name}
                 style={{ height: '200px', objectFit: 'cover' }}

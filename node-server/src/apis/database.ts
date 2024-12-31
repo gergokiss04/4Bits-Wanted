@@ -248,49 +248,56 @@ export class DatabaseApi extends Api {
     });
   }
   override async commitOffer(val: Offer): Promise<void> {
-    const query = `
-      INSERT INTO offers (created, seller_id, title, category_id, description, price, pictures, buyer_id, sold_at, buyer_rating)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        created = VALUES(created),
-        seller_id = VALUES(seller_id),
-        title = VALUES(title),
-        category_id = VALUES(category_id),
-        description = VALUES(description),
-        price = VALUES(price),
-        pictures = VALUES(pictures),
-        buyer_id = VALUES(buyer_id),
-        sold_at = VALUES(sold_at),
-        buyer_rating = VALUES(buyer_rating)
-    `;
-  
-    // Convert Unix timestamp to JavaScript Date object
+    console.log("HELOOO");
+    let query = ``;
+    let params: any[] = [];
+
     const createdDate = new Date(val.createdTimestamp);
-    console.log(val.createdTimestamp);
-    console.log(createdDate);
-    // Format Date object as MySQL DATETIME string
+
     const formatDate = (date: Date) => {
       const pad = (n: number) => (n < 10 ? '0' + n : n);
       return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
     };
   
     const createdDatetime = formatDate(createdDate);
-    console.log(val.buyer);
-    console.log(val.soldTimestamp);
-    console.log(val.buyerRating);
-    const params = [
-      createdDatetime,
-      val.seller.id,
-      val.title,
-      val.category.id,
-      val.description,
-      val.price,
-      JSON.stringify(val.pictureUris),
-      val.buyer ? val.buyer.id : null,
-      val.soldTimestamp ? new Date(val.soldTimestamp) : null, // Convert soldTimestamp if it exists
-      val.buyerRating ? val.buyerRating : null
-    ];
   
+    if(val.buyer == null || val.buyer == undefined) {
+      query = `
+        INSERT INTO offers (created, seller_id, title, category_id, description, price, pictures)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            created = VALUES(created),
+            seller_id = VALUES(seller_id),
+            title = VALUES(title),
+            category_id = VALUES(category_id),
+            description = VALUES(description),
+            price = VALUES(price),
+            pictures = VALUES(pictures)
+      `;
+
+      params = [
+        createdDatetime,
+        val.seller.id,
+        val.title,
+        val.category.id,
+        val.description,
+        val.price,
+        JSON.stringify(val.pictureUris)
+      ];
+    }
+    else {
+      query = `
+        UPDATE offers
+        SET buyer_id = ?, sold_at = ?
+        WHERE id = ?`;
+
+        params = [
+          val.buyer.id,
+          formatDate(new Date()),
+          val.id
+        ];
+    }
+
     console.log("TESTING");
     console.log(params);
   

@@ -741,7 +741,7 @@ if (this.reportErrors) {
         if(offer.seller.id !== call.loggedInAs.id) return new Result(StatusCodes.FORBIDDEN, 'You can only do this to your own offers')
         if(offer.buyer !== null) return new Result(StatusCodes.FORBIDDEN, 'This offer is already sold')
 
-        this.dropOffer(offer.id)
+        await this.dropOffer(offer.id)
         await this.offerCache.drop(offer.id)
 
         return new Result(StatusCodes.OK, 'Offer deleted')
@@ -767,6 +767,10 @@ if (this.reportErrors) {
     offer.buyer = call.loggedInAs
     offer.entangle(offer.buyer)
     offer.entangle(offer.seller)
+
+    console.log(offer);
+
+    await this.commitOffer(offer);
 
     return new Result(StatusCodes.OK, 'Purchased')
   }

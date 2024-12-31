@@ -7,6 +7,11 @@ import { SERVER_PORT } from './Constants.js';
 
 
 function Profile() {
+  useEffect(() => {
+    handleUserName();
+  }, []);
+
+  const [userName, setUserName] = useState();
   const [profilePicUri, setProfilePicUri] = useState('');
   const [mediaStagerInfo, setMediaStagerInfo] = useState({
     imagesLeft: 1,
@@ -78,6 +83,14 @@ function Profile() {
       }
     };
 
+    const handleUserName = async () => {
+      const response = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/users/self`);
+      const currentUser = await response.json();
+
+      console.log(currentUser.name);
+      setUserName(currentUser.name);
+    };
+
   return (
     <div className="p-5 m-auto text-center content bg-lavender img-down">
       <div id="profile" className="container-fluid text-white scrollspy dark-brown-background-color">
@@ -86,7 +99,7 @@ function Profile() {
         <div className="row justify-content-center">
           <div className="col-md-6 text-center">
             <h3>Felhasználónév:</h3>
-            <p className="fs-5">Felhasználónév</p>
+            <p className="fs-5">{userName}</p>
 
             {/* Profilkép megjelenítése */}
             <div className="d-flex justify-content-center mb-5">

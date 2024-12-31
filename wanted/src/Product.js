@@ -34,7 +34,19 @@ function Product({ selectedCategory, userId }) {
       const ids = await response.json();
       const offerDetailed = await Promise.all(ids.map(id => fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${id}`).then(x => x.json())));
 
-      setProducts(offerDetailed);
+      let finalOffers = [];
+      for(const offer of offerDetailed) {
+       const offerResponse = await fetch(`http://127.0.0.1:${SERVER_PORT}/api/offers/${offer.id}`);
+       const offers = await offerResponse.json();
+       console.log(offers);
+        
+       if(offer.buyerId == null || offer.buyerId == undefined) {
+        finalOffers.push(offer);
+       }
+       
+      }
+
+      setProducts(finalOffers);
     } catch (e) {
       console.log(e.message);
     }
