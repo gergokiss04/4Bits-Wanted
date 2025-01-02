@@ -72,7 +72,7 @@ export class Request {
     this.res = res;
 
     const meth = (req.method ?? '').toUpperCase();
-    if (['GET', 'PUT', 'POST', 'DELETE'].includes(meth ?? '')) this.method = meth as 'GET' | 'PUT' | 'POST' | 'DELETE';
+    if(['GET', 'PUT', 'POST', 'DELETE'].includes(meth ?? '')) this.method = meth as 'GET' | 'PUT' | 'POST' | 'DELETE';
     else this.method = undefined;
 
     this.cleanPath = cleanPath;
@@ -85,10 +85,10 @@ export class Request {
     const parsed = url.parse(req.url ?? '/', true);
 
     const pathParts: string[] = [];
-    for (const part of (parsed.pathname ?? '/').split('/')) {
-      if (part.length <= 0 || part === '.') continue;
-      if (part === '..') {
-        if (pathParts.length > 0) pathParts.pop();
+    for(const part of (parsed.pathname ?? '/').split('/')) {
+      if(part.length <= 0 || part === '.') continue;
+      if(part === '..') {
+        if(pathParts.length > 0) pathParts.pop();
         continue;
       }
       pathParts.push(decodeURIComponent(part));
@@ -101,7 +101,7 @@ export class Request {
 
   async writePatiently(chunk: any): Promise<void> {
     const wrote: boolean = this.res.write(chunk);
-    if (!wrote) await new Promise(resolve => this.res.once('drain', resolve));
+    if(!wrote) await new Promise(resolve => this.res.once('drain', resolve));
   }
 
   async readBody(): Promise<string> {
@@ -109,9 +109,9 @@ export class Request {
       let body: string = '';
       let oversized = false;
       this.req.on('data', chunk => {
-        if (oversized) return;
+        if(oversized) return;
 
-        if (body.length > Request.BODY_SIZE_LIMIT) {
+        if(body.length > Request.BODY_SIZE_LIMIT) {
           log.warn(`Oversized request (>${Request.BODY_SIZE_LIMIT}) truncated`);
           oversized = true;
           resolve(body);
@@ -137,8 +137,8 @@ export class Request {
     return new Promise(
       (resolve) => {
         form.parse(this.req, (err: any, _fields: formidable.Fields<string>, files: formidable.Files<string>) => {
-          if (err) throw err;
-          if (files.image === undefined) resolve(undefined);
+          if(err) throw err;
+          if(files.image === undefined) resolve(undefined);
           resolve(files.image![0].filepath);
         });
       }
@@ -152,15 +152,15 @@ export class Request {
     this.res.setHeader('Content-Length', expectedLength);
     this.res.setHeader('Content-Type', mime);
     const buffer: Buffer = Buffer.alloc(2 ** 16);
-    while (true) {
+    while(true) {
       const result: fs.FileReadResult<Buffer> = await file.read(buffer, 0, buffer.length);
       totalBytes += result.bytesRead;
-      if (result.bytesRead <= 0) break;
+      if(result.bytesRead <= 0) break;
 
       await this.writePatiently(buffer.subarray(0, result.bytesRead));
     }
 
-    if (totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading file`);
+    if(totalBytes != expectedLength) log.warn(`Expected ${expectedLength} bytes (previously sent as Content-Length), but found ${totalBytes} when reading file`);
   }
 
   setCookie(name: string, value: string) {
@@ -174,15 +174,15 @@ async function serveStatic(request: Request, url: string): Promise<void> {
   let file: fs.FileHandle | undefined;
   try {
     let filePath: string | undefined = undefined;
-    for (const root of config.staticRoots) {
+    for(const root of config.staticRoots) {
       const trialPath = path.join(root, url);
-      if ((await fs.stat(trialPath)).isFile()) {
+      if((await fs.stat(trialPath)).isFile()) {
         filePath = trialPath;
         break;
       }
     }
 
-    if (!filePath) {
+    if(!filePath) {
       let err = new Error() as NodeJS.ErrnoException;
       err.code = 'ENOENT';
       throw err;
@@ -194,7 +194,7 @@ async function serveStatic(request: Request, url: string): Promise<void> {
     await request.sendFile(file, mimeType);
     request.res.end();
   } catch (error) {
-    if (error instanceof Error) {
+    if(error instanceof Error) {
       switch ((error as NodeJS.ErrnoException).code) {
         case 'ENOENT':
         case 'ERR_FS_EISDIR':
@@ -206,7 +206,7 @@ async function serveStatic(request: Request, url: string): Promise<void> {
     }
     throw error;
   } finally {
-    if (file !== undefined) await file.close();
+    if(file !== undefined) await file.close();
   }
 }
 
@@ -217,7 +217,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
   res.setHeader('Access-Control-Allow-Credentials', 'true')
 
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
+  if(req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
     return;
@@ -228,11 +228,11 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     log.info(`Request from ${log.sanitize(request.req.socket.remoteAddress)} for ${log.sanitize(req.url)} ${JSON.stringify(request.pathParts)}`);
 
     const maybeApiPath: string[] | false = config.maybeApiPath(request.pathParts);
-    if (maybeApiPath !== false) {
+    if(maybeApiPath !== false) {
       log.info(`API call: ${log.sanitize(maybeApiPath)}, query: ${log.sanitize(request.query)}`);
       await api.handle(request, maybeApiPath);
     } else {
-      if (request.cleanPath == '.' && config.rootFile) await serveStatic(request, config.rootFile);
+      if(request.cleanPath == '.' && config.rootFile) await serveStatic(request, config.rootFile);
       else await serveStatic(request, request.cleanPath);
     }
   } catch (e) {

@@ -168,24 +168,24 @@ export abstract class Api {
         const result = await bound(call)
         request.res.statusCode = result.code;
 
-let body = result.body;
-if (body !== undefined) {
-  request.res.setHeader('Content-Type', call.contentType ?? 'application/json');
+        let body = result.body;
+        if(body !== undefined) {
+          request.res.setHeader('Content-Type', call.contentType ?? 'application/json');
 
-  body = (call.contentType === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString());
-  await request.writePatiently(body);
-}
+          body = (call.contentType === null && typeof result.body !== 'string' ? JSON.stringify(result.body) : result.body.toString());
+          await request.writePatiently(body);
+        }
       } catch(e: any) {
         let msg = `Unhandled exception during API call: ${e}`
         if(e instanceof Error) msg += `\n${e.stack}`;
         log.error(msg)
 
         request.res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-if (this.reportErrors) {
-  request.res.setHeader('Content-Type', call.contentType ?? 'application/json');
+        if(this.reportErrors) {
+          request.res.setHeader('Content-Type', call.contentType ?? 'application/json');
 
-  await request.writePatiently(JSON.stringify(e));
-}
+          await request.writePatiently(JSON.stringify(e));
+        }
       }
 
     } else {
