@@ -16,7 +16,13 @@ import { MemoryApi } from './apis/memory.js';
 import { DatabaseApi } from './apis/database.js';
 
 process.on('unhandledRejection', (reason, promise) => {
-  log.error(`Unhandled rejection in ${promise}, because: ${reason}`);
+  let msg = `Unhandled rejection in ${promise}, because: ${reason}`
+  if(reason instanceof Error) {
+    msg += `\nMessage: ${(reason as Error).message}`
+    msg += `\nCause: ${(reason as Error).cause}`
+    msg += `\nStack?: ${(reason as Error).stack}`
+  }
+  log.error(msg)
 });
 
 const configPath = process.env.WANTED_CONFIG || 'wanted-config.json';
@@ -50,7 +56,6 @@ switch (config.apiDriver) {
 
   case 'db':
     log.normal('Using DatabaseApi');
-    log.warn('DatabaseApi isn\'t implemented yet');
     const dbApi = new DatabaseApi(config);
     api = dbApi;
     break;
