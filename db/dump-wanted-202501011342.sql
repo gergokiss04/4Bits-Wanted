@@ -72,7 +72,6 @@ CREATE TABLE `offers` (
 
 LOCK TABLES `offers` WRITE;
 /*!40000 ALTER TABLE `offers` DISABLE KEYS */;
-INSERT INTO `offers` VALUES (22,'iPhone 16',200000,'új iPhone jó állapotban és sok rammal','[\"fst8mfznuwao9mnhksvie8nul4awxrpl.apple\"]',1,1,2,NULL,'2024-12-31 18:02:52','2024-12-31 18:23:21'),(23,'Monopoly',8000,'monopoly eladó alig használt','[\"xzqjg1dt43uma8wq4g6f55bq28ef9y8j.jpg\"]',3,2,NULL,NULL,'2024-12-31 18:04:38',NULL),(24,'Cipő',10000,'Szép cipő :)','[\"baiid4x0qewiv11hy3l2ho2qsypvmg87.jpg\"]',4,2,NULL,NULL,'2024-12-31 18:05:56',NULL);
 /*!40000 ALTER TABLE `offers` ENABLE KEYS */;
 UNLOCK TABLES;
 
