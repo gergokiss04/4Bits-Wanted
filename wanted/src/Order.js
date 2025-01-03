@@ -7,7 +7,7 @@ function Order() {
   const [user, setUser] = useState(null);
   const [shippingPrice, setShippingPrice] = useState(0);
 
-  const {items} = useCart();
+  const {items, emptyCart} = useCart();
 
   useEffect(() => {
     currentUser();
@@ -38,13 +38,16 @@ function Order() {
             'Content-Type': 'application/json'
           }
         });
-      
+
         if (!buyOfferResponse.ok) {
           throw new Error(`Hiba történt a ${item.id} ID termék vásárlásakor: ` + await buyOfferResponse.json());
         }
       }
+
+      emptyCart();
+
     } catch (error) {
-      console.error(error);
+      console.error('Order submission failed:', error);
     }
   };
   

@@ -9,8 +9,8 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { setIsLoggedIn } = useAuth(); // Destructure setUser from useAuth
-  const { emptyCart } = useCart(); // Destructure emptyCart from useCart
+  const { setIsLoggedIn } = useAuth(); 
+  const { emptyCart } = useCart(); 
 
   const handleLogin = async (event) => {
     emptyCart();
