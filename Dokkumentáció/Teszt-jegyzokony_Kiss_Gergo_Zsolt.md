@@ -55,7 +55,7 @@ A végleges tesztelés során az összes fent felsorolt vizsgálati elem újra e
 | Képek megjelenése  | 2024.12.03. | Weboldalon a képek a felhasználói eszköz alapján igényesen jelennek meg| Működik | Nem tapasztaltam hibát |
 | Betöltési idő | 2024.12.03. | Minden oldal gyorsan tölt be | Működik | - |
 | Hirdetés funkció | 2024.12.03. | Feladott hirdetések könnyen kezelhetők | Működik | - |
-| Footer tartalma | 2024.12.03. | Kapcsolódó linkek és információk helyesek | Működik | - |
+| Footer tartalma | 2024.12.03. | Kapcsolódó linkek és információk helyesek | Működik | Ha kevés tartalom jelenik meg,akkor előfordulhat,hogy nem pontosan jelenik meg a footer |
 | Header tartalma | 2024.12.03. | Kapcsolódó linkek és információk helyesek | Működik | - |
 | Szűrők | 2024.12.03. | Termékszűrők helyesen működnek | Működik | - |
 | Betűtípusok | 2024.12.03. | Olvashatóság különböző eszközökön | Működik | - |

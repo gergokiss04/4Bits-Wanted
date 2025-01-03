@@ -24,6 +24,7 @@ function Footer() {
         {/* Alsó sor - Copyright */}
         <div className="pt-3 border-top mt-3">
           <p className="mb-0">&copy; {new Date().getFullYear()} Wanted. Minden jog fenntartva.</p>
+          <br />
         </div>
       </div>
     </footer>
